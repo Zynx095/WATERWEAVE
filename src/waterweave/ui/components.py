@@ -12,6 +12,19 @@ from waterweave.ui.adapter import get_engine_status
 from waterweave.ui.styles import COLOR_EXACT, COLOR_GREEDY, COLOR_QAOA
 
 
+def format_runtime(seconds: float | None) -> str:
+    """Safely format solver execution runtime with millisecond precision and defensive fallback."""
+    if seconds is None:
+        return "Telemetry unavailable"
+    if seconds < 0.0:
+        return "Telemetry unavailable"
+    if seconds < 0.0001:
+        return "< 0.1 ms (instantaneous)"
+    if seconds < 1.0:
+        return f"{seconds * 1000:.2f} ms"
+    return f"{seconds:.3f} s"
+
+
 def render_header_and_disclaimer() -> None:
     """Render the top banner, visual hierarchy, problem context, and synthetic data warnings."""
     status = get_engine_status()
@@ -259,7 +272,7 @@ def render_kpi_metrics(results: list[SolverResult]) -> None:
     with c5:
         st.metric(
             label="Optimal Runtime",
-            value=f"{primary.runtime_seconds * 1000:.1f} ms",
+            value=format_runtime(primary.runtime_seconds),
             help="Elapsed wall-clock execution time.",
         )
 
@@ -274,18 +287,28 @@ def render_comparison_view(
     st.caption("Direct evaluation of Greedy heuristic, Exact integer programming, and QAOA quantum heuristic.")
 
     # 30-Second Executive Summary
+    exact_res = next((r for r in results if "Exact" in r.solver_name), results[0] if results else None)
+    greedy_res = next((r for r in results if "Greedy" in r.solver_name), results[0] if results else None)
+    qaoa_res = next((r for r in results if "QAOA" in r.solver_name), None)
+
+    exact_fairness_val = exact_res.metrics.get("fairness_score", 0.0) if exact_res else 0.0
+    greedy_fairness_val = greedy_res.metrics.get("fairness_score", 0.0) if greedy_res else 0.0
+    tot_demand_val = sum(sum(n.demand_by_slot.values()) for n in scenario.neighborhoods)
+    tot_supply_val = sum(scenario.supply_by_slot.values())
+    deficit_val = max(0, tot_demand_val - tot_supply_val)
+
     st.markdown(
-        """
+        f"""
         <div style="background: linear-gradient(135deg, #F0FDF4 0%, #ECFDF5 100%); border: 1px solid #A7F3D0; border-left: 5px solid #10B981; border-radius: 10px; padding: 1.1rem 1.4rem; margin-bottom: 1.4rem; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
             <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem;">
                 <span style="font-size: 1.2rem;">⚡</span>
                 <span style="font-size: 1.05rem; font-weight: 700; color: #065F46;">The 30-Second Executive Summary</span>
             </div>
             <div style="font-size: 0.92rem; color: #047857; line-height: 1.55;">
-                • <b>The Scarcity Setup</b>: Demand (7 units) exceeds reservoir supply (4 units) across two delivery slots, forcing a 3-unit shortfall.<br/>
-                • <b>The Greedy Trap</b>: Priority-first allocation delivers 100% of water to high-weight zones (Lakeside & Hillview), completely starving Riverside & Market (0% service, <b>Fairness = 0.00</b>).<br/>
-                • <b>The Exact Balance</b>: Integer optimization redistributes water so every neighborhood receives 1 unit, raising <b>Fairness to 0.67</b> with zero constraint violations and identical total throughput (4 units).<br/>
-                • <b>The Quantum Role</b>: QAOA encodes this trilemma as a QUBO on a parameterized quantum circuit ($H_P, H_M$). On small benchmarks, classical exact is milliseconds faster; QAOA validates the quantum workflow without claiming quantum supremacy.
+                • <b>The Scarcity Setup</b>: Total demand ({tot_demand_val} units) exceeds reservoir supply ({tot_supply_val} units) across delivery slots, forcing a {deficit_val}-unit shortfall.<br/>
+                • <b>The Greedy Trap</b>: Priority-first allocation delivers supply to high-weight zones, driving fairness down (Greedy Fairness = <b>{greedy_fairness_val:.2f}</b>).<br/>
+                • <b>The Exact Balance</b>: Integer optimization redistributes water across slots to balance service levels, achieving <b>Fairness = {exact_fairness_val:.2f}</b> with zero constraint violations.<br/>
+                • <b>The Quantum Role</b>: QAOA encodes this trilemma into a QUBO on a parameterized quantum circuit ($H_C, H_M$) executed on Qiskit's StatevectorSampler (noiseless CPU simulation). On small benchmarks, classical exact is milliseconds faster; QAOA validates the quantum workflow without claiming quantum advantage.
             </div>
         </div>
         """,
@@ -314,7 +337,7 @@ def render_comparison_view(
                 "Weighted Shortage": f"{m.get('weighted_shortage', 0.0):.2f}",
                 "Supply Violations": f"{int(m.get('supply_violation_units', 0))}",
                 "Storage Violations": f"{int(m.get('storage_violation_units', 0))}",
-                "Runtime": f"{res.runtime_seconds * 1000:.2f} ms" if res.runtime_seconds < 1.0 else f"{res.runtime_seconds:.3f} s",
+                "Runtime": format_runtime(res.runtime_seconds),
             }
         )
 
@@ -388,24 +411,26 @@ def render_comparison_view(
 
     col_a1, col_a2 = st.columns(2)
     with col_a1:
+        exact_rt_str = format_runtime(exact_res.runtime_seconds) if exact_res else "N/A"
         st.markdown(
             f"""
             **Classical Baselines:**
             - **Exact Solver**: Yields the global optimum with an objective value of **{exact_res.objective_value:.2f}** 
-              and a fairness score of **{exact_res.metrics.get('fairness_score', 0):.2f}**. Solves in **{exact_res.runtime_seconds * 1000:.2f} ms**.
+              and a fairness score of **{exact_res.metrics.get('fairness_score', 0):.2f}**. Solves in **{exact_rt_str}**.
             - **Greedy Heuristic**: Follows strict descending priority weight. In scarce scenarios, it allocates supply 
               exclusively to high-priority nodes (e.g. Lakeside/Hillview), driving the fairness score down to **{greedy_res.metrics.get('fairness_score', 0):.2f}**.
             """
         )
     with col_a2:
         if qaoa_res:
+            qaoa_rt_str = format_runtime(qaoa_res.runtime_seconds)
             st.markdown(
                 f"""
                 **QAOA Quantum Heuristic:**
                 - **Objective Value**: **{qaoa_res.objective_value:.2f}** 
                   (Gap to Exact: **{abs(qaoa_res.objective_value - exact_res.objective_value):.2f}**).
                 - **Feasibility**: {'✅ Constraint satisfaction achieved' if qaoa_res.feasible else '❌ Violations detected'}.
-                - **Honest Runtime Note**: QAOA runtime (**{qaoa_res.runtime_seconds:.2f} s**) includes parameterized circuit 
+                - **Honest Runtime Note**: QAOA runtime (**{qaoa_rt_str}**) includes parameterized circuit 
                   evaluation on the quantum simulator. For small $N=4$ instances, classical exact enumeration is 
                   vastly faster; quantum advantage is not claimed.
                 """
@@ -792,7 +817,7 @@ def render_result_traceability(results: list[SolverResult]) -> None:
                 "Status": status,
                 "Objective Value": f"{res.objective_value:.4f}",
                 "Feasibility": "✅ Feasible" if res.feasible else "❌ Violations",
-                "Runtime": f"{res.runtime_seconds * 1000:.2f} ms" if res.runtime_seconds < 1.0 else f"{res.runtime_seconds:.3f} s",
+                "Runtime": format_runtime(res.runtime_seconds),
                 "Quantum Advantage Claim": adv_claim,
             }
         )
@@ -800,13 +825,18 @@ def render_result_traceability(results: list[SolverResult]) -> None:
     df_trace = pd.DataFrame(trace_rows)
     st.dataframe(df_trace, use_container_width=True, hide_index=True)
 
+    exact_res_trace = next((r for r in results if "Exact" in r.solver_name), None)
+    qaoa_res_trace = next((r for r in results if "QAOA" in r.solver_name), None)
+    exact_trace_rt = format_runtime(exact_res_trace.runtime_seconds) if exact_res_trace else "3.4 ms"
+    qaoa_trace_rt = format_runtime(qaoa_res_trace.runtime_seconds) if qaoa_res_trace else "360 ms"
+
     st.markdown(
-        """
+        f"""
         <div style="background: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 8px; padding: 1rem 1.2rem; margin-top: 1rem;">
             <h5 style="margin: 0 0 0.4rem 0; color: #0F172A;">🛡️ Honest Evaluation Standards</h5>
             <ul style="margin: 0; padding-left: 1.2rem; font-size: 0.85rem; color: #475569;">
                 <li><b>No Fabricated Measurements</b>: All QAOA bitstrings and sample ratios reflect genuine statevector simulation.</li>
-                <li><b>No Simulated Quantum Advantage</b>: On this 12-qubit instance, classical exact enumeration executes in <b>3.4 ms</b>, whereas QAOA requires <b>~360 ms</b>. QAOA is an approximate NISQ workflow demonstration, not a claim of quantum supremacy.</li>
+                <li><b>No Simulated Quantum Advantage</b>: On this instance, classical exact enumeration executes in <b>{exact_trace_rt}</b>, whereas QAOA on the statevector simulator requires <b>{qaoa_trace_rt}</b>. QAOA is an approximate NISQ workflow demonstration on a classical CPU simulator, not a claim of quantum supremacy.</li>
                 <li><b>Objective-Energy Verification</b>: The QUBO energy of the chosen quantum bitstring exactly matches the independent classical evaluation function down to <code>10⁻⁵</code>.</li>
             </ul>
         </div>

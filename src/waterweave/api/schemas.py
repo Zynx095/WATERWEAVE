@@ -127,3 +127,20 @@ class SolveRequest(BaseModel):
 
     scenario: ScenarioIn
     settings: SolveSettings = SolveSettings()
+
+
+class ModelRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    scenario: ScenarioIn
+    fairness_weight: float = Field(2.0, ge=0.0, le=20.0)
+    penalty_weight: float | None = Field(None, gt=0.0, le=1000.0)
+
+
+class EvaluateRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    scenario: ScenarioIn
+    allocation: dict[str, dict[str, int]]
+    fairness_weight: float = Field(2.0, ge=0.0, le=20.0)
+    penalty_weight: float | None = Field(None, gt=0.0, le=1000.0)

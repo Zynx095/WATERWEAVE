@@ -189,3 +189,47 @@ def test_json_safe_handles_non_finite_and_numpy():
     out = service.json_safe({"a": float("inf"), "b": np.float64(1.5), "c": (np.int64(2), np.bool_(True))})
     assert out == {"a": None, "b": 1.5, "c": [2, True]}
     json.dumps(out)
+
+
+# ---- model, circuit structure and scoring ----------------------------------
+
+def test_model_endpoint_describes_qubo_ising_and_circuit(client, default_payload):
+    body = client.post("/api/model", json={"scenario": default_payload}).json()
+    assert (body["n_decision"], body["n_slack"], body["n_vars"]) == (7, 5, 12)
+    assert [v["name"] for v in body["decision_vars"]][:2] == ["x_N1_morning", "x_N1_evening"]
+    assert body["penalty_weight"] == pytest.approx(15.0)
+    assert len(body["qubo"]["linear"]) == 12 and len(body["ising"]["h"]) == 12
+    # Documented in QUANTUM_METHOD.md section 4: largest |h| = 22, largest |J| = 8.25.
+    assert max(abs(h) for h in body["ising"]["h"]) == pytest.approx(22.0)
+    assert max(abs(j[2]) for j in body["ising"]["J"]) == pytest.approx(8.25)
+    depths = {c["p"]: c["depth"] for c in body["circuit_structure"]}
+    assert depths == {1: 17, 2: 29, 3: 41}
+    assert body["qaoa_within_budget"] is True
+
+
+def test_model_ising_reproduces_qubo_energy(client, default_payload):
+    """Spot-check the returned coefficients: H(z) equals the QUBO energy."""
+    body = client.post("/api/model", json={"scenario": default_payload}).json()
+    n = body["n_vars"]
+    for state in (0, 1, 0b101101100101, 2**n - 1):
+        z = [(state >> k) & 1 for k in range(n)]
+        qubo = body["qubo"]["offset"] + sum(c * zk for c, zk in zip(body["qubo"]["linear"], z))
+        qubo += sum(v * z[k] * z[l] for k, l, v in body["qubo"]["quadratic"])
+        spins = [1 - 2 * zk for zk in z]  # z = (1 - Z) / 2
+        ising = body["ising"]["offset"] + sum(h * s for h, s in zip(body["ising"]["h"], spins))
+        ising += sum(v * spins[k] * spins[l] for k, l, v in body["ising"]["J"])
+        assert ising == pytest.approx(qubo)
+
+
+def test_evaluate_scores_any_allocation_with_shared_metrics(client, default_payload):
+    optimum = {"N1": {"morning": 0, "evening": 1}, "N2": {"morning": 0, "evening": 1},
+               "N3": {"morning": 1, "evening": 0}, "N4": {"morning": 1, "evening": 0}}
+    body = client.post("/api/evaluate", json={"scenario": default_payload, "allocation": optimum}).json()
+    assert body["objective_value"] == pytest.approx(6.0)
+    assert body["metrics"]["feasible"] == 1.0
+    # Riverside both slots: storage 2 > 1 -> infeasible, penalised by P = 15.
+    over = {"N2": {"morning": 1, "evening": 1}}
+    body = client.post("/api/evaluate", json={"scenario": default_payload, "allocation": over}).json()
+    assert body["metrics"]["feasible"] == 0.0
+    assert body["metrics"]["storage_violation_units"] == 1.0
+    assert body["objective_value"] == pytest.approx(29.0)

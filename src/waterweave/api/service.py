@@ -155,6 +155,41 @@ def model_summary(model: OptimizationModel) -> dict[str, Any]:
     }
 
 
+def _nonzero_pairs(matrix: np.ndarray) -> list[list[float]]:
+    n = matrix.shape[0]
+    return [
+        [k, l, float(matrix[k, l])]
+        for k in range(n)
+        for l in range(k + 1, n)
+        if abs(matrix[k, l]) > 1e-12
+    ]
+
+
+def model_details(model: OptimizationModel) -> dict[str, Any]:
+    """Model summary plus QUBO and Ising coefficients and circuit structure."""
+    details = model_summary(model)
+    details["qubo"] = {
+        "offset": float(model.offset),
+        "linear": [float(c) for c in model.linear_coeffs],
+        "quadratic": _nonzero_pairs(model.quadratic_matrix),
+    }
+    details["ising"] = {
+        "offset": float(model.ising_offset),
+        "h": [float(h) for h in model.ising_h],
+        "J": _nonzero_pairs(model.ising_J),
+    }
+    structure = []
+    for p in (1, 2, 3):
+        if model.n_vars == 0:
+            break
+        # Gate structure does not depend on the angle values; the optimiser
+        # chooses the angles at run time.
+        qc = _circuit(model, [0.5] * p, [0.5] * p)
+        structure.append({"p": p, "depth": qc.depth(), "gate_counts": dict(qc.count_ops())})
+    details["circuit_structure"] = structure
+    return details
+
+
 def _circuit(model: OptimizationModel, gammas: list[float], betas: list[float]):
     from waterweave.solvers import _build_qaoa_circuit
 
@@ -342,5 +377,29 @@ def solve(scenario: Scenario, settings: SolveSettings, lock_timeout: float = 30.
             "reference": reference_outcomes(scenario, settings.fairness_weight, penalty),
             "wall_seconds": wall,
             "engine": engine_info(),
+        }
+    )
+
+
+def evaluate(
+    scenario: Scenario,
+    allocation: dict[str, dict[str, int]],
+    fairness_weight: float,
+    penalty_weight: float | None,
+) -> dict[str, Any]:
+    """Score any allocation with the shared metrics and the solvers' objective."""
+    penalty = (
+        penalty_weight
+        if penalty_weight is not None
+        else compute_default_penalty_weight(scenario, fairness_weight=fairness_weight)
+    )
+    return json_safe(
+        {
+            "metrics": evaluate_allocation(scenario, allocation),
+            "objective_value": evaluate_objective(
+                scenario, allocation, fairness_weight=fairness_weight, penalty_weight=penalty
+            ),
+            "fairness_weight": fairness_weight,
+            "penalty_weight": penalty,
         }
     )

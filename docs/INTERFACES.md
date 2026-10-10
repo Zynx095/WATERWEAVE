@@ -1,4 +1,4 @@
-﻿# Shared Python interfaces
+# Shared Python interfaces
 
 All agents must follow these contracts. Coordinate before changing them.
 
@@ -42,9 +42,11 @@ waterweave.metrics.evaluate_allocation(
 
 Expected metric keys include:
 total_demand_units, total_allocated_units, unmet_demand_units,
-weighted_shortage, service_level, fairness_score, feasible.
+weighted_shortage, service_level, fairness_score, disparity, feasible.
 
-Define the fairness-score direction clearly and use it consistently.
+Define the metric directions clearly and use them consistently:
+- `fairness_score` in [0, 1]: 1 - (max(s) - min(s)), higher is better.
+- `disparity` >= 0: sum_{i<j} (s_i - s_j)^2, lower is better (exact quadratic term minimized by QUBO).
 
 ## Solver entry point
 waterweave.optimization.run_comparison(

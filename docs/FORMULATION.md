@@ -57,8 +57,14 @@ $$\text{Weighted Shortage}(x) = \sum_{i \in \mathcal{N}} w_i u_i = \sum_{i \in \
 The normalized service level of neighborhood $i$ (with $D_i > 0$) is:
 $$s_i = \frac{y_i}{D_i} = \frac{1}{D_i} \sum_{t: (i,t) \in \mathcal{V}} x_{i,t} \in [0, 1]$$
 
-While the dashboard and evaluation metric reports `fairness_score = 1 - (max(s) - min(s))` (which is non-quadratic), the mathematical optimization model minimizes the pairwise squared disparity:
+While the dashboard and evaluation metric reports `fairness_score = 1 - (max(s) - min(s))` (which is range-based and non-quadratic), the mathematical optimization model minimizes the pairwise squared disparity:
 $$\text{Disparity}(x) = \sum_{\substack{i < j \\ D_i > 0, D_j > 0}} (s_i - s_j)^2$$
+
+> [!IMPORTANT]
+> **Distinction between Disparity and Fairness Score**:
+> - `Disparity(x)`: Pairwise squared difference across service levels ($\in [0, \infty)$). Lower is better. This exact quadratic polynomial is minimized by QUBO and Ising Hamiltonians.
+> - `fairness_score`: Range-based metric $1 - (\max_i s_i - \min_i s_i) \in [0, 1]$. Higher is better.
+> - Because one is based on pairwise squared dispersion and the other on extreme range, they can rank allocations differently on asymmetric instances (e.g., service levels $(0.0, 0.5, 1.0, 0.5)$ has range $1.0$ and disparity $2.0$, whereas $(0.0, 0.9, 0.9, 0.9)$ has range $0.9$ and disparity $2.43$). The QUBO energy must never be equated to or reported as the range-based `fairness_score`. Both metrics are reported separately in `SolverResult.metrics`.
 
 **Quadratic Expansion**:
 $$(s_i - s_j)^2 = s_i^2 - 2 s_i s_j + s_j^2$$

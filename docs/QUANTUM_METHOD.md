@@ -216,7 +216,7 @@ seeds 0..4, noiseless statevector simulation.
   0.0353 (p=2), 0.0201 (p=3). Only p=2 exceeds uniform, by about 1.5x;
   p=1 and p=3 are below it. Fraction of feasible mass: uniform 0.508; QAOA
   0.746, 0.630, 0.655.
-* Simulation runtime: exact ~3 ms, QAOA ~0.3 to 0.8 s. This compares an
+* Simulation runtime: exact ~3 ms, QAOA ~0.3 to 1.0 s (median per run, machine dependent). This compares an
   enumeration of 128 states with a 4,096-amplitude simulation and is not a
   statement about quantum hardware.
 

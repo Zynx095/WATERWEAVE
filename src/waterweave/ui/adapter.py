@@ -302,16 +302,32 @@ def _generate_qaoa_demo_allocation(scenario: Scenario) -> dict[str, dict[str, in
     return alloc
 
 
+def _compute_pairwise_disparity(scenario: Scenario, allocation: dict[str, dict[str, int]]) -> float:
+    """Compute pairwise squared disparity sum_{i < j} (s_i - s_j)^2 matching docs/FORMULATION.md."""
+    service_levels: list[float] = []
+    for n in scenario.neighborhoods:
+        total_dem = sum(n.demand_by_slot.get(s, 0) for s in scenario.slots)
+        total_alloc = sum(allocation.get(n.id, {}).get(s, 0) for s in scenario.slots)
+        s_i = (min(total_alloc, total_dem) / total_dem) if total_dem > 0 else 1.0
+        service_levels.append(s_i)
+    disparity = 0.0
+    for i in range(len(service_levels)):
+        for j in range(i + 1, len(service_levels)):
+            diff = service_levels[i] - service_levels[j]
+            disparity += diff * diff
+    return disparity
+
+
 def get_demo_results(scenario: Scenario, include_qaoa: bool = True) -> list[SolverResult]:
     """Generate documented synthetic contract demo results when optimization engine is pending."""
     results: list[SolverResult] = []
 
     # 1. Greedy Heuristic Baseline
-    t0 = time.perf_counter()
     greedy_alloc = _generate_greedy_allocation(scenario)
     greedy_metrics = evaluate_allocation_safe(scenario, greedy_alloc)
-    # Objective combining weighted shortage + disparity penalty
-    greedy_obj = greedy_metrics["weighted_shortage"] + 10.0 * (1.0 - greedy_metrics["fairness_score"])
+    greedy_disparity = _compute_pairwise_disparity(scenario, greedy_alloc)
+    # Objective matching docs/FORMULATION.md: weighted_shortage + 2.0 * pairwise_disparity
+    greedy_obj = greedy_metrics["weighted_shortage"] + 2.0 * greedy_disparity
     results.append(
         SolverResult(
             solver_name="Greedy (Priority-First)",
@@ -323,19 +339,21 @@ def get_demo_results(scenario: Scenario, include_qaoa: bool = True) -> list[Solv
             metadata={
                 "is_demo": True,
                 "solver_type": "classical_heuristic",
+                "objective_definition": "Illustrative fallback: weighted_shortage + 2.0 * pairwise_disparity",
+                "pairwise_disparity": float(greedy_disparity),
                 "description": "Greedy priority-first allocation. Tends to over-serve high-priority nodes while starving lower-priority neighborhoods.",
             },
         )
     )
 
     # 2. Exact Classical (Optimal)
-    t0 = time.perf_counter()
     exact_alloc = _generate_exact_allocation(scenario)
     exact_metrics = evaluate_allocation_safe(scenario, exact_alloc)
-    exact_obj = exact_metrics["weighted_shortage"] + 10.0 * (1.0 - exact_metrics["fairness_score"])
+    exact_disparity = _compute_pairwise_disparity(scenario, exact_alloc)
+    exact_obj = exact_metrics["weighted_shortage"] + 2.0 * exact_disparity
     results.append(
         SolverResult(
-            solver_name="Exact Classical (Equitable)",
+            solver_name="Exact Classical (Optimal)",
             allocation=exact_alloc,
             objective_value=float(exact_obj),
             feasible=bool(exact_metrics["feasible"]),
@@ -344,6 +362,8 @@ def get_demo_results(scenario: Scenario, include_qaoa: bool = True) -> list[Solv
             metadata={
                 "is_demo": True,
                 "solver_type": "classical_exact",
+                "objective_definition": "Illustrative fallback: weighted_shortage + 2.0 * pairwise_disparity",
+                "pairwise_disparity": float(exact_disparity),
                 "description": "Global optimal integer enumeration balancing weighted shortage and service-level disparity.",
             },
         )
@@ -353,7 +373,8 @@ def get_demo_results(scenario: Scenario, include_qaoa: bool = True) -> list[Solv
     if include_qaoa:
         qaoa_alloc = _generate_qaoa_demo_allocation(scenario)
         qaoa_metrics = evaluate_allocation_safe(scenario, qaoa_alloc)
-        qaoa_obj = exact_obj  # On small 4x2 instances, p=1 QAOA finds ground state or near-ground state
+        qaoa_disparity = _compute_pairwise_disparity(scenario, qaoa_alloc)
+        qaoa_obj = qaoa_metrics["weighted_shortage"] + 2.0 * qaoa_disparity
         results.append(
             SolverResult(
                 solver_name="QAOA (Quantum Heuristic)",
@@ -365,6 +386,8 @@ def get_demo_results(scenario: Scenario, include_qaoa: bool = True) -> list[Solv
                 metadata={
                     "is_demo": True,
                     "solver_type": "quantum_approximate",
+                    "objective_definition": "Illustrative fallback: weighted_shortage + 2.0 * pairwise_disparity",
+                    "pairwise_disparity": float(qaoa_disparity),
                     "layers_p": 1,
                     "shots": 1024,
                     "optimizer": "COBYLA",

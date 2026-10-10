@@ -252,3 +252,13 @@
   gap: var(--space-2);
   color: var(--ink-2);
 }
+
+.run-bar + .table-scroll,
+.notice + .table-scroll,
+.run-bar + .notice {
+  margin-top: var(--space-4);
+}
+
+.section > h2 + .run-bar {
+  margin-top: 0;
+}

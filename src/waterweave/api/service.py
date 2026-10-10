@@ -8,6 +8,7 @@ reported as failed; its result is never replaced by another solver's.
 
 from __future__ import annotations
 
+import json
 import math
 import os
 import platform
@@ -15,6 +16,7 @@ import threading
 import time
 import uuid
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -85,6 +87,14 @@ def json_safe(value: Any) -> Any:
     if isinstance(value, datetime):
         return value.isoformat()
     return value
+
+
+def repo_root() -> Path:
+    override = os.environ.get("WATERWEAVE_REPO_ROOT")
+    if override:
+        return Path(override).resolve()
+    # src/waterweave/api/service.py -> repository root
+    return Path(__file__).resolve().parents[3]
 
 
 def offline_mode() -> bool:
@@ -513,3 +523,37 @@ def data_sources(live: bool) -> dict[str, Any]:
             },
         }
     )
+
+
+# ---- recorded benchmark --------------------------------------------------
+
+def load_benchmark() -> dict[str, Any] | None:
+    """Return the committed benchmark summaries, or None if they are absent."""
+    folder = repo_root() / "benchmark_results"
+    out: dict[str, Any] = {}
+    for instance in ("default", "small"):
+        path = folder / f"benchmark_{instance}.json"
+        if not path.is_file():
+            continue
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        meta = payload.get("meta") or {}
+        audit = payload.get("audit") or {}  # null when the run used --skip-audit
+        out[instance] = {
+            "file": f"benchmark_results/{path.name}",
+            "instance": meta.get("instance"),
+            "timestamp_utc": meta.get("timestamp_utc"),
+            "synthetic_notice": meta.get("synthetic_notice"),
+            "parameters": {
+                k: meta.get(k)
+                for k in ("fairness_weight", "penalty_weight", "shots", "maxiter", "seeds", "p_values")
+            },
+            "exact_optimum_objective": meta.get("exact_optimum_objective_independent"),
+            "seed_note": meta.get("seed_note"),
+            "provenance": meta.get("provenance") or {},
+            "summary": payload.get("summary") or [],
+            "audit_checks": [
+                {"name": c.get("name"), "status": c.get("status")} for c in audit.get("checks") or []
+            ],
+            "limitations": payload.get("limitations") or [],
+        }
+    return json_safe(out) if out else None

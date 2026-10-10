@@ -9,6 +9,7 @@ reported as failed; its result is never replaced by another solver's.
 from __future__ import annotations
 
 import math
+import os
 import platform
 import threading
 import time
@@ -20,6 +21,7 @@ import numpy as np
 import scipy
 
 from waterweave.api.schemas import ScenarioIn, SolveSettings
+from waterweave.data import ScenarioBuilder, registry
 from waterweave.formulation import (
     OptimizationModel,
     build_model,
@@ -30,6 +32,7 @@ from waterweave.formulation import (
 from waterweave.metrics import evaluate_allocation
 from waterweave.models import Neighborhood, Scenario, SolverResult
 from waterweave.optimization import run_comparison
+from waterweave.scenarios import default_scenario
 
 try:
     import qiskit
@@ -42,6 +45,10 @@ except ImportError:  # pragma: no cover - qiskit is a hard dependency
 # presentation can wait (measured: 0.45 s at 12 qubits, 3.9 s at 15, more
 # than a minute at 18 for p = 1).
 MAX_QAOA_QUBITS = 15
+
+# Providers that need the network. With live=False they are skipped and
+# reported as skipped, never replaced by invented values.
+NETWORK_PROVIDERS = frozenset({"open_meteo"})
 
 SOLVER_KEYS = {
     "Greedy (Priority-First)": "greedy",
@@ -78,6 +85,10 @@ def json_safe(value: Any) -> Any:
     if isinstance(value, datetime):
         return value.isoformat()
     return value
+
+
+def offline_mode() -> bool:
+    return os.environ.get("WATERWEAVE_OFFLINE", "").strip().lower() in {"1", "true", "yes"}
 
 
 def engine_info() -> dict[str, Any]:
@@ -401,5 +412,104 @@ def evaluate(
             ),
             "fairness_weight": fairness_weight,
             "penalty_weight": penalty,
+        }
+    )
+
+
+# ---- data provenance -----------------------------------------------------
+
+def _observation_dict(obs, now: datetime, request_started: datetime) -> dict[str, Any]:
+    try:
+        identity = registry.get_provider(obs.provider_id).identity
+        provider = {
+            "id": identity.id,
+            "name": identity.name,
+            "organization": identity.organization,
+            "url": identity.url,
+        }
+    except KeyError:
+        provider = {"id": obs.provider_id, "name": obs.provider_id, "organization": "", "url": ""}
+    source_age = (now - obs.source_timestamp).total_seconds() if obs.source_timestamp else None
+    retrieval_age = (now - obs.retrieval_timestamp).total_seconds()
+    return {
+        "provider": provider,
+        "dataset_id": obs.dataset_id,
+        "geographic_level": obs.geographic_level,
+        "geographic_id": obs.geographic_id,
+        "variable": obs.variable,
+        "value": obs.value,
+        "unit": obs.unit,
+        "source_timestamp": obs.source_timestamp,
+        "retrieval_timestamp": obs.retrieval_timestamp,
+        "source_age_seconds": source_age,
+        "retrieval_age_seconds": retrieval_age,
+        # The provider's in-memory TTL cache returns the earlier retrieval
+        # unchanged, so a retrieval older than this request means "cached".
+        "served_from_cache": obs.retrieval_timestamp < request_started,
+        "quality": {
+            "status": obs.quality.status,
+            "missing": obs.quality.missing,
+            "error_details": obs.quality.error_details,
+        },
+    }
+
+
+def data_sources(live: bool) -> dict[str, Any]:
+    """Fetch observations and explain how they would enter a scenario."""
+    forced_offline = offline_mode()
+    live = live and not forced_offline
+    request_started = utc_now()
+    observations = []
+    skipped = []
+    for provider in registry.get_all():
+        pid = provider.identity.id
+        if pid in NETWORK_PROVIDERS and not live:
+            skipped.append(
+                {
+                    "provider": {"id": pid, "name": provider.identity.name, "url": provider.identity.url},
+                    "reason": (
+                        "Offline mode (WATERWEAVE_OFFLINE is set)."
+                        if forced_offline
+                        else "Live fetch not requested."
+                    ),
+                }
+            )
+            continue
+        try:
+            observations.extend(provider.fetch())
+        except Exception as exc:  # noqa: BLE001 - providers normally report errors themselves
+            skipped.append(
+                {
+                    "provider": {"id": pid, "name": provider.identity.name, "url": provider.identity.url},
+                    "reason": f"Provider raised {type(exc).__name__}: {exc}",
+                }
+            )
+    now = utc_now()
+
+    builder = ScenarioBuilder()
+    built = builder.build(observations)
+    base = default_scenario()
+    base_weights = {n.id: n.priority_weight for n in base.neighborhoods}
+    weight_changes = [
+        {"id": n.id, "default": base_weights.get(n.id), "data_informed": n.priority_weight}
+        for n in built.neighborhoods
+        if base_weights.get(n.id) != n.priority_weight
+    ]
+    supply_changed = dict(built.supply_by_slot) != dict(base.supply_by_slot)
+
+    return json_safe(
+        {
+            "requested_live": live,
+            "offline_mode": forced_offline,
+            "fetched_at": now,
+            "observations": [_observation_dict(o, now, request_started) for o in observations],
+            "skipped": skipped,
+            "scenario_effect": {
+                "rainfall_heuristic_enabled": builder.apply_hypothetical_rainfall_heuristic,
+                "supply_changed": supply_changed,
+                "supply_by_slot": dict(built.supply_by_slot),
+                "default_supply_by_slot": dict(base.supply_by_slot),
+                "priority_weight_changes": weight_changes,
+            },
         }
     )

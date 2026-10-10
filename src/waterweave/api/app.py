@@ -4,13 +4,14 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from waterweave.api import service
 from waterweave.api.presets import PRESETS
 from waterweave.api.schemas import EvaluateRequest, ModelRequest, SolveRequest
+from waterweave.data import clear_cache
 from waterweave.formulation import build_model
 
 
@@ -40,6 +41,7 @@ def create_app() -> FastAPI:
                 "status": "ok",
                 "server_time": service.utc_now(),
                 "engine": service.engine_info(),
+                "offline_mode": service.offline_mode(),
             }
         )
 
@@ -80,6 +82,15 @@ def create_app() -> FastAPI:
         return service.evaluate(
             scenario, request.allocation, request.fairness_weight, request.penalty_weight
         )
+
+    @app.get("/api/data-sources")
+    def data_sources(
+        live: bool = Query(True, description="Contact network providers (Open-Meteo)."),
+        refresh: bool = Query(False, description="Clear the providers' 5-minute cache first."),
+    ) -> dict[str, Any]:
+        if refresh:
+            clear_cache()
+        return service.data_sources(live=live)
 
     @app.api_route("/api/{rest:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
     def unknown_api(rest: str) -> None:

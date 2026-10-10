@@ -233,3 +233,96 @@ def test_evaluate_scores_any_allocation_with_shared_metrics(client, default_payl
     assert body["metrics"]["feasible"] == 0.0
     assert body["metrics"]["storage_violation_units"] == 1.0
     assert body["objective_value"] == pytest.approx(29.0)
+
+
+# ---- data provenance --------------------------------------------------------
+
+class _FakeResponse:
+    def __init__(self, payload):
+        self._data = json.dumps(payload).encode("utf-8")
+
+    def read(self):
+        return self._data
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+
+@pytest.fixture
+def fresh_cache():
+    from waterweave.data import clear_cache
+
+    clear_cache()
+    yield
+    clear_cache()
+
+
+def _no_network(*args, **kwargs):
+    raise AssertionError("offline request must not touch the network")
+
+
+def _rain(body):
+    return next(o for o in body["observations"] if o["provider"]["id"] == "open_meteo")
+
+
+def test_offline_data_sources_skip_network_and_label_illustrative(client, monkeypatch, fresh_cache):
+    monkeypatch.setattr("urllib.request.urlopen", _no_network)
+    body = client.get("/api/data-sources", params={"live": "false"}).json()
+    assert [s["provider"]["id"] for s in body["skipped"]] == ["open_meteo"]
+    assert {o["quality"]["status"] for o in body["observations"]} == {"ILLUSTRATIVE"}
+    assert len(body["observations"]) == 4
+    effect = body["scenario_effect"]
+    assert effect["rainfall_heuristic_enabled"] is False
+    assert effect["supply_changed"] is False
+    assert {c["id"] for c in effect["priority_weight_changes"]} == {"N1", "N2", "N3", "N4"}
+
+
+def test_offline_mode_env_overrides_live_request(client, monkeypatch, fresh_cache):
+    monkeypatch.setenv("WATERWEAVE_OFFLINE", "1")
+    monkeypatch.setattr("urllib.request.urlopen", _no_network)
+    body = client.get("/api/data-sources", params={"live": "true"}).json()
+    assert body["offline_mode"] is True and body["requested_live"] is False
+    assert "WATERWEAVE_OFFLINE" in body["skipped"][0]["reason"]
+    assert client.get("/api/health").json()["offline_mode"] is True
+
+
+def test_live_rainfall_is_reported_with_timestamps_and_cache_flag(client, monkeypatch, fresh_cache):
+    calls = []
+
+    def fake_urlopen(req, timeout=None):
+        calls.append(req.full_url)
+        return _FakeResponse({"current": {"time": "2026-10-10T12:00", "precipitation": 1.2}})
+
+    monkeypatch.setattr("urllib.request.urlopen", fake_urlopen)
+    first = client.get("/api/data-sources").json()
+    rain = _rain(first)
+    assert rain["quality"]["status"] == "VERIFIED_LIVE"
+    assert rain["value"] == pytest.approx(1.2)
+    assert rain["source_timestamp"].startswith("2026-10-10T12:00")
+    assert rain["served_from_cache"] is False
+    # Rainfall is context only: the heuristic is off, so supply is unchanged.
+    assert first["scenario_effect"]["supply_changed"] is False
+
+    second = client.get("/api/data-sources").json()
+    assert _rain(second)["served_from_cache"] is True and len(calls) == 1
+
+    third = client.get("/api/data-sources", params={"refresh": "true"}).json()
+    assert _rain(third)["served_from_cache"] is False and len(calls) == 2
+
+
+def test_live_failure_is_reported_as_missing_not_invented(client, monkeypatch, fresh_cache):
+    import urllib.error
+
+    def failing(req, timeout=None):
+        raise urllib.error.URLError("no route to host")
+
+    monkeypatch.setattr("urllib.request.urlopen", failing)
+    resp = client.get("/api/data-sources")
+    assert resp.status_code == 200
+    rain = _rain(resp.json())
+    assert rain["quality"]["status"] == "ERROR" and rain["quality"]["missing"] is True
+    assert rain["value"] is None
+    assert "Network error" in rain["quality"]["error_details"]

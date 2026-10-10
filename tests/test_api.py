@@ -326,3 +326,27 @@ def test_live_failure_is_reported_as_missing_not_invented(client, monkeypatch, f
     assert rain["quality"]["status"] == "ERROR" and rain["quality"]["missing"] is True
     assert rain["value"] is None
     assert "Network error" in rain["quality"]["error_details"]
+
+
+# ---- recorded benchmark -----------------------------------------------------
+
+def test_benchmark_serves_committed_results_with_provenance(client):
+    body = client.get("/api/benchmark").json()
+    default = body["default"]
+    assert default["file"] == "benchmark_results/benchmark_default.json"
+    assert default["instance"] == "synthetic-4x2"
+    assert default["exact_optimum_objective"] == pytest.approx(6.0)
+    assert default["provenance"]["engine_git_commit"]
+    assert default["parameters"]["seeds"] == [0, 1, 2, 3, 4]
+    rows = {(r["solver_name"], r["qaoa_p"]): r for r in default["summary"]}
+    control = rows[("Uniform random sampling (shot-matched control)", None)]
+    assert control["hit_optimum_rate"] == pytest.approx(1.0)
+    assert rows[("QAOA (Quantum Heuristic)", 1)]["hit_optimum_rate"] == pytest.approx(0.8)
+    assert all(c["status"] == "pass" for c in default["audit_checks"])
+
+
+def test_benchmark_missing_files_give_404(client, monkeypatch, tmp_path):
+    monkeypatch.setenv("WATERWEAVE_REPO_ROOT", str(tmp_path))
+    resp = client.get("/api/benchmark")
+    assert resp.status_code == 404
+    assert "scripts/benchmark.py" in resp.json()["detail"]

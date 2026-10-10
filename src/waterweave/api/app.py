@@ -92,6 +92,16 @@ def create_app() -> FastAPI:
             clear_cache()
         return service.data_sources(live=live)
 
+    @app.get("/api/benchmark")
+    def benchmark() -> dict[str, Any]:
+        payload = service.load_benchmark()
+        if payload is None:
+            raise HTTPException(
+                status_code=404,
+                detail="No recorded benchmark found in benchmark_results/. Run python scripts/benchmark.py.",
+            )
+        return payload
+
     @app.api_route("/api/{rest:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
     def unknown_api(rest: str) -> None:
         raise HTTPException(status_code=404, detail=f"Unknown API route: /api/{rest}")

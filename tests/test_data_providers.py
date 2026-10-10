@@ -59,3 +59,25 @@ def test_validation_rejects_negative_rainfall():
     assert validated.value is None
     assert validated.quality.missing is True
     assert "negative" in validated.quality.error_details.lower()
+
+def test_data_provider_outage_behavior():
+    from waterweave.data.registry import ProviderRegistry, DataProvider
+    from waterweave.data.models import ProviderIdentity
+
+    class FailingProvider(DataProvider):
+        @property
+        def identity(self) -> ProviderIdentity:
+            return ProviderIdentity(id="failing_provider", name="Failing", organization="Org", url="http://example.com")
+
+        def fetch(self) -> list[Observation]:
+            raise ConnectionError("Network timeout")
+
+    test_registry = ProviderRegistry()
+    test_registry.register(FailingProvider())
+    
+    observations = test_registry.fetch_all()
+    assert len(observations) == 1
+    obs = observations[0]
+    assert obs.quality.missing is True
+    assert obs.quality.status == "ERROR"
+    assert "Network timeout" in obs.quality.error_details

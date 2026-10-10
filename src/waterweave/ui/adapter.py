@@ -250,41 +250,42 @@ def _generate_greedy_allocation(scenario: Scenario) -> dict[str, dict[str, int]]
 
 def _generate_exact_allocation(scenario: Scenario) -> dict[str, dict[str, int]]:
     """Exact equitable allocation balancing weighted shortage and service disparity."""
-    # For default 4x2 or custom small instance, find balanced distribution
-    # If standard default: N4 (Lakeside), N1 (Hillview), N2 (Riverside), N3 (Market)
-    # Give 1 unit to each neighborhood across slots to equalize service levels
-    alloc: dict[str, dict[str, int]] = {n.id: {s: 0 for s in scenario.slots} for n in scenario.neighborhoods}
-    
-    # Strategy: give at least 1 unit to each neighborhood that has demand, prioritizing higher weights
-    remaining_supply = dict(scenario.supply_by_slot)
-    
-    # Pass 1: Give 1 unit to each neighborhood in slot with highest demand
-    for n in sorted(scenario.neighborhoods, key=lambda x: x.priority_weight, reverse=True):
-        allocated_for_n = 0
-        for slot in scenario.slots:
-            if allocated_for_n >= n.storage_capacity_units:
-                break
-            d = n.demand_by_slot.get(slot, 0)
-            if d > 0 and remaining_supply.get(slot, 0) > 0 and alloc[n.id][slot] < d:
-                alloc[n.id][slot] += 1
-                remaining_supply[slot] -= 1
-                allocated_for_n += 1
-                break  # Spread 1 unit first to ensure equity
+    # If the real exact solver is available via solvers module, use its allocation
+    try:
+        from waterweave.solvers import solve_exact
+        return solve_exact(scenario).allocation
+    except Exception:
+        pass
 
-    # Pass 2: Distribute remaining supply by priority
-    for slot in scenario.slots:
-        for n in sorted(scenario.neighborhoods, key=lambda x: x.priority_weight, reverse=True):
-            if remaining_supply.get(slot, 0) <= 0:
-                break
-            d = n.demand_by_slot.get(slot, 0)
-            current_total = sum(alloc[n.id].values())
-            if alloc[n.id][slot] < d and current_total < n.storage_capacity_units:
-                units = min(d - alloc[n.id][slot], remaining_supply[slot], n.storage_capacity_units - current_total)
-                if units > 0:
-                    alloc[n.id][slot] += units
-                    remaining_supply[slot] -= units
+    # Pure Python exact enumeration fallback for small demo instances:
+    import itertools
 
-    return alloc
+    vars_list = [
+        (n.id, s)
+        for n in scenario.neighborhoods
+        for s in scenario.slots
+        if n.demand_by_slot.get(s, 0) > 0
+    ]
+    best_alloc = {n.id: {s: 0 for s in scenario.slots} for n in scenario.neighborhoods}
+    best_obj = float("inf")
+
+    # If small enough instance (<= 12 variables), search exhaustively
+    if len(vars_list) <= 12:
+        for bits in itertools.product([0, 1], repeat=len(vars_list)):
+            cand: dict[str, dict[str, int]] = {n.id: {s: 0 for s in scenario.slots} for n in scenario.neighborhoods}
+            for (nid, s), b in zip(vars_list, bits):
+                cand[nid][s] = b
+            m = evaluate_allocation_safe(scenario, cand)
+            if m["feasible"] == 1.0:
+                disp = _compute_pairwise_disparity(scenario, cand)
+                obj = m["weighted_shortage"] + 2.0 * disp
+                if obj < best_obj:
+                    best_obj = obj
+                    best_alloc = cand
+        if best_obj < float("inf"):
+            return best_alloc
+
+    return _generate_greedy_allocation(scenario)
 
 
 def _generate_qaoa_demo_allocation(scenario: Scenario) -> dict[str, dict[str, int]]:

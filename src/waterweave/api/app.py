@@ -2,17 +2,34 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from waterweave.api import service
 from waterweave.api.presets import PRESETS
 from waterweave.api.schemas import EvaluateRequest, ModelRequest, SolveRequest
 from waterweave.data import clear_cache
 from waterweave.formulation import build_model
+
+_NOT_BUILT_PAGE = """<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>WATERWEAVE API</title></head>
+<body style="font-family: system-ui, sans-serif; max-width: 40rem; margin: 3rem auto; line-height: 1.5">
+<h1>WATERWEAVE API is running</h1>
+<p>The web frontend has not been built, so there is nothing to show here yet.</p>
+<p>Build it once with <code>cd frontend &amp;&amp; npm ci &amp;&amp; npm run build</code>, then restart
+<code>python -m waterweave.api</code>. For development, run <code>npm run dev</code> in
+<code>frontend/</code> instead.</p>
+<p>The API itself is available under <a href="/api/health">/api/health</a>.</p>
+</body></html>"""
+
+
+def _frontend_dist() -> Path:
+    return service.repo_root() / "frontend" / "dist"
 
 
 def create_app() -> FastAPI:
@@ -42,6 +59,7 @@ def create_app() -> FastAPI:
                 "server_time": service.utc_now(),
                 "engine": service.engine_info(),
                 "offline_mode": service.offline_mode(),
+                "frontend_built": (_frontend_dist() / "index.html").is_file(),
             }
         )
 
@@ -105,6 +123,22 @@ def create_app() -> FastAPI:
     @app.api_route("/api/{rest:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
     def unknown_api(rest: str) -> None:
         raise HTTPException(status_code=404, detail=f"Unknown API route: /api/{rest}")
+
+    dist = _frontend_dist()
+    if (dist / "assets").is_dir():
+        app.mount("/assets", StaticFiles(directory=dist / "assets"), name="assets")
+
+    @app.get("/{rest:path}", include_in_schema=False)
+    def frontend(rest: str):
+        index = dist / "index.html"
+        if not index.is_file():
+            return HTMLResponse(_NOT_BUILT_PAGE)
+        candidate = (dist / rest).resolve()
+        # Serve real files from dist (favicon, fonts); everything else is a
+        # client-side route and gets index.html.
+        if rest and candidate.is_file() and dist.resolve() in candidate.parents:
+            return FileResponse(candidate)
+        return FileResponse(index)
 
     return app
 

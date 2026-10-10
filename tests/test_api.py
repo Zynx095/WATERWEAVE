@@ -350,3 +350,31 @@ def test_benchmark_missing_files_give_404(client, monkeypatch, tmp_path):
     resp = client.get("/api/benchmark")
     assert resp.status_code == 404
     assert "scripts/benchmark.py" in resp.json()["detail"]
+
+
+# ---- serving the built frontend --------------------------------------------
+
+def test_without_a_build_the_root_explains_how_to_build(monkeypatch, tmp_path):
+    monkeypatch.setenv("WATERWEAVE_REPO_ROOT", str(tmp_path))
+    local = TestClient(create_app())
+    resp = local.get("/")
+    assert resp.status_code == 200
+    assert "npm run build" in resp.text
+    assert local.get("/api/health").json()["frontend_built"] is False
+
+
+def test_built_frontend_is_served_with_client_side_routes(monkeypatch, tmp_path):
+    dist = tmp_path / "frontend" / "dist"
+    (dist / "assets").mkdir(parents=True)
+    (dist / "index.html").write_text("<!doctype html><div id=root></div>", encoding="utf-8")
+    (dist / "assets" / "app.js").write_text("console.log(1)", encoding="utf-8")
+    (dist / "favicon.svg").write_text("<svg/>", encoding="utf-8")
+    monkeypatch.setenv("WATERWEAVE_REPO_ROOT", str(tmp_path))
+    local = TestClient(create_app())
+    assert local.get("/").text.startswith("<!doctype html>")
+    assert local.get("/workspace").text.startswith("<!doctype html>")  # SPA route
+    assert local.get("/assets/app.js").text == "console.log(1)"
+    assert local.get("/favicon.svg").text == "<svg/>"
+    assert local.get("/../pyproject.toml").text.startswith("<!doctype html>")
+    assert local.get("/api/nope").status_code == 404
+    assert local.get("/api/health").json()["frontend_built"] is True

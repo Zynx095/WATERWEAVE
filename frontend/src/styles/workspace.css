@@ -298,6 +298,12 @@
   width: 100%;
   border-collapse: collapse;
   min-width: 34rem;
+  /* Equal columns per solver, so bars are comparable at a glance. */
+  table-layout: fixed;
+}
+
+.service__table thead th:first-child {
+  width: 11rem;
 }
 
 .service__table th,

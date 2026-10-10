@@ -112,6 +112,7 @@ if __name__ == "__main__":
         print(f"  Objective Value:      {res.objective_value:.4f}")
         print(f"  Weighted Shortage:    {m.get('weighted_shortage', 0.0):.2f}")
         print(f"  Fairness Score:       {m.get('fairness_score', 0.0):.4f}")
+        print(f"  Disparity (QUBO):     {m.get('disparity', 0.0):.4f}")
         print(f"  Service Level:        {m.get('service_level', 0.0):.2%}")
         print(f"  Allocated / Demand:   {int(m.get('total_allocated_units', 0))}/{int(m.get('total_demand_units', 0))} units")
         print(f"  Runtime:              {res.runtime_seconds:.4f} s")

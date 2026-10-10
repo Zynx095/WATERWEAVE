@@ -253,3 +253,31 @@ def test_circuit_inspector_telemetry_missing_or_corrupted():
     assert format_runtime(corrupt_res.runtime_seconds) == "Telemetry unavailable"
 
 
+def test_adapter_fallback_disparity_metric():
+    """Verify that evaluate_allocation_safe computes both fairness_score and disparity."""
+    from waterweave.ui.adapter import evaluate_allocation_safe
+    scenario = get_default_scenario()
+    alloc = {n.id: {s: 0 for s in scenario.slots} for n in scenario.neighborhoods}
+    metrics = evaluate_allocation_safe(scenario, alloc)
+    assert "fairness_score" in metrics
+    assert "disparity" in metrics
+    assert metrics["fairness_score"] == pytest.approx(1.0)
+    assert metrics["disparity"] == pytest.approx(0.0)
+
+
+def test_demo_results_include_disparity_in_metrics():
+    """Verify that get_demo_results exposes disparity in metrics and metadata."""
+    scenario = get_default_scenario()
+    results = get_demo_results(scenario, include_qaoa=True)
+    for res in results:
+        assert "disparity" in res.metrics
+        assert "pairwise_disparity" in res.metadata
+        assert res.metrics["disparity"] == pytest.approx(res.metadata["pairwise_disparity"])
+
+
+def test_models_allocation_type_alias():
+    """Verify Allocation type alias is accessible from waterweave.models."""
+    import waterweave.models as models
+    assert hasattr(models, "Allocation")
+
+

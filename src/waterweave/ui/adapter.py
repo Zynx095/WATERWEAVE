@@ -208,6 +208,11 @@ def evaluate_allocation_safe(
 
     service_level = served_total / total_demand if total_demand else 1.0
     fairness = 1.0 - (max(service_levels) - min(service_levels)) if service_levels else 1.0
+    disparity = 0.0
+    if len(service_levels) > 1:
+        for i in range(len(service_levels)):
+            for j in range(i + 1, len(service_levels)):
+                disparity += (service_levels[i] - service_levels[j]) ** 2
     feasible = invalid == 0 and demand_viol == 0 and supply_viol == 0 and storage_viol == 0
 
     return {
@@ -217,6 +222,7 @@ def evaluate_allocation_safe(
         "weighted_shortage": float(weighted_shortage),
         "service_level": float(service_level),
         "fairness_score": float(fairness),
+        "disparity": float(disparity),
         "feasible": 1.0 if feasible else 0.0,
         "invalid_entries": float(invalid),
         "demand_violation_units": float(demand_viol),

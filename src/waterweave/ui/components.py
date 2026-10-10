@@ -332,6 +332,7 @@ def render_comparison_view(
                 "Objective Value": f"{res.objective_value:.2f}",
                 "Service Level": f"{m.get('service_level', 0.0) * 100:.1f}%",
                 "Fairness Score (0-1)": f"{m.get('fairness_score', 0.0):.3f}",
+                "Disparity (QUBO)": f"{m.get('disparity', 0.0):.3f}",
                 "Total Served": f"{int(m.get('total_allocated_units', 0))}/{int(m.get('total_demand_units', 0))} units",
                 "Unmet Demand": f"{int(m.get('unmet_demand_units', 0))} units",
                 "Weighted Shortage": f"{m.get('weighted_shortage', 0.0):.2f}",
@@ -591,7 +592,9 @@ def get_qaoa_circuit_for_inspector(scenario: Scenario, qaoa_res: SolverResult | 
     try:
         from waterweave.formulation import build_model
         from waterweave.solvers import _build_qaoa_circuit
-        model = build_model(scenario)
+        fw = float(meta.get("fairness_weight", 2.0))
+        pw = float(meta["penalty_weight"]) if meta.get("penalty_weight") is not None else None
+        model = build_model(scenario, fairness_weight=fw, penalty_weight=pw)
         qc = _build_qaoa_circuit(model, gammas, betas)
         gate_counts = dict(qc.count_ops())
         return qc, gate_counts

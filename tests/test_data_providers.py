@@ -20,7 +20,7 @@ def test_bbmp_static_fetch():
     obs_list = provider.fetch()
     assert len(obs_list) == 4
     for obs in obs_list:
-        assert obs.quality.status == "VERIFIED_STATIC"
+        assert obs.quality.status == "ILLUSTRATIVE"
         assert obs.variable == "population"
         assert obs.value > 0
 

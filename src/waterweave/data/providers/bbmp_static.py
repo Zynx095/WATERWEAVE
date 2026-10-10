@@ -23,9 +23,8 @@ class BbmpStaticProvider(DataProvider):
         # Using a static representative 2011 timestamp
         source_time = datetime(2011, 3, 1, tzinfo=timezone.utc)
         
-        # Hardcode the mock data for N1-N4 that corresponds to real ward metrics 
-        # (synthesized for demonstration of the pipeline)
-        # Population figures are estimated based on average Bangalore ward sizes
+        # These are illustrative values representing typical Bengaluru ward sizes.
+        # They do not correspond to specific, verified BBMP ward census records.
         ward_data = {
             "N1": 35000,
             "N2": 42000,
@@ -37,7 +36,7 @@ class BbmpStaticProvider(DataProvider):
         for ward_id, pop in ward_data.items():
             observations.append(Observation(
                 provider_id=self.identity.id,
-                dataset_id="ward_population_2011",
+                dataset_id="ward_population_illustrative",
                 geographic_level="neighborhood",
                 geographic_id=ward_id,
                 variable="population",
@@ -45,7 +44,7 @@ class BbmpStaticProvider(DataProvider):
                 unit="count",
                 source_timestamp=source_time,
                 retrieval_timestamp=retrieval_time,
-                quality=DataQuality(status="VERIFIED_STATIC", missing=False)
+                quality=DataQuality(status="ILLUSTRATIVE", missing=False)
             ))
             
         return observations

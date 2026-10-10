@@ -79,7 +79,12 @@ export function SolverPanel({ outcome, scenario, source, runId }: SolverPanelPro
   const m = outcome.metrics
   const titleId = `solver-${outcome.key}-${runId}`
   return (
-    <article className={`solver solver--${outcome.key}`} aria-labelledby={titleId} data-status={outcome.status}>
+    <article
+      className={`solver solver--${outcome.key}`}
+      aria-labelledby={titleId}
+      data-status={outcome.status}
+      data-present-id={`solver-${outcome.key}`}
+    >
       <header className="solver__head">
         <h3 id={titleId}>{info.name}</h3>
         <p className="solver__short">{info.short}</p>

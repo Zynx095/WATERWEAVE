@@ -140,6 +140,16 @@ export function reducer(state: StoreState, action: Action): StoreState {
 const message = (error: unknown) =>
   error instanceof ApiError ? error.message : error instanceof Error ? error.message : String(error)
 
+/** Result of an async action: data, or a message saying why not; both null if cancelled. */
+export interface Outcome<T> {
+  data: T | null
+  error: string | null
+}
+
+const ok = <T,>(data: T): Outcome<T> => ({ data, error: null })
+const failed = <T,>(error: string): Outcome<T> => ({ data: null, error })
+const cancelled = <T,>(): Outcome<T> => ({ data: null, error: null })
+
 export interface RunOptions {
   includeQaoa?: boolean
   settings?: Partial<SolveSettings>
@@ -154,9 +164,13 @@ export interface StoreActions {
   selectPreset: (id: string) => void
   editScenario: (update: (scenario: ScenarioSpec) => ScenarioSpec) => void
   updateSettings: (settings: Partial<SolveSettings>) => void
-  runSolvers: (options?: RunOptions) => Promise<SolveResponse | null>
-  fetchDataSources: (options: { live: boolean; refresh?: boolean; signal?: AbortSignal }) => Promise<DataSourcesResponse | null>
-  loadBenchmark: (options?: { signal?: AbortSignal }) => Promise<BenchmarkResponse | null>
+  runSolvers: (options?: RunOptions) => Promise<Outcome<SolveResponse>>
+  fetchDataSources: (options: {
+    live: boolean
+    refresh?: boolean
+    signal?: AbortSignal
+  }) => Promise<Outcome<DataSourcesResponse>>
+  loadBenchmark: (options?: { signal?: AbortSignal }) => Promise<Outcome<BenchmarkResponse>>
 }
 
 interface StoreValue {
@@ -238,10 +252,10 @@ export function StoreProvider({ children, autoConnect = true }: { children: Reac
     dispatch({ type: 'settings', settings })
   }, [])
 
-  const runSolvers = useCallback(async (options: RunOptions = {}): Promise<SolveResponse | null> => {
+  const runSolvers = useCallback(async (options: RunOptions = {}): Promise<Outcome<SolveResponse>> => {
     const current = stateRef.current
     const scenario = current.scenario
-    if (!scenario) return null
+    if (!scenario) return failed('No scenario is loaded yet.')
     const settings: SolveSettings = {
       ...current.settings,
       ...options.settings,
@@ -265,80 +279,77 @@ export function StoreProvider({ children, autoConnect = true }: { children: Reac
             settings.maxiter === recorded.settings.maxiter &&
             settings.seed === recorded.settings.seed))
       if (!recorded || !matches) {
-        dispatch({
-          type: 'slice/error',
-          key: 'run',
-          error:
-            'The recorded run only covers the default scenario with the default settings. Start the API to solve this scenario.',
-        })
-        return null
+        const error =
+          'The recorded run only covers the default scenario with the default settings. Start the API to solve this scenario.'
+        dispatch({ type: 'slice/error', key: 'run', error })
+        return failed(error)
       }
       dispatch({ type: 'slice/ready', key: 'run', data: recorded, source: 'recorded' })
-      return recorded
+      return ok(recorded)
     }
 
     try {
       const response = await api.solve(scenario, settings, { signal: options.signal })
-      if (id !== runCounter.current) return null // a newer run superseded this one
+      if (id !== runCounter.current) return cancelled() // a newer run superseded this one
       dispatch({ type: 'slice/ready', key: 'run', data: response, source: 'live' })
-      return response
+      return ok(response)
     } catch (error) {
-      if (id !== runCounter.current) return null
+      if (id !== runCounter.current) return cancelled()
       if (isAbortError(error)) {
         dispatch({ type: 'slice/clear', key: 'run' })
-        return null
+        return cancelled()
       }
       dispatch({ type: 'slice/error', key: 'run', error: message(error) })
-      return null
+      return failed(message(error))
     }
   }, [])
 
   const fetchDataSources = useCallback(
-    async (options: { live: boolean; refresh?: boolean; signal?: AbortSignal }) => {
+    async (options: { live: boolean; refresh?: boolean; signal?: AbortSignal }): Promise<Outcome<DataSourcesResponse>> => {
       const id = ++dataCounter.current
       const current = stateRef.current
       dispatch({ type: 'slice/loading', key: 'dataSources' })
       if (current.mode === 'recorded' && current.recording) {
         dispatch({ type: 'slice/ready', key: 'dataSources', data: current.recording.dataSources, source: 'recorded' })
-        return current.recording.dataSources
+        return ok(current.recording.dataSources)
       }
       try {
         const data = await api.dataSources({ live: options.live, refresh: options.refresh }, { signal: options.signal })
-        if (id !== dataCounter.current) return null
+        if (id !== dataCounter.current) return cancelled()
         dispatch({ type: 'slice/ready', key: 'dataSources', data, source: 'live' })
-        return data
+        return ok(data)
       } catch (error) {
-        if (id !== dataCounter.current) return null
+        if (id !== dataCounter.current) return cancelled()
         if (isAbortError(error)) {
           dispatch({ type: 'slice/clear', key: 'dataSources' })
-          return null
+          return cancelled()
         }
         dispatch({ type: 'slice/error', key: 'dataSources', error: message(error) })
-        return null
+        return failed(message(error))
       }
     },
     [],
   )
 
-  const loadBenchmark = useCallback(async (options: { signal?: AbortSignal } = {}) => {
+  const loadBenchmark = useCallback(async (options: { signal?: AbortSignal } = {}): Promise<Outcome<BenchmarkResponse>> => {
     const current = stateRef.current
-    if (current.benchmark.status === 'ready' && current.benchmark.data) return current.benchmark.data
+    if (current.benchmark.status === 'ready' && current.benchmark.data) return ok(current.benchmark.data)
     dispatch({ type: 'slice/loading', key: 'benchmark' })
     if (current.mode === 'recorded' && current.recording) {
       dispatch({ type: 'slice/ready', key: 'benchmark', data: current.recording.benchmark, source: 'recorded' })
-      return current.recording.benchmark
+      return ok(current.recording.benchmark)
     }
     try {
       const data = await api.benchmark({ signal: options.signal })
       dispatch({ type: 'slice/ready', key: 'benchmark', data, source: 'live' })
-      return data
+      return ok(data)
     } catch (error) {
       if (isAbortError(error)) {
         dispatch({ type: 'slice/clear', key: 'benchmark' })
-        return null
+        return cancelled()
       }
       dispatch({ type: 'slice/error', key: 'benchmark', error: message(error) })
-      return null
+      return failed(message(error))
     }
   }, [])
 

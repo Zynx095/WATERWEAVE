@@ -172,7 +172,20 @@ print(f"Circuit width: {qc.num_qubits} qubits, Depth: {qc.depth()}, Gate counts:
 
 ---
 
-## 4. Implementation Walkthrough & Live Demo
+## 4. Live Municipal Data Integration
+
+WATERWEAVE includes a live data-ingestion pipeline designed to map real-world observations into the synthetic combinatorial topology.
+
+* **Verified Sources**:
+  * **Open-Meteo**: Provides real-time rainfall data for Bengaluru, which heuristics use to adjust the evening slot reservoir supply.
+  * **BBMP Census Data (2011)**: Static estimates used to scale priority weights per neighborhood proportionally based on verified ward counts.
+* **Architecture**: A modular `DataProvider` registry (`src/waterweave/data/`) standardizes live/static inputs into a unified `Observation` schema. 
+* **Resilience**: The system caches responses with a 5-minute TTL, explicitly flags missing values or API failures, and gracefully falls back to synthetic inputs if external connectivity is lost.
+* **Limitations**: There is currently no public real-time API for BWSSB reservoir levels or real-time local demand flow, necessitating heuristic models based on weather and census data.
+
+---
+
+## 5. Implementation Walkthrough & Live Demo
 
 * **Walkthrough of Gameplay / Optimization Pipeline:**  
   1. **Scenario Ingestion:** The municipal scenario specifies 4 neighborhoods and 2 delivery slots. Total demand is 7 units; total supply is 4 units (forcing a 3-unit shortfall).

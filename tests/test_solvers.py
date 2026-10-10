@@ -159,3 +159,35 @@ def test_zero_supply_scenario():
     re = solve_exact(zero_sup)
     assert re.feasible is True
     assert re.metrics["total_allocated_units"] == 0
+
+
+def test_empty_neighborhoods_scenario():
+    """Verify solvers handle scenario with no neighborhoods gracefully."""
+    empty_s = Scenario(
+        name="empty-s",
+        slots=("morning",),
+        neighborhoods=(),
+        supply_by_slot={"morning": 10},
+    )
+    rg = solve_greedy(empty_s)
+    assert rg.feasible is True
+    assert rg.objective_value == 0.0
+
+    re = solve_exact(empty_s)
+    assert re.feasible is True
+    assert re.objective_value == 0.0
+
+    rq = solve_qaoa(empty_s, p=1, shots=100)
+    assert rq.feasible is True
+    assert rq.objective_value == 0.0
+
+
+def test_qaoa_p2_execution():
+    """Verify QAOA with p=2 layers executes with correct circuit depth."""
+    res = solve_qaoa(S, p=2, shots=512, maxiter=10, seed=42)
+    assert res.feasible is True
+    assert res.metadata["layers_p"] == 2
+    assert res.metadata["circuit_depth"] == 29
+    assert len(res.metadata["optimal_gammas"]) == 2
+    assert len(res.metadata["optimal_betas"]) == 2
+

@@ -2,6 +2,7 @@ import type { ReferenceOutcome, ScenarioSpec, SolverOutcome } from '../api/types
 import { formatNumber, formatPercent } from '../lib/format'
 import { agreesWithMetrics, serviceShares } from '../lib/service'
 import { SOLVERS } from '../lib/solvers'
+import { ScrollRegion } from './ScrollRegion'
 
 export interface ServiceChartProps {
   scenario: ScenarioSpec
@@ -30,7 +31,7 @@ export function ServiceChart({ scenario, results, reference }: ServiceChartProps
   }
 
   return (
-    <div className="service">
+    <ScrollRegion className="service" label="Share of requests met">
       <table className="service__table">
         <caption className="sr-only">Share of each neighborhood's requests that each solver met</caption>
         <thead>
@@ -93,7 +94,7 @@ export function ServiceChart({ scenario, results, reference }: ServiceChartProps
         </tfoot>
       </table>
       <ReferenceNote reference={reference} objectives={ok.map((r) => r.objective_value as number)} />
-    </div>
+    </ScrollRegion>
   )
 }
 

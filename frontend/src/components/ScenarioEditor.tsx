@@ -8,6 +8,7 @@ import type { NeighborhoodSpec, ScenarioSpec } from '../api/types'
 import { capitalise, shortName } from '../lib/format'
 import { NumberStepper } from './NumberStepper'
 import { Crossing } from './Weave'
+import { ScrollRegion } from './ScrollRegion'
 
 export interface ScenarioEditorProps {
   scenario: ScenarioSpec
@@ -26,7 +27,7 @@ function updateNeighborhood(
 export function ScenarioEditor({ scenario, onChange, disabled = false }: ScenarioEditorProps) {
   const { slots, neighborhoods } = scenario
   return (
-    <div className="weave-wrap">
+    <ScrollRegion className="weave-wrap" label="Scenario editor">
       <p className="editor__scroll-hint">Scroll the table sideways for weight and storage.</p>
       <table className="weave weave--editor">
         <caption className="sr-only">
@@ -142,6 +143,6 @@ export function ScenarioEditor({ scenario, onChange, disabled = false }: Scenari
           </tr>
         </tfoot>
       </table>
-    </div>
+    </ScrollRegion>
   )
 }

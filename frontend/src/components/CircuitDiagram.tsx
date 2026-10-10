@@ -6,6 +6,7 @@
  */
 import type { CircuitInfo } from '../api/types'
 import { formatNumber } from '../lib/format'
+import { ScrollRegion } from './ScrollRegion'
 
 export interface PlacedGate {
   name: string
@@ -98,7 +99,7 @@ export function CircuitDiagram({ circuit, labels }: { circuit: CircuitInfo; labe
     .join(', ')
 
   return (
-    <div className="circuit-wrap">
+    <ScrollRegion className="circuit-wrap" label="QAOA circuit diagram">
       <svg
         className="circuit"
         viewBox={`0 0 ${width} ${height}`}
@@ -155,6 +156,6 @@ export function CircuitDiagram({ circuit, labels }: { circuit: CircuitInfo; labe
           )
         })}
       </svg>
-    </div>
+    </ScrollRegion>
   )
 }

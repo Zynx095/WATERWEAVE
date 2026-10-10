@@ -6,6 +6,7 @@
  */
 import type { ModelDetails } from '../api/types'
 import { formatNumber } from '../lib/format'
+import { ScrollRegion } from './ScrollRegion'
 
 export function CouplingMatrix({ model, labels, longLabels }: { model: ModelDetails; labels: string[]; longLabels: string[] }) {
   const n = model.n_vars
@@ -26,7 +27,7 @@ export function CouplingMatrix({ model, labels, longLabels }: { model: ModelDeta
 
   return (
     <figure className="matrix">
-      <div className="matrix__scroll">
+      <ScrollRegion className="matrix__scroll" label="QUBO coefficient grid">
         <svg
           viewBox={`0 0 ${48 + n * cell} ${48 + n * cell}`}
           width={48 + n * cell}
@@ -67,7 +68,7 @@ export function CouplingMatrix({ model, labels, longLabels }: { model: ModelDeta
             ),
           )}
         </svg>
-      </div>
+      </ScrollRegion>
       <figcaption className="matrix__legend">
         <span className="matrix__swatch matrix__swatch--neg" aria-hidden="true" /> negative: switching both on lowers
         the energy
@@ -76,7 +77,7 @@ export function CouplingMatrix({ model, labels, longLabels }: { model: ModelDeta
       </figcaption>
       <details className="explain">
         <summary>All {model.qubo.quadratic.length} couplings and {n} linear coefficients as a table</summary>
-        <div className="table-scroll">
+        <ScrollRegion className="table-scroll" label="QUBO coefficient table">
           <table className="data-table data-table--compact">
             <caption className="sr-only">QUBO coefficients</caption>
             <thead>
@@ -103,7 +104,7 @@ export function CouplingMatrix({ model, labels, longLabels }: { model: ModelDeta
               ))}
             </tbody>
           </table>
-        </div>
+        </ScrollRegion>
       </details>
     </figure>
   )

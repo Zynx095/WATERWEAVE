@@ -67,29 +67,23 @@ def test_disparity_algebraic_identity():
         assert model_disp == pytest.approx(direct_disp, abs=1e-6)
 
 
-def test_qubo_energy_matches_objective_for_all_feasible_allocations():
-    """Verify that for every feasible allocation, the minimal QUBO slack energy matches evaluate_objective."""
+def test_qubo_energy_matches_objective_for_all_feasible_and_infeasible_allocations():
+    """Verify that for ALL 128 allocations, the minimal QUBO slack energy matches evaluate_objective."""
     model = build_model(S, fairness_weight=2.0, penalty_weight=15.0)
 
-    feasible_checked = 0
     for dec_bits in itertools.product([0, 1], repeat=model.n_decision):
         alloc = decode_allocation(model, list(dec_bits))
-        m = evaluate_allocation(S, alloc)
-        if m["feasible"] == 1.0:
-            feasible_checked += 1
-            obj = evaluate_objective(S, alloc, fairness_weight=2.0, penalty_weight=15.0)
+        obj = evaluate_objective(S, alloc, fairness_weight=2.0, penalty_weight=15.0)
 
-            # Minimum energy over slack variable settings
-            min_e = float("inf")
-            for slack_bits in itertools.product([0, 1], repeat=model.n_slack):
-                full_bits = list(dec_bits) + list(slack_bits)
-                e = evaluate_qubo_energy(model, full_bits)
-                if e < min_e:
-                    min_e = e
+        # Minimum energy over slack variable settings
+        min_e = float("inf")
+        for slack_bits in itertools.product([0, 1], repeat=model.n_slack):
+            full_bits = list(dec_bits) + list(slack_bits)
+            e = evaluate_qubo_energy(model, full_bits)
+            if e < min_e:
+                min_e = e
 
-            assert min_e == pytest.approx(obj, abs=1e-6)
-
-    assert feasible_checked == 65
+        assert min_e == pytest.approx(obj, abs=1e-6)
 
 
 def test_penalty_weight_dominance():
@@ -122,6 +116,33 @@ def test_penalty_weight_dominance():
     assert min_infeasible_energy >= 19.5
 
 
+def test_dynamic_penalty_weight_guarantees_dominance_for_large_weights():
+    """Verify that compute_default_penalty_weight scales dynamically to maintain dominance."""
+    from waterweave.formulation import compute_default_penalty_weight
+    sc_large = Scenario(
+        name="large-w",
+        slots=("morning",),
+        neighborhoods=(
+            Neighborhood("N1", "N1", {"morning": 1}, priority_weight=30.0, storage_capacity_units=1),
+        ),
+        supply_by_slot={"morning": 0},
+    )
+    p_dyn = compute_default_penalty_weight(sc_large, fairness_weight=2.0)
+    assert p_dyn >= 62.0
+
+    m_dyn = build_model(sc_large)
+    assert m_dyn.penalty_weight == p_dyn
+
+    # Allocating 0 is feasible (supply 0), allocating 1 is infeasible
+    alloc_feas = {"N1": {"morning": 0}}
+    alloc_infeas = {"N1": {"morning": 1}}
+    obj_feas = evaluate_objective(sc_large, alloc_feas)
+    obj_infeas = evaluate_objective(sc_large, alloc_infeas)
+    assert obj_feas == pytest.approx(30.0)
+    assert obj_infeas == pytest.approx(p_dyn)
+    assert obj_infeas > obj_feas
+
+
 def test_decode_allocation_endianness():
     """Verify little-endian decoding from Qiskit measurement string."""
     model = build_model(S)
@@ -144,3 +165,16 @@ def test_sparse_pauli_op_generation():
     H = to_sparse_pauli_op(model)
     assert H.num_qubits == model.n_vars
     assert len(H) > 0
+
+
+def test_sparse_pauli_op_zero_qubits():
+    """Verify SparsePauliOp operator handles empty model gracefully."""
+    sc_empty = Scenario(
+        name="empty",
+        slots=("morning",),
+        neighborhoods=(),
+        supply_by_slot={"morning": 0},
+    )
+    m_empty = build_model(sc_empty)
+    H = to_sparse_pauli_op(m_empty)
+    assert H.num_qubits == 0

@@ -80,6 +80,51 @@ def test_qaoa_solver_execution():
     assert meta["feasible_samples_ratio"] > 0.3
     assert len(meta["optimal_gammas"]) == 1
     assert len(meta["optimal_betas"]) == 1
+    assert meta["slack_consistent"] is True
+    assert meta["qubo_energy"] == pytest.approx(res.objective_value)
+
+
+def test_greedy_binary_decision_cap():
+    """Verify greedy assigns at most 1 unit per slot even when demand is > 1."""
+    sc_multi = Scenario(
+        name="multi-demand",
+        slots=("morning",),
+        neighborhoods=(
+            Neighborhood("N1", "N1", {"morning": 3}, priority_weight=1.0, storage_capacity_units=3),
+        ),
+        supply_by_slot={"morning": 5},
+    )
+    rg = solve_greedy(sc_multi)
+    assert rg.feasible is True
+    assert rg.allocation["N1"]["morning"] == 1
+
+
+def test_qaoa_failure_handling():
+    """Verify QAOA handles invalid settings or runtime failures cleanly."""
+    res = solve_qaoa(S, shots=0)
+    assert res.feasible is False
+    assert res.objective_value == float("inf")
+    assert res.metrics["feasible"] == 0.0
+    assert "error" in res.metadata
+
+
+def test_solvers_asymmetric_3slots():
+    """Verify solvers handle asymmetric 3-slot custom scenarios."""
+    sc_3slots = Scenario(
+        name="test-3slots",
+        slots=("morning", "afternoon", "evening"),
+        neighborhoods=(
+            Neighborhood("N1", "N1", {"morning": 1, "afternoon": 0, "evening": 1}, 1.0, 2),
+            Neighborhood("N2", "N2", {"morning": 0, "afternoon": 1, "evening": 1}, 1.0, 2),
+        ),
+        supply_by_slot={"morning": 1, "afternoon": 1, "evening": 1},
+    )
+    rg = solve_greedy(sc_3slots)
+    assert rg.feasible is True
+    re = solve_exact(sc_3slots)
+    assert re.feasible is True
+    rq = solve_qaoa(sc_3slots, p=1, shots=512)
+    assert rq.feasible is True
 
 
 def test_zero_demand_scenario():

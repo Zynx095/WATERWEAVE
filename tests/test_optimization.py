@@ -48,3 +48,23 @@ def test_run_comparison_without_qaoa():
     assert len(results) == 2
     assert results[0].solver_name == "Greedy (Priority-First)"
     assert results[1].solver_name == "Exact Classical (Optimal)"
+
+
+def test_run_comparison_custom_scenario():
+    """Verify run_comparison succeeds on custom scenario with dynamic penalty."""
+    from waterweave.models import Neighborhood, Scenario
+    sc_custom = Scenario(
+        name="custom-test",
+        slots=("slot1", "slot2"),
+        neighborhoods=(
+            Neighborhood("A", "Area A", {"slot1": 1, "slot2": 0}, priority_weight=5.0, storage_capacity_units=1),
+            Neighborhood("B", "Area B", {"slot1": 0, "slot2": 1}, priority_weight=2.0, storage_capacity_units=1),
+        ),
+        supply_by_slot={"slot1": 1, "slot2": 1},
+    )
+    results = run_comparison(sc_custom, include_qaoa=True, shots=256)
+    assert len(results) == 3
+    for r in results:
+        assert r.feasible is True
+        assert r.objective_value == pytest.approx(0.0)
+        assert r.metrics["total_allocated_units"] == 2.0

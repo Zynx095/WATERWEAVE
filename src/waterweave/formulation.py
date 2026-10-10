@@ -60,10 +60,30 @@ class OptimizationModel:
     ising_J: np.ndarray
 
 
+def compute_default_penalty_weight(
+    scenario: Scenario,
+    fairness_weight: float = 2.0,
+) -> float:
+    """Derive a penalty weight P guaranteeing that feasible states dominate infeasible states.
+
+    A single constraint violation yields penalty P * (1)^2 = P.
+    The maximum possible reduction in shortage from serving neighborhood i is w_i,
+    and disparity change is bounded by alpha.
+    To ensure every violation strictly increases energy:
+        P >= max(15.0, 2.0 * max_i(w_i) + alpha)
+    """
+    max_w = (
+        max(n.priority_weight for n in scenario.neighborhoods)
+        if scenario.neighborhoods
+        else 1.0
+    )
+    return float(max(15.0, 2.0 * max_w + fairness_weight))
+
+
 def build_model(
     scenario: Scenario,
     fairness_weight: float = 2.0,
-    penalty_weight: float = 15.0,
+    penalty_weight: float | None = None,
 ) -> OptimizationModel:
     """Construct an explicit QUBO and Ising model for the given Scenario.
 
@@ -77,6 +97,9 @@ def build_model(
         Minimize:
           Weighted Shortage + alpha * Disparity + P * Constraint Penalties
     """
+    if penalty_weight is None:
+        penalty_weight = compute_default_penalty_weight(scenario, fairness_weight=fairness_weight)
+
     # 1. Identify active decision variables: only where demand > 0
     decision_vars: list[tuple[str, str]] = []
     for n in scenario.neighborhoods:
@@ -111,26 +134,19 @@ def build_model(
         ]
         u_bound = len(participating_vars)
         if u_bound > supply_limit:
-            # Slack needed: S_t - sum(x) in {0, ..., S_t}
-            needed_slack = supply_limit
             slack_indices: list[int] = []
-            for s_idx in range(needed_slack):
-                slack_name = f"slack_supply_{t}_{s_idx}"
-                slack_vars.append(slack_name)
-                slack_indices.append(n_decision + len(slack_vars) - 1)
+            if supply_limit > 0:
+                # Slack needed: S_t - sum(x) in {0, ..., S_t}
+                needed_slack = supply_limit
+                for s_idx in range(needed_slack):
+                    slack_name = f"slack_supply_{t}_{s_idx}"
+                    slack_vars.append(slack_name)
+                    slack_indices.append(n_decision + len(slack_vars) - 1)
             constraint_specs.append({
                 "name": f"supply_{t}",
                 "var_indices": participating_vars + slack_indices,
                 "coeffs": [1.0] * len(participating_vars) + [1.0] * len(slack_indices),
                 "bound": float(supply_limit),
-            })
-        elif supply_limit == 0 and u_bound > 0:
-            # Cannot allocate anything: sum(x) = 0
-            constraint_specs.append({
-                "name": f"supply_{t}",
-                "var_indices": participating_vars,
-                "coeffs": [1.0] * len(participating_vars),
-                "bound": 0.0,
             })
 
     # Neighborhood storage constraints: sum_{t} x[i, t] <= C_i
@@ -143,24 +159,18 @@ def build_model(
         ]
         u_bound = len(participating_vars)
         if u_bound > cap:
-            needed_slack = cap
             slack_indices = []
-            for s_idx in range(needed_slack):
-                slack_name = f"slack_storage_{n.id}_{s_idx}"
-                slack_vars.append(slack_name)
-                slack_indices.append(n_decision + len(slack_vars) - 1)
+            if cap > 0:
+                needed_slack = cap
+                for s_idx in range(needed_slack):
+                    slack_name = f"slack_storage_{n.id}_{s_idx}"
+                    slack_vars.append(slack_name)
+                    slack_indices.append(n_decision + len(slack_vars) - 1)
             constraint_specs.append({
                 "name": f"storage_{n.id}",
                 "var_indices": participating_vars + slack_indices,
                 "coeffs": [1.0] * len(participating_vars) + [1.0] * len(slack_indices),
                 "bound": float(cap),
-            })
-        elif cap == 0 and u_bound > 0:
-            constraint_specs.append({
-                "name": f"storage_{n.id}",
-                "var_indices": participating_vars,
-                "coeffs": [1.0] * len(participating_vars),
-                "bound": 0.0,
             })
 
     n_slack = len(slack_vars)
@@ -279,7 +289,7 @@ def decode_allocation(
 
     for k, (nid, slot) in enumerate(model.decision_vars):
         if k < len(bits):
-            allocation[nid][slot] = int(bits[k])
+            allocation[nid][slot] = max(0, min(1, int(bits[k])))
 
     return allocation
 
@@ -288,19 +298,27 @@ def evaluate_objective(
     scenario: Scenario,
     allocation: dict[str, dict[str, int]],
     fairness_weight: float = 2.0,
-    penalty_weight: float = 15.0,
+    penalty_weight: float | None = None,
 ) -> float:
     """Evaluate the exact theoretical objective function for a given allocation.
 
     Objective:
-        Weighted Shortage + alpha * Disparity + P * Violations^2
+        Weighted Shortage + alpha * Disparity + P * sum(violations^2)
+
+    Penalties are summed across individual squared constraint violations:
+        sum_t (supply_viol_t)^2 + sum_i (storage_viol_i)^2 + sum_{i,t} (demand_viol_{i,t})^2.
+    This aligns mathematically with the quadratic binary formulation where each
+    inequality is penalized by P * (sum x + sum s - B)^2 individually.
     """
+    if penalty_weight is None:
+        penalty_weight = compute_default_penalty_weight(scenario, fairness_weight=fairness_weight)
+
     total_shortage = 0.0
     service_levels: list[float] = []
 
     # Storage and demand violations
-    storage_viol = 0
-    demand_viol = 0
+    storage_viol_sq = 0.0
+    demand_viol_sq = 0.0
     for n in scenario.neighborhoods:
         nd = sum(n.demand_by_slot.get(t, 0) for t in scenario.slots)
         n_alloc = 0
@@ -311,20 +329,20 @@ def evaluate_objective(
             n_alloc += a
             served += min(a, d)
             if a > d:
-                demand_viol += (a - d)
+                demand_viol_sq += (a - d) ** 2
         if n_alloc > n.storage_capacity_units:
-            storage_viol += (n_alloc - n.storage_capacity_units)
+            storage_viol_sq += (n_alloc - n.storage_capacity_units) ** 2
         total_shortage += n.priority_weight * (nd - served)
         if nd > 0:
             service_levels.append(served / nd)
 
-    # Supply violations
-    supply_viol = 0
+    # Supply violations (squared per slot)
+    supply_viol_sq = 0.0
     for t in scenario.slots:
         used = sum(allocation.get(n.id, {}).get(t, 0) for n in scenario.neighborhoods)
         s_cap = scenario.supply_by_slot.get(t, 0)
         if used > s_cap:
-            supply_viol += (used - s_cap)
+            supply_viol_sq += (used - s_cap) ** 2
 
     # Disparity: sum_{i < j} (s_i - s_j)^2
     disparity = 0.0
@@ -335,7 +353,7 @@ def evaluate_objective(
                 disparity += (service_levels[i] - service_levels[j]) ** 2
 
     # Total objective
-    penalties = penalty_weight * (supply_viol ** 2 + storage_viol ** 2 + demand_viol ** 2)
+    penalties = penalty_weight * (supply_viol_sq + storage_viol_sq + demand_viol_sq)
     return float(total_shortage + fairness_weight * disparity + penalties)
 
 
@@ -370,6 +388,9 @@ def to_sparse_pauli_op(model: OptimizationModel) -> SparsePauliOp:
         raise ImportError("Qiskit is required to generate SparsePauliOp.")
 
     n = model.n_vars
+    if n == 0:
+        return SparsePauliOp.from_list([("", 0.0)])
+
     pauli_list: list[tuple[str, float]] = []
 
     # Offset term: I * ... * I
@@ -392,5 +413,8 @@ def to_sparse_pauli_op(model: OptimizationModel) -> SparsePauliOp:
                 p_chars[n - 1 - k] = "Z"
                 p_chars[n - 1 - l] = "Z"
                 pauli_list.append(("".join(p_chars), model.ising_J[k, l]))
+
+    if len(pauli_list) == 0:
+        pauli_list.append(("I" * n, 0.0))
 
     return SparsePauliOp.from_list(pauli_list)

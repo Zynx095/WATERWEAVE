@@ -86,6 +86,28 @@ describe('WorkspacePage', () => {
     expect(screen.getByRole('table', { name: /Share of each/ })).not.toHaveTextContent('QAOA')
   })
 
+  it('says when there was nothing to decide', async () => {
+    const empty = {
+      ...quantum,
+      scenario: {
+        ...quantum.scenario,
+        neighborhoods: quantum.scenario.neighborhoods.map((n) => ({ ...n, demand_by_slot: { morning: 0, evening: 0 } })),
+      },
+      results: quantum.results.map((r) =>
+        r.key === 'qaoa'
+          ? { ...r, objective_value: 0, metadata: { solver_type: 'quantum_approximate', num_qubits: 0, layers_p: 1, shots: 1024 }, circuit: null, samples: null }
+          : r,
+      ),
+    }
+    mockApi({ '/api/solve': () => json(empty) })
+    const user = userEvent.setup()
+    renderWithStore(<WorkspacePage />)
+    await runSolvers(user)
+    const qaoa = await screen.findByRole('article', { name: 'QAOA' })
+    expect(qaoa).toHaveTextContent('Nothing was requested, so the circuit had nothing to decide.')
+    expect(qaoa).not.toHaveTextContent('simulated qubits')
+  })
+
   it('explains a skipped QAOA run', async () => {
     mockApi({
       '/api/solve': () =>

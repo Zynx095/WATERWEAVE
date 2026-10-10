@@ -1,5 +1,6 @@
 /* Display formatting only. Values are never recomputed here. */
 
+/** Date and time in the viewer's local time zone, with the zone named. */
 export function formatDateTime(iso: string | null | undefined): string {
   if (!iso) return 'unknown time'
   const date = new Date(iso)
@@ -10,9 +11,20 @@ export function formatDateTime(iso: string | null | undefined): string {
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-    timeZone: 'UTC',
     timeZoneName: 'short',
   }).format(date)
+}
+
+/** "just now", "3 min ago", "2 h ago", "4 days ago". */
+export function formatRelative(iso: string | null | undefined, now = Date.now()): string {
+  if (!iso) return ''
+  const t = new Date(iso).getTime()
+  if (Number.isNaN(t)) return ''
+  const s = Math.round((now - t) / 1000)
+  if (s < 45) return 'just now'
+  if (s < 90 * 60) return `${Math.max(1, Math.round(s / 60))} min ago`
+  if (s < 36 * 3600) return `${Math.round(s / 3600)} h ago`
+  return `${Math.round(s / 86400)} days ago`
 }
 
 export function formatTime(iso: string | null | undefined): string {

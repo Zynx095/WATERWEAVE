@@ -99,6 +99,7 @@ print(f"Circuit width: {qc.num_qubits} qubits, Depth: {qc.depth()}, Gate counts:
 │   ├── VALIDATION.md       # Independent audit and review
 │   ├── BENCHMARK_FINDINGS.md # Benchmark tables and random-control analysis
 │   ├── FRONTEND_ARCHITECTURE.md # Web app audit, architecture, design and presentation mode
+│   ├── API.md              # HTTP API used by the web app
 │   ├── DATA_*.md, LIVE_DATA_ARCHITECTURE.md # Data sources, gaps, model and validation
 │   ├── INTERFACES.md       # Shared Python contracts and telemetry schema
 │   └── PROJECT_SPEC.md     # Hackathon track specifications and design rules

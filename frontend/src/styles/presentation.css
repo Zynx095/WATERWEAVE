@@ -383,3 +383,143 @@ li[data-status='fail'] .preflight__result {
 .preflight__checks p + p {
   margin-top: 0.15rem;
 }
+
+/* ---- presenter view ------------------------------------------------------ */
+
+.presenter {
+  min-height: 100vh;
+  padding: var(--space-5) var(--gutter) var(--space-7);
+  max-width: 72rem;
+  margin: 0 auto;
+}
+
+.presenter__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.presenter__head h1 {
+  font-size: var(--step-2);
+}
+
+.presenter__head .pill {
+  margin-left: auto;
+}
+
+.presenter__waiting {
+  display: grid;
+  gap: var(--space-5);
+  justify-items: start;
+}
+
+.presenter__main {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: var(--space-6) var(--space-7);
+}
+
+.presenter__now,
+.presenter__controls {
+  grid-column: 1 / -1;
+}
+
+.presenter__count {
+  color: var(--ink-2);
+  font-weight: 650;
+}
+
+.presenter__now h2 {
+  font-size: var(--step-5);
+}
+
+.presenter__state {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  margin-top: var(--space-2);
+  max-width: none;
+  font-size: var(--step-1);
+}
+
+.presenter__action {
+  margin-top: var(--space-2);
+  color: var(--ink-2);
+}
+
+.presenter__action--failed {
+  color: var(--madder);
+  font-weight: 650;
+}
+
+.presenter__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.presenter__toggle {
+  min-width: 10rem;
+}
+
+.presenter__notes h3,
+.presenter__next h3 {
+  font-size: var(--step-1);
+  margin: var(--space-4) 0 var(--space-2);
+  color: var(--ink-2);
+}
+
+.presenter__notes ul {
+  margin: 0;
+  padding-left: 1.2rem;
+  display: grid;
+  gap: var(--space-3);
+  font-size: var(--step-1);
+  line-height: 1.4;
+}
+
+.presenter__caption {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--step-1);
+}
+
+.presenter__next-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--step-2);
+}
+
+.presenter__steps {
+  grid-column: 1 / -1;
+}
+
+.presenter__steps ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.presenter__steps button {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-control);
+  background: var(--sheet);
+  cursor: pointer;
+}
+
+.presenter__steps button[aria-current='step'] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--sheet);
+}
+
+@media (max-width: 760px) {
+  .presenter__main {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

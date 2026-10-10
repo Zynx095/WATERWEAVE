@@ -51,7 +51,7 @@ describe('application shell', () => {
 
     await user.click(screen.getByRole('button', { name: 'Show recorded run' }))
     await waitFor(() => expect(screen.getByText(/Nothing is being executed now/)).toBeInTheDocument())
-    expect(screen.getByText('Recorded run', { selector: '.pill' })).toBeInTheDocument()
+    expect(screen.getByText('Recorded run', { selector: '.pill__text' })).toBeInTheDocument()
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 

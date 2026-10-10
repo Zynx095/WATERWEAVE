@@ -27,6 +27,7 @@ export function ScenarioEditor({ scenario, onChange, disabled = false }: Scenari
   const { slots, neighborhoods } = scenario
   return (
     <div className="weave-wrap">
+      <p className="editor__scroll-hint">Scroll the table sideways for weight and storage.</p>
       <table className="weave weave--editor">
         <caption className="sr-only">
           Scenario editor: requests per neighborhood and slot, supply per slot, weight and storage per neighborhood

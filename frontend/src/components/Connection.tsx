@@ -9,7 +9,7 @@ export function ConnectionPill() {
   if (state.mode === 'recorded') {
     return (
       <span className="pill pill--recorded" title="Results come from a recorded run, not a fresh execution">
-        <History aria-hidden size={16} /> Recorded run
+        <History aria-hidden size={16} /> <span className="pill__text">Recorded run</span>
       </span>
     )
   }
@@ -17,7 +17,7 @@ export function ConnectionPill() {
   if (status === 'checking') {
     return (
       <span className="pill pill--neutral">
-        <LoaderCircle aria-hidden size={16} className="spin" /> Connecting
+        <LoaderCircle aria-hidden size={16} className="spin" /> <span className="pill__text">Connecting</span>
       </span>
     )
   }
@@ -27,13 +27,13 @@ export function ConnectionPill() {
         className="pill pill--live"
         title={`Python ${health?.engine.python ?? '?'}, Qiskit ${health?.engine.qiskit ?? '?'}`}
       >
-        <CircleCheck aria-hidden size={16} /> Engine connected
+        <CircleCheck aria-hidden size={16} /> <span className="pill__text">Engine connected</span>
       </span>
     )
   }
   return (
     <span className="pill pill--error">
-      <CircleAlert aria-hidden size={16} /> API offline
+      <CircleAlert aria-hidden size={16} /> <span className="pill__text">API offline</span>
     </span>
   )
 }

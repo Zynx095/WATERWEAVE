@@ -37,7 +37,7 @@ def test_scenario_builder_with_data():
         quality=DataQuality(status="VERIFIED_STATIC", missing=False)
     )
     
-    builder = ScenarioBuilder()
+    builder = ScenarioBuilder(apply_hypothetical_rainfall_heuristic=True)
     scenario = builder.build([obs1, obs2])
     
     # Rainfall = 6.0 >= 5.0 -> evening supply + 1

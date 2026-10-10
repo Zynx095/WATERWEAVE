@@ -890,6 +890,34 @@ def render_tradeoffs_and_qaoa_explainer(scenario: Scenario, results: list[Solver
             twice as heavily.
             - Fulfilling high-priority demand first pulls **away** from equal service percentages.
             - The optimal allocation strikes a Pareto balance governed by the objective penalty weights.
+
+            ### 3. Algebraic Distinction: Fairness Metric vs. QUBO Pairwise Disparity
+            WATERWEAVE evaluates equity using two complementary but algebraically distinct formulations:
+
+            - **Range-Based Fairness Score ($[0, 1]$)**:
+              $$\\text{Fairness Score} = 1.0 - (\\max_i s_i - \\min_i s_i)$$
+              where $s_i = \\frac{\\text{served}_i}{\\text{demand}_i}$. This metric is used for high-level KPI reporting 
+              because it has an intuitive, normalized $[0, 1]$ scale ($1.0 = \\text{perfect equality}$). However, the $\\max$ 
+              and $\\min$ functions over a vector of allocations are **non-linear and non-quadratic**, meaning they cannot 
+              be directly mapped into an Ising Hamiltonian or quadratic binary matrix ($x^T Q x$).
+
+            - **QUBO Pairwise Squared Disparity Penalty**:
+              $$\\text{Disparity} = \\sum_{i < j} (s_i - s_j)^2 = \\sum_{i < j} \\left(\\frac{\\text{served}_i}{D_i} - \\frac{\\text{served}_j}{D_j}\\right)^2$$
+              Because expanding $(s_i - s_j)^2 = s_i^2 - 2 s_i s_j + s_j^2$ contains strictly degree-1 and degree-2 
+              interaction terms between decision variables $x_{i,t}$, it translates directly into the 2-qubit 
+              Ising coupling terms ($J_{kl} Z_k Z_l$) of the QAOA cost Hamiltonian.
+
+            - **Mathematical Equivalence**: Minimizing pairwise squared disparity $\\sum_{i < j}(s_i - s_j)^2$ penalizes 
+              unequal service levels quadratically, shrinking the variance across neighborhoods and indirectly maximizing 
+              the range-based Fairness Score without requiring auxiliary sorting or non-quadratic operators.
+
+            ### 4. Quantum Simulation vs. Hardware Execution
+            - **Execution Environment**: All QAOA circuits in this prototype are executed using Qiskit's `StatevectorSampler` 
+              running on classical host CPU cores. This computes the exact statevector evolution under $e^{-i \\gamma H_C}$ 
+              and $e^{-i \\beta H_M}$ before sampling 1,024 measurement shots.
+            - **Honest Advantage Assessment**: For small $N=4$ neighborhood instances ($n=12$ qubits), classical exact enumeration 
+              executes in milliseconds, while QAOA parameter optimization requires hundreds of milliseconds of simulation overhead. 
+              QAOA demonstrates algorithmic feasibility and quantum circuit compilation, not NISQ supremacy or quantum advantage.
             """
         )
 

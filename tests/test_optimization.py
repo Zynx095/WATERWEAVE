@@ -68,3 +68,50 @@ def test_run_comparison_custom_scenario():
         assert r.feasible is True
         assert r.objective_value == pytest.approx(0.0)
         assert r.metrics["total_allocated_units"] == 2.0
+
+
+def test_run_comparison_invalid_settings_rejection():
+    """Verify run_comparison raises ValueError on invalid parameter types or values."""
+    with pytest.raises(ValueError, match="p must be a positive integer"):
+        run_comparison(S, p=0)
+
+    with pytest.raises(ValueError, match="shots must be a positive integer"):
+        run_comparison(S, shots=-1)
+
+    with pytest.raises(ValueError, match="maxiter must be a positive integer"):
+        run_comparison(S, maxiter=0)
+
+    with pytest.raises(ValueError, match="fairness_weight must be non-negative"):
+        run_comparison(S, fairness_weight=-1.0)
+
+    with pytest.raises(ValueError, match="Unsupported keyword argument"):
+        run_comparison(S, unknown_setting=123)
+
+
+def test_qaoa_rich_telemetry():
+    """Verify QAOA result contains consistent, transparent execution metadata."""
+    results = run_comparison(S, include_qaoa=True, p=1, shots=256, maxiter=25, seed=42)
+    qaoa = results[2]
+    meta = qaoa.metadata
+
+    expected_keys = {
+        "solver_type", "layers_p", "shots", "num_qubits", "circuit_depth",
+        "optimizer", "optimizer_iterations", "optimizer_converged", "optimizer_status",
+        "grid_evaluations", "total_evaluations", "optimal_gammas", "optimal_betas",
+        "sampled_unique_bitstrings", "feasible_samples_ratio", "modal_bitstring",
+        "modal_bitstring_feasible", "selection_rule", "best_bitstring",
+        "qubo_energy", "slack_consistent", "quantum_advantage_claimed", "seed",
+    }
+    assert expected_keys <= set(meta.keys())
+    assert meta["solver_type"] == "quantum_approximate"
+    assert meta["layers_p"] == 1
+    assert meta["shots"] == 256
+    assert meta["seed"] == 42
+    assert meta["optimizer"] == "COBYLA"
+    assert isinstance(meta["optimizer_converged"], bool)
+    assert meta["optimizer_status"] in ("converged", "maxiter_reached")
+    assert meta["grid_evaluations"] == 36
+    assert meta["total_evaluations"] == 36 + meta["optimizer_iterations"]
+    assert meta["selection_rule"] == "best_feasible_slack_consistent"
+    assert isinstance(meta["modal_bitstring_feasible"], bool)
+

@@ -62,6 +62,8 @@ describe('presenter view', () => {
     )
     const view = within(presenter.container)
     await waitFor(() => expect(view.getByRole('status')).toHaveTextContent('Linked to the main window'))
+    // With a presenter view open, notes stay off the audience screen.
+    await waitFor(() => expect(within(bar).getByRole('button', { name: 'Presenter notes' })).toBeDisabled())
     expect(view.getByRole('heading', { level: 2, name: 'The problem' })).toBeInTheDocument()
     expect(view.getByText(/Today: 7 requests and 4 units of water/)).toBeInTheDocument()
     expect(view.getByText('The scenario', { selector: '.presenter__next-title' })).toBeInTheDocument()

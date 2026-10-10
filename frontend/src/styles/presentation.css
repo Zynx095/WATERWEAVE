@@ -1,9 +1,5 @@
 /* ---- guided presentation ---------------------------------------------- */
 
-body[data-presenting='true'] {
-  padding-bottom: 10.5rem;
-}
-
 body[data-presenting='true'] .shell-footer {
   display: none;
 }
@@ -248,10 +244,6 @@ body[data-presenting='true'] .shell-footer {
 }
 
 @media (max-width: 640px) {
-  body[data-presenting='true'] {
-    padding-bottom: 14rem;
-  }
-
   .present-bar__caption {
     font-size: var(--step-1);
   }
@@ -548,4 +540,78 @@ body[data-clean-view='true'] .shell-header__status .button {
 .present-btn--quiet:hover,
 .present-btn--quiet:focus-visible {
   opacity: 1;
+}
+
+/* ---- framing content above the caption bar (design review) ---------------- */
+
+body[data-presenting='true'] {
+  padding-bottom: calc(var(--present-bar-h, 10.5rem) + var(--space-6));
+}
+
+/* The bar names the step, so the header can scroll away and give content room. */
+body[data-presenting='true'] .shell-header {
+  position: static;
+}
+
+/* Reading aids that matter in the app but not on stage. */
+body[data-presenting='true'] .solver__details,
+body[data-presenting='true'] .solver__link {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  .present-btn__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+
+  .present-btn--main {
+    min-width: 2.75rem;
+  }
+
+  .present-bar__controls {
+    flex-wrap: nowrap;
+    justify-content: space-between;
+  }
+}
+
+body[data-presenting='true'] .solver__score dd {
+  font-size: var(--step-3);
+}
+
+/* Short laptop screens: a slimmer bar leaves more room for the content. */
+@media (max-height: 820px) {
+  .present-bar__caption {
+    font-size: var(--step-1);
+  }
+
+  .present-btn {
+    height: 2.5rem;
+  }
+
+  .present-bar__inner {
+    padding-top: var(--space-2);
+    padding-bottom: var(--space-2);
+  }
+}
+
+@media (max-height: 820px) {
+  /* Same crossing proportions (112:72), smaller, so whole solver panels fit. */
+  body[data-presenting='true'] .weave--compact {
+    --cell-w: 4.375rem;
+    --cell-h: 2.8125rem;
+  }
+
+  body[data-presenting='true'] .solver {
+    gap: var(--space-3);
+    padding-top: var(--space-4);
+  }
+
+  body[data-presenting='true'] .solver__metrics {
+    gap: var(--space-2) var(--space-4);
+  }
 }

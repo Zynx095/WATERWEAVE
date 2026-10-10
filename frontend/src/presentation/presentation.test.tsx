@@ -207,7 +207,10 @@ describe('guided presentation', () => {
     await flush()
     fireEvent.click(within(bar()).getByRole('button', { name: 'Next step' }))
     await flush()
-    expect(bar()).toHaveTextContent('End of the guided presentation')
+    expect(bar()).toHaveTextContent('Finished: restart, or exit to explore')
+    // The conclusion stays on screen, and there is a single Restart.
+    expect(bar()).toHaveTextContent('A transparent, checked pipeline')
+    expect(within(bar()).getAllByRole('button', { name: /Restart/ })).toHaveLength(1)
     expect(within(bar()).getByRole('button', { name: 'Next step' })).toBeDisabled()
     fireEvent.click(within(bar()).getByRole('button', { name: /^Restart$/ }))
     await flush()

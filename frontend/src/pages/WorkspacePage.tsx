@@ -265,13 +265,15 @@ export function WorkspacePage() {
       </section>
 
       {result && (
-        <section className="section ws-section" aria-labelledby="fairness-title" data-present-id="fairness">
+        <section className="section ws-section" aria-labelledby="fairness-title">
           <h2 id="fairness-title">Who was served</h2>
           <p className="section-intro">
             Each bar is the share of a neighborhood's requests that a plan met. The fairness score is 1 minus the gap
             between the best- and worst-served neighborhood, so 1 means everyone got the same share.
           </p>
-          <ServiceChart scenario={result.scenario} results={ordered} reference={result.reference.deliver_nothing} />
+          <div data-present-id="fairness">
+            <ServiceChart scenario={result.scenario} results={ordered} reference={result.reference.deliver_nothing} />
+          </div>
           <details className="explain">
             <summary>How the score is built</summary>
             <p>

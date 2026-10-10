@@ -33,7 +33,8 @@ test.describe('guided presentation', () => {
         await expect(bar(page)).toContainText(/random sampling with the same budget: 15 of 15/i)
       }
     }
-    await expect(bar(page)).toContainText('End of the guided presentation', { timeout: 30_000 })
+    await expect(bar(page)).toContainText('Finished: restart, or exit to explore', { timeout: 30_000 })
+    await expect(bar(page)).toContainText('A transparent, checked pipeline')
     await expect(bar(page).getByRole('button', { name: 'Restart', exact: true })).toBeVisible()
     expectClean(problems)
   })

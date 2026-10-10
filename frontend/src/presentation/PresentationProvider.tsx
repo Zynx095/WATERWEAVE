@@ -56,8 +56,12 @@ async function runAction(
   actions: StoreActions,
   signal: AbortSignal,
   liveData: boolean,
+  hasQuantumResults: boolean,
 ): Promise<string | null> {
   switch (action) {
+    case 'ensure-results':
+      if (hasQuantumResults) return null
+      return runAction('run-quantum', actions, signal, liveData, false)
     case 'load-default':
       actions.selectPreset('default')
       actions.updateSettings(DEFAULT_SETTINGS)
@@ -98,8 +102,12 @@ export function PresentationProvider({ children }: { children: ReactNode }) {
   const step = STEPS[state.index]
 
   // Latest values for effects that must not re-run when they change.
-  const latest = useRef({ actions, liveData })
-  latest.current = { actions, liveData }
+  const run = store.run.status === 'ready' ? store.run.data : null
+  const hasQuantumResults = Boolean(
+    run?.settings.include_qaoa && run.results.some((r) => r.key === 'exact' && r.status === 'ok'),
+  )
+  const latest = useRef({ actions, liveData, hasQuantumResults })
+  latest.current = { actions, liveData, hasQuantumResults }
 
   // Clock: real elapsed time while playing, nothing while paused or in manual mode.
   useEffect(() => {
@@ -121,7 +129,13 @@ export function PresentationProvider({ children }: { children: ReactNode }) {
     const token = state.token
     const controller = new AbortController()
     dispatch({ type: 'ACTION_STARTED', token })
-    runAction(step.action, latest.current.actions, controller.signal, latest.current.liveData).then(
+    runAction(
+      step.action,
+      latest.current.actions,
+      controller.signal,
+      latest.current.liveData,
+      latest.current.hasQuantumResults,
+    ).then(
       (error) => {
         if (controller.signal.aborted) return
         dispatch(error ? { type: 'ACTION_FAILED', token, error } : { type: 'ACTION_DONE', token })

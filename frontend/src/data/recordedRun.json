@@ -1,8 +1,8 @@
 {
  "kind": "waterweave-recorded-run",
- "captured_at": "2026-10-10T18:54:33+00:00",
- "git_commit": "ec0df9a5391232cc95e8d5a7307af5791b6e9102",
- "git_dirty": false,
+ "captured_at": "2026-10-10T19:19:10+00:00",
+ "git_commit": "6c4acb43729a838c446a600d66822474940f3e70",
+ "git_dirty": true,
  "command": "python scripts/export_demo_snapshot.py",
  "note": "Raw responses of the WATERWEAVE API for the synthetic default scenario. Shown by the frontend only when the API is unreachable, and labelled as recorded.",
  "quantum_settings": {
@@ -15,7 +15,7 @@
  "responses": {
   "health": {
    "status": "ok",
-   "server_time": "2026-10-10T18:54:32.634467+00:00",
+   "server_time": "2026-10-10T19:19:09.855298+00:00",
    "engine": {
     "python": "3.12.0",
     "qiskit": "2.5.2",
@@ -334,8 +334,8 @@
    }
   ],
   "solve_classical": {
-   "run_id": "531507ca4cf9",
-   "executed_at": "2026-10-10T18:54:32.660108+00:00",
+   "run_id": "63ca36881aea",
+   "executed_at": "2026-10-10T19:19:09.875099+00:00",
    "source": "live",
    "scenario": {
     "name": "synthetic-4x2",
@@ -517,7 +517,7 @@
       "supply_violation_units": 0.0,
       "storage_violation_units": 0.0
      },
-     "runtime_seconds": 0.00270089996047318,
+     "runtime_seconds": 0.0021389999892562628,
      "gap_to_exact": 1.0,
      "metadata": {
       "solver_type": "classical_heuristic",
@@ -567,7 +567,7 @@
       "supply_violation_units": 0.0,
       "storage_violation_units": 0.0
      },
-     "runtime_seconds": 0.009358800016343594,
+     "runtime_seconds": 0.0064830000046640635,
      "gap_to_exact": 0.0,
      "metadata": {
       "solver_type": "classical_exact",
@@ -617,7 +617,7 @@
      }
     }
    },
-   "wall_seconds": 0.012175300042144954,
+   "wall_seconds": 0.008735199924558401,
    "engine": {
     "python": "3.12.0",
     "qiskit": "2.5.2",
@@ -627,8 +627,8 @@
    }
   },
   "solve_quantum": {
-   "run_id": "a67b3a03e60a",
-   "executed_at": "2026-10-10T18:54:33.899681+00:00",
+   "run_id": "d46389661ee9",
+   "executed_at": "2026-10-10T19:19:10.638390+00:00",
    "source": "live",
    "scenario": {
     "name": "synthetic-4x2",
@@ -810,7 +810,7 @@
       "supply_violation_units": 0.0,
       "storage_violation_units": 0.0
      },
-     "runtime_seconds": 0.0012633000733330846,
+     "runtime_seconds": 0.001030899933539331,
      "gap_to_exact": 1.0,
      "metadata": {
       "solver_type": "classical_heuristic",
@@ -860,7 +860,7 @@
       "supply_violation_units": 0.0,
       "storage_violation_units": 0.0
      },
-     "runtime_seconds": 0.011471200035884976,
+     "runtime_seconds": 0.005448200041428208,
      "gap_to_exact": 0.0,
      "metadata": {
       "solver_type": "classical_exact",
@@ -911,7 +911,7 @@
       "supply_violation_units": 0.0,
       "storage_violation_units": 0.0
      },
-     "runtime_seconds": 1.2141289999708533,
+     "runtime_seconds": 0.748784999945201,
      "gap_to_exact": 0.0,
      "metadata": {
       "solver_type": "quantum_approximate",
@@ -1772,7 +1772,7 @@
      }
     }
    },
-   "wall_seconds": 1.2291096999542788,
+   "wall_seconds": 0.7560821000952274,
    "engine": {
     "python": "3.12.0",
     "qiskit": "2.5.2",
@@ -2319,7 +2319,7 @@
   "data_sources_offline": {
    "requested_live": false,
    "offline_mode": false,
-   "fetched_at": "2026-10-10T18:54:33.922078+00:00",
+   "fetched_at": "2026-10-10T19:19:10.660256+00:00",
    "observations": [
     {
      "provider": {
@@ -2335,9 +2335,9 @@
      "value": 35000.0,
      "unit": "count",
      "source_timestamp": "2011-03-01T00:00:00+00:00",
-     "retrieval_timestamp": "2026-10-10T18:54:33.922078+00:00",
-     "source_age_seconds": 492720873.922078,
-     "retrieval_age_seconds": 0.0,
+     "retrieval_timestamp": "2026-10-10T19:19:10.659251+00:00",
+     "source_age_seconds": 492722350.660256,
+     "retrieval_age_seconds": 0.001005,
      "served_from_cache": false,
      "quality": {
       "status": "ILLUSTRATIVE",
@@ -2359,9 +2359,9 @@
      "value": 42000.0,
      "unit": "count",
      "source_timestamp": "2011-03-01T00:00:00+00:00",
-     "retrieval_timestamp": "2026-10-10T18:54:33.922078+00:00",
-     "source_age_seconds": 492720873.922078,
-     "retrieval_age_seconds": 0.0,
+     "retrieval_timestamp": "2026-10-10T19:19:10.659251+00:00",
+     "source_age_seconds": 492722350.660256,
+     "retrieval_age_seconds": 0.001005,
      "served_from_cache": false,
      "quality": {
       "status": "ILLUSTRATIVE",
@@ -2383,9 +2383,9 @@
      "value": 28000.0,
      "unit": "count",
      "source_timestamp": "2011-03-01T00:00:00+00:00",
-     "retrieval_timestamp": "2026-10-10T18:54:33.922078+00:00",
-     "source_age_seconds": 492720873.922078,
-     "retrieval_age_seconds": 0.0,
+     "retrieval_timestamp": "2026-10-10T19:19:10.659251+00:00",
+     "source_age_seconds": 492722350.660256,
+     "retrieval_age_seconds": 0.001005,
      "served_from_cache": false,
      "quality": {
       "status": "ILLUSTRATIVE",
@@ -2407,9 +2407,9 @@
      "value": 51000.0,
      "unit": "count",
      "source_timestamp": "2011-03-01T00:00:00+00:00",
-     "retrieval_timestamp": "2026-10-10T18:54:33.922078+00:00",
-     "source_age_seconds": 492720873.922078,
-     "retrieval_age_seconds": 0.0,
+     "retrieval_timestamp": "2026-10-10T19:19:10.659251+00:00",
+     "source_age_seconds": 492722350.660256,
+     "retrieval_age_seconds": 0.001005,
      "served_from_cache": false,
      "quality": {
       "status": "ILLUSTRATIVE",
@@ -2644,29 +2644,99 @@
     "audit_checks": [
      {
       "name": "penalty_dominance",
-      "status": "pass"
+      "status": "pass",
+      "detail": "best infeasible objective 19.5000 vs optimum 6.0000 (margin 13.5000); checked by exhaustive enumeration, not by the analytical bound"
      },
      {
       "name": "variable_order_matches",
-      "status": "pass"
+      "status": "pass",
+      "detail": "engine decision_vars [('N1', 'morning'), ('N1', 'evening'), ('N2', 'morning'), ('N2', 'evening'), ('N3', 'morning'), ('N4', 'morning'), ('N4', 'evening')]"
      },
      {
       "name": "engine_objective_matches_independent",
-      "status": "pass"
+      "status": "pass",
+      "detail": "max |engine - independent| over all 128 states = 0.00e+00"
      },
      {
       "name": "qubo_min_over_slack_equals_objective",
-      "status": "pass"
+      "status": "pass",
+      "detail": "max deviation 0.00e+00 over 128 decision patterns x 32 slack settings"
      },
      {
       "name": "ising_diagonal_equals_qubo_energy",
-      "status": "pass"
+      "status": "pass",
+      "detail": "max deviation 0.00e+00 over 4096 basis states"
      },
      {
       "name": "independent_qaoa_simulation_matches_engine_circuit",
-      "status": "pass"
+      "status": "pass",
+      "detail": "max probability deviation 3.85e-18 (p=2)"
      }
     ],
+    "audit_facts": {
+     "n_decision_vars": 7,
+     "n_states": 128,
+     "n_feasible_states": 65,
+     "optimal_objective": 6.0,
+     "n_optimal_ties": 3,
+     "uniform_p_feasible_pattern": 0.5078125,
+     "uniform_p_optimal_pattern": 0.0234375,
+     "best_infeasible_objective": 19.5,
+     "penalty_margin": 13.5,
+     "alpha": 2.0,
+     "penalty_weight": 15.0,
+     "serve_nobody_alpha_threshold": 7.333333333333333,
+     "unpenalised_best_is_infeasible": true,
+     "fairness_vs_disparity_inverted_pairs": 0,
+     "feasible_pairs_compared": 2080,
+     "optimum_fairness_score": 0.5,
+     "max_feasible_fairness_score": 1.0,
+     "fairness_score_of_serving_nobody": 1.0,
+     "alpha_sensitivity": [
+      {
+       "alpha": 0.0,
+       "units_served": 4,
+       "weighted_shortage": 3.0,
+       "disparity": 4.0
+      },
+      {
+       "alpha": 0.5,
+       "units_served": 4,
+       "weighted_shortage": 3.5,
+       "disparity": 2.0
+      },
+      {
+       "alpha": 1.0,
+       "units_served": 4,
+       "weighted_shortage": 4.5,
+       "disparity": 0.75
+      },
+      {
+       "alpha": 2.0,
+       "units_served": 4,
+       "weighted_shortage": 4.5,
+       "disparity": 0.75
+      },
+      {
+       "alpha": 4.0,
+       "units_served": 4,
+       "weighted_shortage": 4.5,
+       "disparity": 0.75
+      },
+      {
+       "alpha": 8.0,
+       "units_served": 0,
+       "weighted_shortage": 10.0,
+       "disparity": 0.0
+      }
+     ],
+     "n_slack_vars": 5,
+     "n_qubits": 12,
+     "uniform_mean_energy": 83.75,
+     "ground_energy": 6.0,
+     "max_abs_ising_h": 22.0,
+     "max_abs_ising_J": 8.25
+    },
     "limitations": [
      "Single tiny synthetic instance (7 decision bits, 12 qubits with slack): results do not generalise and are not evidence of quantum advantage.",
      "QAOA is run by noiseless statevector simulation on a classical computer; its runtime is simulation cost, not hardware runtime.",
@@ -2802,6 +2872,7 @@
      }
     ],
     "audit_checks": [],
+    "audit_facts": {},
     "limitations": [
      "Single tiny synthetic instance (7 decision bits, 12 qubits with slack): results do not generalise and are not evidence of quantum advantage.",
      "QAOA is run by noiseless statevector simulation on a classical computer; its runtime is simulation cost, not hardware runtime.",

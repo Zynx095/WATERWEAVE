@@ -552,8 +552,12 @@ def load_benchmark() -> dict[str, Any] | None:
             "provenance": meta.get("provenance") or {},
             "summary": payload.get("summary") or [],
             "audit_checks": [
-                {"name": c.get("name"), "status": c.get("status")} for c in audit.get("checks") or []
+                {"name": c.get("name"), "status": c.get("status"), "detail": c.get("detail")}
+                for c in audit.get("checks") or []
             ],
+            # Facts from exhaustive enumeration (e.g. number of optimal plans,
+            # probability that a uniform sample is optimal).
+            "audit_facts": audit.get("facts") or {},
             "limitations": payload.get("limitations") or [],
         }
     return json_safe(out) if out else None

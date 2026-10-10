@@ -343,6 +343,11 @@ def test_benchmark_serves_committed_results_with_provenance(client):
     assert control["hit_optimum_rate"] == pytest.approx(1.0)
     assert rows[("QAOA (Quantum Heuristic)", 1)]["hit_optimum_rate"] == pytest.approx(0.8)
     assert all(c["status"] == "pass" for c in default["audit_checks"])
+    assert all(c["detail"] for c in default["audit_checks"])
+    facts = default["audit_facts"]
+    assert facts["n_states"] == 128 and facts["n_optimal_ties"] == 3
+    assert facts["uniform_p_optimal_pattern"] == pytest.approx(3 / 128)
+    assert body["small"]["audit_facts"] == {}  # the small run used --skip-audit
 
 
 def test_benchmark_missing_files_give_404(client, monkeypatch, tmp_path):

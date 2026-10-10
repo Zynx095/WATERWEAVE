@@ -5,6 +5,7 @@ import { ConnectionBanner, ConnectionPill } from './Connection'
 import { ErrorBoundary } from './ErrorBoundary'
 import { WeaveMark } from './Wordmark'
 import { PresentationBar } from '../presentation/PresentationBar'
+import { PreflightDialog } from '../presentation/PreflightDialog'
 
 export const NAV_ITEMS = [
   { to: '/', label: 'Overview', end: true },
@@ -97,6 +98,7 @@ export function AppShell({ actions }: { actions?: ReactNode }) {
         </div>
       </footer>
       <PresentationBar />
+      <PreflightDialog />
       <div className="sr-only" role="status" aria-live="polite">
         {announcement}
       </div>

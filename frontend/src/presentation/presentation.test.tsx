@@ -1,7 +1,7 @@
 import { act, fireEvent, screen, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AppRoutes } from '../App'
-import { json, mockApi, renderWithStore } from '../test/utils'
+import { fixtures, json, mockApi, renderWithStore } from '../test/utils'
 import { STEPS } from './steps'
 
 const bar = () => screen.getByRole('region', { name: 'Presentation controls' })
@@ -13,10 +13,13 @@ async function flush(ms = 0) {
   })
 }
 
+/** Opens the preflight from the overview, waits for its checks and starts live. */
 async function startPresentation() {
   renderWithStore(<AppRoutes />, '/')
   await flush()
   fireEvent.click(screen.getByRole('button', { name: 'Start the guided presentation' }))
+  await flush()
+  fireEvent.click(screen.getByRole('button', { name: 'Start with the live engine' }))
   await flush()
 }
 
@@ -91,21 +94,23 @@ describe('guided presentation', () => {
 
   it('runs the real solvers on the classical step and holds the clock until they answer', async () => {
     let answer: (r: Response) => void = () => {}
+    let calls = 0
     const fetchMock = mockApi({
-      '/api/solve': () => new Promise<Response>((resolve) => (answer = resolve)),
+      // The first run is the preflight check; the step's run then hangs until answered.
+      '/api/solve': () =>
+        ++calls === 1 ? json(fixtures.solve_quantum) : new Promise<Response>((resolve) => (answer = resolve)),
     })
     await startPresentation()
     fireEvent.click(within(bar()).getByRole('button', { name: 'Go to step 4: Classical solvers' }))
     await flush()
     expect(bar()).toHaveTextContent('Waiting for the engine')
     expect(bar()).toHaveTextContent('Running greedy and exact search on the engine.')
-    const call = fetchMock.mock.calls.find(([url]) => String(url) === '/api/solve')!
+    const call = fetchMock.mock.calls.filter(([url]) => String(url) === '/api/solve').at(-1)!
     expect(JSON.parse(String((call[1] as RequestInit).body)).settings.include_qaoa).toBe(false)
 
     await flush(90_000 - 1000) // longer than the step, shorter than the request timeout
     expect(where()).toContain('Classical solvers')
 
-    const { fixtures } = await import('../test/utils')
     answer(json(fixtures.solve_classical))
     await flush()
     expect(bar()).toHaveTextContent(/Exact search checked all 128 plans in .*: best score 6\. Greedy scored 7\./)
@@ -117,10 +122,8 @@ describe('guided presentation', () => {
   it('pauses on a failed step with the reason, and Retry runs it again', async () => {
     let calls = 0
     mockApi({
-      '/api/solve': () => {
-        calls++
-        return json({ detail: 'Another solver run is still in progress.' }, 503)
-      },
+      '/api/solve': () =>
+        ++calls === 1 ? json(fixtures.solve_quantum) : json({ detail: 'Another solver run is still in progress.' }, 503),
     })
     await startPresentation()
     fireEvent.click(within(bar()).getByRole('button', { name: 'Go to step 4: Classical solvers' }))
@@ -129,7 +132,7 @@ describe('guided presentation', () => {
     expect(bar()).toHaveTextContent('Paused')
     fireEvent.click(within(bar()).getByRole('button', { name: 'Retry' }))
     await flush()
-    expect(calls).toBe(2)
+    expect(calls).toBe(3)
     fireEvent.click(within(bar()).getByRole('button', { name: 'Next step' }))
     await flush()
     expect(where()).toContain('Quantum optimisation')
@@ -174,14 +177,73 @@ describe('guided presentation', () => {
 
   it('leaves no timers running when the app unmounts mid-presentation', async () => {
     mockApi()
-    renderWithStore(<AppRoutes />, '/')
-    await flush()
-    fireEvent.click(screen.getByRole('button', { name: 'Start the guided presentation' }))
-    await flush()
+    await startPresentation()
     expect(vi.getTimerCount()).toBeGreaterThan(0)
     const { cleanup } = await import('@testing-library/react')
     cleanup()
     await flush()
     expect(vi.getTimerCount()).toBe(0)
+  })
+})
+
+describe('preflight', () => {
+  const dialog = () => screen.getByRole('dialog', { name: 'Before you present' })
+  const check = (label: string) => within(dialog()).getByText(label).closest('li')!
+
+  it('runs the real checks and offers the live start when they pass', async () => {
+    const fetchMock = mockApi()
+    renderWithStore(<AppRoutes />, '/')
+    await flush()
+    fireEvent.click(screen.getByRole('button', { name: 'Present' }))
+    await flush()
+    expect(check('API reachable')).toHaveTextContent('Passed')
+    expect(check('API reachable')).toHaveTextContent('Required')
+    expect(check('Solvers ready')).toHaveTextContent(/Greedy, exact and QAOA ran in .* \(QAOA: 12 qubits, score 6\)/)
+    expect(check('Live weather')).toHaveTextContent('Optional')
+    expect(check('Recorded fallback')).toHaveTextContent('Passed')
+    expect(within(dialog()).getByRole('button', { name: 'Start with the live engine' })).toBeEnabled()
+    const solve = fetchMock.mock.calls.find(([url]) => String(url) === '/api/solve')!
+    expect(JSON.parse(String((solve[1] as RequestInit).body)).settings).toMatchObject({ include_qaoa: true, p: 1 })
+    // Running the checks does not change what the workspace shows.
+    expect(screen.queryByRole('region', { name: 'Presentation controls' })).not.toBeInTheDocument()
+  })
+
+  it('falls back to the recorded run when the API is down', async () => {
+    const { offlineApi } = await import('../test/utils')
+    offlineApi()
+    renderWithStore(<AppRoutes />, '/')
+    await flush()
+    fireEvent.click(screen.getByRole('button', { name: 'Present' }))
+    await flush()
+    expect(check('API reachable')).toHaveTextContent('Failed')
+    expect(within(dialog()).getByRole('button', { name: 'Start with the live engine' })).toBeDisabled()
+    fireEvent.click(within(dialog()).getByRole('button', { name: 'Start with the recorded run' }))
+    await flush()
+    expect(bar()).toBeInTheDocument()
+    expect(screen.getByText(/Nothing is being executed now/)).toBeInTheDocument()
+    fireEvent.click(within(bar()).getByRole('button', { name: 'Go to step 4: Classical solvers' }))
+    await flush()
+    expect(screen.getByRole('article', { name: 'Exact search' })).toHaveTextContent('Recorded run')
+  })
+
+  it('applies the chosen pace and can be cancelled', async () => {
+    mockApi()
+    renderWithStore(<AppRoutes />, '/')
+    await flush()
+    fireEvent.click(screen.getByRole('button', { name: 'Present' }))
+    await flush()
+    fireEvent.click(within(dialog()).getByRole('button', { name: 'Cancel' }))
+    await flush()
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: 'Presentation controls' })).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Present' }))
+    await flush()
+    fireEvent.change(within(dialog()).getByRole('combobox', { name: 'Pace' }), { target: { value: '0.2' } })
+    fireEvent.click(within(dialog()).getByRole('button', { name: 'Start with the live engine' }))
+    await flush()
+    expect(bar()).toHaveTextContent(/0:05 left, 0:4\d total/)
+    await flush(Math.round(STEPS[0].durationMs * 0.2) + 300)
+    expect(where()).toContain('The scenario')
   })
 })

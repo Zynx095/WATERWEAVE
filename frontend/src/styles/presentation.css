@@ -270,3 +270,116 @@ body[data-presenting='true'] .shell-footer {
     flex: 1;
   }
 }
+
+/* ---- preflight dialog ---------------------------------------------------- */
+
+.preflight {
+  width: min(44rem, calc(100vw - 2rem));
+  max-height: calc(100vh - 2rem);
+  padding: var(--space-6);
+  border: 0;
+  border-radius: var(--radius-panel);
+  background: var(--sheet);
+  color: var(--ink);
+  box-shadow: 0 24px 64px -24px rgb(19 33 60 / 0.55);
+}
+
+.preflight::backdrop {
+  background: rgb(19 33 60 / 0.55);
+}
+
+.preflight h2 {
+  font-size: var(--step-3);
+  margin-bottom: var(--space-2);
+}
+
+.preflight__lede {
+  color: var(--ink-2);
+  margin-bottom: var(--space-5);
+}
+
+.preflight__checks {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-5);
+  padding: 0;
+  list-style: none;
+}
+
+.preflight__checks li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-3);
+  align-items: start;
+}
+
+.preflight__checks li > svg {
+  margin-top: 0.15rem;
+  color: var(--ink-3);
+}
+
+.preflight__checks li[data-status='pass'] > svg {
+  color: var(--verdigris);
+}
+
+.preflight__checks li[data-status='fail'] > svg {
+  color: var(--madder);
+}
+
+.preflight__check {
+  max-width: none;
+}
+
+.preflight__need {
+  margin-left: var(--space-2);
+  padding: 0 0.4rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: 4px;
+  font-size: 0.8rem;
+  color: var(--ink-2);
+}
+
+.preflight__result {
+  margin-left: var(--space-2);
+  font-size: var(--step--1);
+  font-weight: 650;
+  color: var(--ink-2);
+}
+
+li[data-status='pass'] .preflight__result {
+  color: var(--verdigris);
+}
+
+li[data-status='fail'] .preflight__result {
+  color: var(--madder);
+}
+
+.preflight__detail {
+  font-size: var(--step--1);
+  color: var(--ink-2);
+}
+
+.preflight__options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--space-4) var(--space-5);
+  padding: var(--space-4) 0;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: var(--space-5);
+}
+
+.preflight__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.preflight {
+  overflow-y: auto;
+}
+
+.preflight__checks p + p {
+  margin-top: 0.15rem;
+}

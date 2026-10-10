@@ -1,8 +1,8 @@
 {
  "kind": "waterweave-recorded-run",
- "captured_at": "2026-10-10T19:19:10+00:00",
- "git_commit": "6c4acb43729a838c446a600d66822474940f3e70",
- "git_dirty": true,
+ "captured_at": "2026-10-10T20:04:57+00:00",
+ "git_commit": "0e25b0d03940a66c5af74753d1a850415fc363e9",
+ "git_dirty": false,
  "command": "python scripts/export_demo_snapshot.py",
  "note": "Raw responses of the WATERWEAVE API for the synthetic default scenario. Shown by the frontend only when the API is unreachable, and labelled as recorded.",
  "quantum_settings": {
@@ -15,7 +15,7 @@
  "responses": {
   "health": {
    "status": "ok",
-   "server_time": "2026-10-10T19:19:09.855298+00:00",
+   "server_time": "2026-10-10T20:04:57.627363+00:00",
    "engine": {
     "python": "3.12.0",
     "qiskit": "2.5.2",
@@ -334,8 +334,8 @@
    }
   ],
   "solve_classical": {
-   "run_id": "63ca36881aea",
-   "executed_at": "2026-10-10T19:19:09.875099+00:00",
+   "run_id": "3136ad8eb91c",
+   "executed_at": "2026-10-10T20:04:57.633954+00:00",
    "source": "live",
    "scenario": {
     "name": "synthetic-4x2",
@@ -517,7 +517,7 @@
       "supply_violation_units": 0.0,
       "storage_violation_units": 0.0
      },
-     "runtime_seconds": 0.0021389999892562628,
+     "runtime_seconds": 0.0006885000038892031,
      "gap_to_exact": 1.0,
      "metadata": {
       "solver_type": "classical_heuristic",
@@ -567,7 +567,7 @@
       "supply_violation_units": 0.0,
       "storage_violation_units": 0.0
      },
-     "runtime_seconds": 0.0064830000046640635,
+     "runtime_seconds": 0.002574299927800894,
      "gap_to_exact": 0.0,
      "metadata": {
       "solver_type": "classical_exact",
@@ -617,7 +617,7 @@
      }
     }
    },
-   "wall_seconds": 0.008735199924558401,
+   "wall_seconds": 0.003297800081782043,
    "engine": {
     "python": "3.12.0",
     "qiskit": "2.5.2",
@@ -627,8 +627,8 @@
    }
   },
   "solve_quantum": {
-   "run_id": "d46389661ee9",
-   "executed_at": "2026-10-10T19:19:10.638390+00:00",
+   "run_id": "b302d08f715d",
+   "executed_at": "2026-10-10T20:04:57.979859+00:00",
    "source": "live",
    "scenario": {
     "name": "synthetic-4x2",
@@ -810,7 +810,7 @@
       "supply_violation_units": 0.0,
       "storage_violation_units": 0.0
      },
-     "runtime_seconds": 0.001030899933539331,
+     "runtime_seconds": 0.0006544999778270721,
      "gap_to_exact": 1.0,
      "metadata": {
       "solver_type": "classical_heuristic",
@@ -860,7 +860,7 @@
       "supply_violation_units": 0.0,
       "storage_violation_units": 0.0
      },
-     "runtime_seconds": 0.005448200041428208,
+     "runtime_seconds": 0.00263109989464283,
      "gap_to_exact": 0.0,
      "metadata": {
       "solver_type": "classical_exact",
@@ -911,7 +911,7 @@
       "supply_violation_units": 0.0,
       "storage_violation_units": 0.0
      },
-     "runtime_seconds": 0.748784999945201,
+     "runtime_seconds": 0.33738779998384416,
      "gap_to_exact": 0.0,
      "metadata": {
       "solver_type": "quantum_approximate",
@@ -1772,7 +1772,7 @@
      }
     }
    },
-   "wall_seconds": 0.7560821000952274,
+   "wall_seconds": 0.34150900004897267,
    "engine": {
     "python": "3.12.0",
     "qiskit": "2.5.2",
@@ -2319,7 +2319,7 @@
   "data_sources_offline": {
    "requested_live": false,
    "offline_mode": false,
-   "fetched_at": "2026-10-10T19:19:10.660256+00:00",
+   "fetched_at": "2026-10-10T20:04:57.990943+00:00",
    "observations": [
     {
      "provider": {
@@ -2335,9 +2335,9 @@
      "value": 35000.0,
      "unit": "count",
      "source_timestamp": "2011-03-01T00:00:00+00:00",
-     "retrieval_timestamp": "2026-10-10T19:19:10.659251+00:00",
-     "source_age_seconds": 492722350.660256,
-     "retrieval_age_seconds": 0.001005,
+     "retrieval_timestamp": "2026-10-10T20:04:57.990943+00:00",
+     "source_age_seconds": 492725097.990943,
+     "retrieval_age_seconds": 0.0,
      "served_from_cache": false,
      "quality": {
       "status": "ILLUSTRATIVE",
@@ -2359,9 +2359,9 @@
      "value": 42000.0,
      "unit": "count",
      "source_timestamp": "2011-03-01T00:00:00+00:00",
-     "retrieval_timestamp": "2026-10-10T19:19:10.659251+00:00",
-     "source_age_seconds": 492722350.660256,
-     "retrieval_age_seconds": 0.001005,
+     "retrieval_timestamp": "2026-10-10T20:04:57.990943+00:00",
+     "source_age_seconds": 492725097.990943,
+     "retrieval_age_seconds": 0.0,
      "served_from_cache": false,
      "quality": {
       "status": "ILLUSTRATIVE",
@@ -2383,9 +2383,9 @@
      "value": 28000.0,
      "unit": "count",
      "source_timestamp": "2011-03-01T00:00:00+00:00",
-     "retrieval_timestamp": "2026-10-10T19:19:10.659251+00:00",
-     "source_age_seconds": 492722350.660256,
-     "retrieval_age_seconds": 0.001005,
+     "retrieval_timestamp": "2026-10-10T20:04:57.990943+00:00",
+     "source_age_seconds": 492725097.990943,
+     "retrieval_age_seconds": 0.0,
      "served_from_cache": false,
      "quality": {
       "status": "ILLUSTRATIVE",
@@ -2407,9 +2407,9 @@
      "value": 51000.0,
      "unit": "count",
      "source_timestamp": "2011-03-01T00:00:00+00:00",
-     "retrieval_timestamp": "2026-10-10T19:19:10.659251+00:00",
-     "source_age_seconds": 492722350.660256,
-     "retrieval_age_seconds": 0.001005,
+     "retrieval_timestamp": "2026-10-10T20:04:57.990943+00:00",
+     "source_age_seconds": 492725097.990943,
+     "retrieval_age_seconds": 0.0,
      "served_from_cache": false,
      "quality": {
       "status": "ILLUSTRATIVE",

@@ -46,7 +46,7 @@ This document tracks the research, verification status, and integration feasibil
 * **Variables provided**: Population count, household count.
 * **Data format**: CSV
 * **Authentication**: Free
-* **Implementation status**: **VERIFIED_STATIC**
+* **Implementation status**: **ILLUSTRATIVE** (Currently simulated in code using typical values for representative neighborhoods, not direct dynamic ingestion of census records)
 * **Relevance**: Fundamental for calculating estimated demand per neighborhood using standard per-capita norms (e.g., 135 LPCD for urban areas).
 
 ## 3. Weather, Rainfall, Drought, and Environmental Conditions

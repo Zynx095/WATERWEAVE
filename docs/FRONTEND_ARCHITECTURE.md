@@ -137,12 +137,15 @@ backend is down, the presenter can run the walkthrough on a recorded run
 captured by `scripts/export_demo_snapshot.py`; every result it shows is
 labelled "recorded".
 
-## 6. Verification plan
+## 6. Verification
 
-* `pytest`: existing suite plus `tests/test_api.py`.
-* `npm test` (Vitest): reducer, clock, API client, weave, workspace
-  validation, result and error rendering, provenance labels, presentation
-  controls, channel protocol.
-* `npm run e2e` (Playwright): the full browser walkthrough against the real
-  backend, including the presentation, failure paths, console errors and
-  three viewport sizes.
+| Suite | Command | Result on this branch |
+|---|---|---|
+| Python | `pytest` | 142 passed, 1 skipped (optional live fetch). The original 104 still pass; `tests/test_api.py` covers every endpoint, validation, failure reporting and offline mode; `tests/test_recorded_snapshot.py` replays the recorded run against the engine. |
+| Frontend | `cd frontend && npm test` | 98 passed: state machine transitions, the controller with fake timers (auto-advance, pause, resume, keys, failures, timer cleanup), preflight, presenter channel, API client, weave, editor validation, pages, and the browser-side service shares checked against the engine's fairness numbers. |
+| Browser | `cd frontend && npm run e2e` | 21 passed in Microsoft Edge against the real API: all pages, real solver runs, failure and offline paths, three viewport sizes, keyboard use, the full nine-step presentation playing on its own, the presenter window, and an axe-core WCAG 2.1 AA audit with no serious or critical violations. |
+
+Playwright's own browser download was blocked on the development machine,
+so the browser tests ran with `PLAYWRIGHT_CHANNEL=msedge` (the installed
+Edge). On a machine where `npx playwright install chromium` works, the
+default bundled Chromium is used.

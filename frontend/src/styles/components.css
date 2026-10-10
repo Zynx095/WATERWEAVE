@@ -1,0 +1,254 @@
+/* ---- buttons ---------------------------------------------------------- */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 2.75rem;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--ink);
+  border-radius: var(--radius-control);
+  background: var(--sheet);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-weight: 650;
+  font-size: 1rem;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 120ms var(--ease-out), border-color 120ms var(--ease-out);
+}
+
+.button:hover {
+  background: var(--sheet-sunk);
+}
+
+.button--primary {
+  background: var(--indigo);
+  border-color: var(--indigo);
+  color: var(--sheet);
+}
+
+.button--primary:hover {
+  background: var(--indigo-strong);
+  border-color: var(--indigo-strong);
+  color: var(--sheet);
+}
+
+.button--quiet {
+  border-color: var(--rule-strong);
+}
+
+.button--large {
+  min-height: 3.25rem;
+  padding: var(--space-3) var(--space-5);
+  font-size: 1.08rem;
+}
+
+.button:disabled,
+.button[aria-disabled='true'] {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.icon-button {
+  display: inline-grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-control);
+  background: var(--sheet);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.icon-button:hover {
+  background: var(--sheet-sunk);
+}
+
+.icon-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+/* ---- pills and tags --------------------------------------------------- */
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.92rem;
+  font-weight: 650;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.pill--live {
+  background: var(--verdigris-soft);
+  color: var(--verdigris);
+}
+
+.pill--error {
+  background: var(--madder-soft);
+  color: var(--madder);
+}
+
+.pill--recorded {
+  background: var(--ochre-soft);
+  color: var(--ochre);
+}
+
+.pill--neutral {
+  background: var(--slate-soft);
+  color: var(--ink-2);
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.12rem 0.5rem;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 650;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.tag--synthetic {
+  color: var(--slate);
+}
+
+.tag--illustrative {
+  color: var(--ochre);
+}
+
+.tag--live {
+  color: var(--verdigris);
+}
+
+.tag--recorded {
+  color: var(--ochre);
+}
+
+.tag--error {
+  color: var(--madder);
+}
+
+/* ---- banners ---------------------------------------------------------- */
+
+.banner {
+  border-bottom: 1px solid var(--rule);
+}
+
+.banner__inner {
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: var(--space-3) var(--gutter);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-4);
+}
+
+.banner__inner p {
+  flex: 1 1 28rem;
+}
+
+.banner__icon {
+  flex: none;
+}
+
+.banner__actions {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.banner--error {
+  background: var(--madder-soft);
+}
+
+.banner--error .banner__icon {
+  color: var(--madder);
+}
+
+.banner--recorded {
+  background: var(--ochre-soft);
+}
+
+.banner--recorded .banner__icon {
+  color: var(--ochre);
+}
+
+/* ---- notices inside pages --------------------------------------------- */
+
+.notice {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  padding: var(--space-3) var(--space-4);
+  border-left: 4px solid var(--rule-strong);
+  background: var(--sheet);
+  border-radius: 0 var(--radius-control) var(--radius-control) 0;
+}
+
+.notice svg {
+  flex: none;
+  margin-top: 0.2rem;
+}
+
+.notice--error {
+  border-left-color: var(--madder);
+}
+
+.notice--error svg {
+  color: var(--madder);
+}
+
+.notice--info {
+  border-left-color: var(--indigo);
+}
+
+.notice--info svg {
+  color: var(--indigo);
+}
+
+.notice--recorded {
+  border-left-color: var(--ochre);
+}
+
+.notice--recorded svg {
+  color: var(--ochre);
+}
+
+/* ---- loading ---------------------------------------------------------- */
+
+.spin {
+  animation: spin 900ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-line {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--ink-2);
+}

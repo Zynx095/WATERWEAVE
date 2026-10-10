@@ -300,3 +300,9 @@
     display: block;
   }
 }
+
+/* The control clips overflow, so the focus ring is drawn inside the button (WCAG 2.4.7). */
+.stepper__button:focus-visible {
+  box-shadow: inset 0 0 0 3px var(--indigo);
+  border-radius: 0;
+}

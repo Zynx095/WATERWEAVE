@@ -67,17 +67,24 @@ def compute_default_penalty_weight(
     """Derive a penalty weight P guaranteeing that feasible states dominate infeasible states.
 
     A single constraint violation yields penalty P * (1)^2 = P.
-    The maximum possible reduction in shortage from serving neighborhood i is w_i,
-    and disparity change is bounded by alpha.
-    To ensure every violation strictly increases energy:
-        P >= max(15.0, 2.0 * max_i(w_i) + alpha)
+    Every feasible state has objective <= F(empty) = sum_i w_i * D_i.
+    Any infeasible state has base objective >= 0 and violation >= 1, so
+    F(infeasible) >= P.
+    Setting P >= max(15.0, sum_i w_i * D_i + 1.0, 2.0 * max_i(w_i) + fairness_weight)
+    strictly guarantees that every infeasible state has higher energy than
+    the optimal feasible state across arbitrary scenario dimensions.
     """
     max_w = (
         max(n.priority_weight for n in scenario.neighborhoods)
         if scenario.neighborhoods
         else 1.0
     )
-    return float(max(15.0, 2.0 * max_w + fairness_weight))
+    total_unserved_shortage = sum(
+        n.priority_weight * sum(n.demand_by_slot.get(t, 0) for t in scenario.slots)
+        for n in scenario.neighborhoods
+    )
+    return float(max(15.0, total_unserved_shortage + 1.0, 2.0 * max_w + fairness_weight))
+
 
 
 def build_model(

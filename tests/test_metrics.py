@@ -155,3 +155,51 @@ def test_metric_keys_and_types():
     r = ev({})
     assert keys <= set(r)
     assert all(isinstance(v, float) for v in r.values())
+
+
+def test_fairness_score_vs_disparity_inversion():
+    """Verify that range-based fairness_score and quadratic disparity can invert ranking.
+
+    Counterexample:
+    Scenario with 4 neighborhoods (demands 10 units each).
+    Allocation A has service levels (0.0, 0.5, 1.0, 0.5):
+      - range = 1.0 - 0.0 = 1.0 => fairness_score = 0.0
+      - disparity = 2.0
+    Allocation B has service levels (0.0, 0.9, 0.9, 0.9):
+      - range = 0.9 - 0.0 = 0.9 => fairness_score = 0.1
+      - disparity = 2.43
+
+    Result:
+      - Range-based fairness_score rates B fairer than A (0.1 > 0.0).
+      - Quadratic disparity (minimized by QUBO) rates A fairer than B (2.0 < 2.43).
+    """
+    from waterweave.models import Scenario
+    sc_counter = Scenario(
+        name="counterexample-fairness",
+        slots=("slot1",),
+        neighborhoods=(
+            Neighborhood("N1", "N1", {"slot1": 10}, 1.0, 10),
+            Neighborhood("N2", "N2", {"slot1": 10}, 1.0, 10),
+            Neighborhood("N3", "N3", {"slot1": 10}, 1.0, 10),
+            Neighborhood("N4", "N4", {"slot1": 10}, 1.0, 10),
+        ),
+        supply_by_slot={"slot1": 30},
+    )
+    alloc_a = {"N1": {"slot1": 0}, "N2": {"slot1": 5}, "N3": {"slot1": 10}, "N4": {"slot1": 5}}
+    alloc_b = {"N1": {"slot1": 0}, "N2": {"slot1": 9}, "N3": {"slot1": 9}, "N4": {"slot1": 9}}
+
+    mA = evaluate_allocation(sc_counter, alloc_a)
+    mB = evaluate_allocation(sc_counter, alloc_b)
+
+    # Range-based fairness_score: B > A
+    assert mA["fairness_score"] == pytest.approx(0.0)
+    assert mB["fairness_score"] == pytest.approx(0.1)
+    assert mB["fairness_score"] > mA["fairness_score"]
+
+    # Quadratic disparity: A < B (lower disparity means fairer in QUBO)
+    # When exposed in metrics:
+    if "disparity" in mA:
+        assert mA["disparity"] == pytest.approx(2.0)
+        assert mB["disparity"] == pytest.approx(2.43)
+        assert mA["disparity"] < mB["disparity"]
+

@@ -173,6 +173,12 @@
   margin-bottom: var(--space-2);
 }
 
+.solver__numbers {
+  display: grid;
+  gap: var(--space-4);
+  align-content: start;
+}
+
 .solver__metrics {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -417,7 +423,7 @@
     column-gap: var(--space-6);
   }
 
-  .solver > :not(.weave-wrap):not(.solver__metrics) {
+  .solver > :not(.weave-wrap):not(.solver__numbers) {
     grid-column: 1 / -1;
   }
 }

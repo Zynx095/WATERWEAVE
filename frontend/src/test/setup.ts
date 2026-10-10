@@ -7,6 +7,8 @@ afterEach(() => {
 })
 
 // jsdom does not implement these; components call them for scrolling and dialogs.
+window.scrollTo = () => {}
+
 if (!Element.prototype.scrollIntoView) {
   Element.prototype.scrollIntoView = function scrollIntoView() {}
 }

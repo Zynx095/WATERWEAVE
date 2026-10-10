@@ -101,43 +101,45 @@ export function SolverPanel({ outcome, scenario, source, runId }: SolverPanelPro
             animateKey={`${runId}-${outcome.key}`}
             compact
           />
-          <dl className="solver__metrics">
-            <div className="solver__score">
-              <dt>Score (lower is better)</dt>
-              <dd className="num">{formatNumber(outcome.objective_value)}</dd>
-            </div>
-            <div>
-              <dt>Requests met</dt>
-              <dd className="num">
-                {m.total_demand_units - m.unmet_demand_units} of {m.total_demand_units}
-              </dd>
-            </div>
-            <div>
-              <dt>Weighted shortage</dt>
-              <dd className="num">{formatNumber(m.weighted_shortage)}</dd>
-            </div>
-            <div>
-              <dt>Fairness score</dt>
-              <dd className="num">{formatNumber(m.fairness_score)}</dd>
-            </div>
-            <div>
-              <dt>Run time</dt>
-              <dd className="num">{formatSeconds(outcome.runtime_seconds)}</dd>
-            </div>
-          </dl>
-          <RulesLine outcome={outcome} />
-          <GapLine outcome={outcome} />
-          {outcome.key === 'qaoa' &&
-            (outcome.metadata.num_qubits === 0 ? (
-              <p className="field__hint">Nothing was requested, so the circuit had nothing to decide.</p>
-            ) : (
-              <>
-                <QaoaFacts outcome={outcome} />
-                <p className="solver__link">
-                  <Link to="/lab#circuit">Inspect this circuit in the quantum lab</Link>
-                </p>
-              </>
-            ))}
+          <div className="solver__numbers" data-present-id={`solver-${outcome.key}-numbers`}>
+            <dl className="solver__metrics">
+              <div className="solver__score">
+                <dt>Score (lower is better)</dt>
+                <dd className="num">{formatNumber(outcome.objective_value)}</dd>
+              </div>
+              <div>
+                <dt>Requests met</dt>
+                <dd className="num">
+                  {m.total_demand_units - m.unmet_demand_units} of {m.total_demand_units}
+                </dd>
+              </div>
+              <div>
+                <dt>Weighted shortage</dt>
+                <dd className="num">{formatNumber(m.weighted_shortage)}</dd>
+              </div>
+              <div>
+                <dt>Fairness score</dt>
+                <dd className="num">{formatNumber(m.fairness_score)}</dd>
+              </div>
+              <div>
+                <dt>Run time</dt>
+                <dd className="num">{formatSeconds(outcome.runtime_seconds)}</dd>
+              </div>
+            </dl>
+            <RulesLine outcome={outcome} />
+            <GapLine outcome={outcome} />
+            {outcome.key === 'qaoa' &&
+              (outcome.metadata.num_qubits === 0 ? (
+                <p className="field__hint">Nothing was requested, so the circuit had nothing to decide.</p>
+              ) : (
+                <>
+                  <QaoaFacts outcome={outcome} />
+                  <p className="solver__link">
+                    <Link to="/lab#circuit">Inspect this circuit in the quantum lab</Link>
+                  </p>
+                </>
+              ))}
+          </div>
         </>
       ) : outcome.status === 'skipped' ? (
         <div className="notice notice--info" role="status">

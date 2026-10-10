@@ -129,7 +129,8 @@ export const STEPS: StepDef[] = [
     id: 'quantum',
     title: 'Quantum optimisation',
     route: '/workspace',
-    target: 'solver-qaoa',
+    // QAOA's numbers and sampling facts; the whole card is taller than a laptop screen.
+    target: 'solver-qaoa-numbers',
     durationMs: 32_000,
     action: 'run-quantum',
     actionLabel: 'Running QAOA: optimising and sampling the circuit.',

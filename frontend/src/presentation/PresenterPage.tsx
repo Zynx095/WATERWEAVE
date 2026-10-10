@@ -32,8 +32,11 @@ export function PresenterPage() {
     }
     ch.postMessage({ kind: 'hello' } satisfies PresenterMessage)
     const id = window.setInterval(() => setNow(Date.now()), 1000)
+    // Lets the main window know a presenter view is open (it then keeps notes off the projector).
+    const heartbeat = window.setInterval(() => ch.postMessage({ kind: 'hello' } satisfies PresenterMessage), 2000)
     return () => {
       window.clearInterval(id)
+      window.clearInterval(heartbeat)
       ch.close()
       channel.current = null
     }

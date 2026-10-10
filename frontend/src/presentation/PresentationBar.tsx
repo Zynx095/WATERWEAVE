@@ -11,6 +11,7 @@ import {
   SkipForward,
   X,
 } from 'lucide-react'
+import { useEffect, useRef } from 'react'
 import { remaining, stepDuration } from './machine'
 import { MACHINE_CONFIG, usePresentation } from './PresentationProvider'
 import { STEPS } from './steps'
@@ -20,9 +21,28 @@ export function formatClock(ms: number) {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
 }
 
+/** Publishes the bar's height as --present-bar-h so the page can keep content clear of it. */
+function useBarHeight() {
+  const ref = useRef<HTMLElement>(null)
+  useEffect(() => {
+    const el = ref.current
+    if (!el || typeof ResizeObserver === 'undefined') return
+    const root = document.documentElement
+    const observer = new ResizeObserver(() => root.style.setProperty('--present-bar-h', `${el.offsetHeight}px`))
+    observer.observe(el)
+    return () => {
+      observer.disconnect()
+      root.style.removeProperty('--present-bar-h')
+    }
+  })
+  return ref
+}
+
 /** Audience-facing caption and controls, fixed to the bottom of the window. */
 export function PresentationBar() {
-  const { state, dispatch, context, notesOpen, setNotesOpen, cleanView, setCleanView } = usePresentation()
+  const { state, dispatch, context, notesOpen, setNotesOpen, presenterLinked, cleanView, setCleanView } =
+    usePresentation()
+  const barRef = useBarHeight()
   if (state.status === 'idle') return null
 
   const step = STEPS[state.index]
@@ -31,9 +51,10 @@ export function PresentationBar() {
   const duration = stepDuration(MACHINE_CONFIG, state)
   const playing = state.status === 'running'
   const pending = state.action.status === 'pending'
+  const showNotes = notesOpen && !cleanView && !presenterLinked
   const statusText =
     state.status === 'finished'
-      ? 'Finished'
+      ? 'Finished: restart, or exit to explore'
       : pending
         ? 'Waiting for the engine'
         : !state.auto
@@ -43,8 +64,13 @@ export function PresentationBar() {
             : 'Paused'
 
   return (
-    <section className="present-bar" data-clean={cleanView || undefined} aria-label="Presentation controls">
-      {notesOpen && !cleanView && (
+    <section
+      ref={barRef}
+      className="present-bar"
+      data-clean={cleanView || undefined}
+      aria-label="Presentation controls"
+    >
+      {showNotes && (
         <div className="present-notes" id="presenter-notes">
           <h2 className="present-notes__title">Presenter notes</h2>
           <ul>
@@ -58,7 +84,7 @@ export function PresentationBar() {
 
       <div className="present-bar__inner">
         <p className="present-bar__caption" aria-live="polite">
-          {state.status === 'finished' ? 'End of the guided presentation. Restart, or exit to explore freely.' : step.caption(context)}
+          {step.caption(context)}
         </p>
 
         {(pending || state.action.status === 'failed') && (
@@ -146,7 +172,7 @@ export function PresentationBar() {
               </button>
               {state.status === 'finished' ? (
                 <button type="button" className="present-btn present-btn--main" onClick={() => dispatch({ type: 'RESTART' })}>
-                  <RotateCcw aria-hidden size={20} /> Restart
+                  <RotateCcw aria-hidden size={20} /> <span className="present-btn__label">Restart</span>
                 </button>
               ) : (
                 <button
@@ -157,7 +183,7 @@ export function PresentationBar() {
                   onClick={() => dispatch({ type: 'TOGGLE' })}
                 >
                   {playing ? <Pause aria-hidden size={20} /> : <Play aria-hidden size={20} />}
-                  {playing ? 'Pause' : 'Resume'}
+                  <span className="present-btn__label">{playing ? 'Pause' : 'Resume'}</span>
                 </button>
               )}
               <button
@@ -170,22 +196,25 @@ export function PresentationBar() {
               >
                 <SkipForward aria-hidden size={20} />
               </button>
+              {state.status !== 'finished' && (
+                <button
+                  type="button"
+                  className="present-btn"
+                  aria-label="Restart from the beginning"
+                  title="Restart (Home)"
+                  onClick={() => dispatch({ type: 'RESTART' })}
+                >
+                  <RotateCcw aria-hidden size={20} />
+                </button>
+              )}
               <button
                 type="button"
                 className="present-btn"
-                aria-label="Restart from the beginning"
-                title="Restart (Home)"
-                onClick={() => dispatch({ type: 'RESTART' })}
-              >
-                <RotateCcw aria-hidden size={20} />
-              </button>
-              <button
-                type="button"
-                className="present-btn"
-                aria-expanded={notesOpen}
+                aria-expanded={showNotes}
                 aria-controls="presenter-notes"
                 aria-label="Presenter notes"
-                title="Presenter notes (N)"
+                title={presenterLinked ? 'Notes are shown in the presenter view' : 'Presenter notes (N)'}
+                disabled={presenterLinked}
                 onClick={() => setNotesOpen(!notesOpen)}
               >
                 <NotebookText aria-hidden size={20} />
@@ -206,7 +235,7 @@ export function PresentationBar() {
                 title="Exit (Esc)"
                 onClick={() => dispatch({ type: 'EXIT' })}
               >
-                <X aria-hidden size={20} /> Exit
+                <X aria-hidden size={20} /> <span className="present-btn__label">Exit</span>
               </button>
             </div>
           )}

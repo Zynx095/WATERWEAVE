@@ -46,6 +46,8 @@ export interface PresentationValue {
   closePreflight: () => void
   notesOpen: boolean
   setNotesOpen: (open: boolean) => void
+  /** A presenter view in another window has been heard from recently. */
+  presenterLinked: boolean
   /** Audience view: hides navigation and controls, leaving content and caption. */
   cleanView: boolean
   setCleanView: (clean: boolean) => void
@@ -87,6 +89,22 @@ async function runAction(
   }
 }
 
+/**
+ * Scrolls so the element sits in the space above the caption bar: centred if
+ * it fits, otherwise with its top in view.
+ */
+function frameAboveBar(element: HTMLElement, reduceMotion: boolean) {
+  const gap = 24
+  const barHeight = document.querySelector('.present-bar')?.getBoundingClientRect().height ?? 0
+  const room = window.innerHeight - barHeight - 2 * gap
+  const rect = element.getBoundingClientRect()
+  const centring = rect.height < room ? (room - rect.height) / 2 : 0
+  window.scrollTo({
+    top: Math.max(0, window.scrollY + rect.top - gap - centring),
+    behavior: reduceMotion ? 'auto' : 'smooth',
+  })
+}
+
 function isTypingTarget(target: EventTarget | null) {
   const el = target as HTMLElement | null
   if (!el || !el.tagName) return false
@@ -100,6 +118,7 @@ export function PresentationProvider({ children }: { children: ReactNode }) {
   const [preflightOpen, setPreflightOpen] = useState(false)
   const [notesOpen, setNotesOpen] = useState(false)
   const [cleanView, setCleanView] = useState(false)
+  const [presenterLinked, setPresenterLinked] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
   const active = state.status !== 'idle'
@@ -166,7 +185,7 @@ export function PresentationProvider({ children }: { children: ReactNode }) {
       element = document.querySelector<HTMLElement>(`[data-present-id="${step.target}"]`)
       if (element) {
         element.setAttribute('data-spotlight', 'true')
-        element.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' })
+        frameAboveBar(element, reduceMotion)
       } else if (tries++ < 30) {
         timer = window.setTimeout(find, 150)
       }
@@ -261,14 +280,20 @@ export function PresentationProvider({ children }: { children: ReactNode }) {
     const ch = new BroadcastChannel(CHANNEL_NAME)
     channel.current = ch
     const publish = () => ch.postMessage({ kind: 'snapshot', snapshot: latestSnapshot.current } satisfies AudienceMessage)
+    let presenterSeenAt = 0
     ch.onmessage = (event: MessageEvent) => {
       const message = parsePresenterMessage(event.data)
       if (!message) return
+      presenterSeenAt = Date.now()
+      setPresenterLinked(true)
       if (message.kind === 'hello') publish()
       else dispatch(message.event)
     }
-    // A heartbeat lets the presenter view tell a quiet window from a closed one.
-    const heartbeat = window.setInterval(publish, 1000)
+    // Heartbeats in both directions tell each window whether the other is still there.
+    const heartbeat = window.setInterval(() => {
+      publish()
+      if (presenterSeenAt && Date.now() - presenterSeenAt > 5000) setPresenterLinked(false)
+    }, 1000)
     return () => {
       window.clearInterval(heartbeat)
       ch.close()
@@ -295,10 +320,11 @@ export function PresentationProvider({ children }: { children: ReactNode }) {
       closePreflight,
       notesOpen,
       setNotesOpen,
+      presenterLinked,
       cleanView,
       setCleanView,
     }),
-    [state, context, liveData, preflightOpen, openPreflight, closePreflight, notesOpen, cleanView],
+    [state, context, liveData, preflightOpen, openPreflight, closePreflight, notesOpen, presenterLinked, cleanView],
   )
 
   return <PresentationContext.Provider value={value}>{children}</PresentationContext.Provider>

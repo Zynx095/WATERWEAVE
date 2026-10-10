@@ -20,9 +20,11 @@ import { useLocation, useNavigate } from 'react-router'
 import { benchmarkFacts } from '../lib/benchmark'
 import { scenarioFacts } from '../lib/scenario'
 import { DEFAULT_SETTINGS, useStore, type StoreActions } from '../state/store'
+import { CHANNEL_NAME, parsePresenterMessage, type AudienceMessage, type PresenterSnapshot } from './channel'
 import {
   createReducer,
   initialPresentation,
+  remaining,
   type PresentationEvent,
   type PresentationState,
 } from './machine'
@@ -203,6 +205,48 @@ export function PresentationProvider({ children }: { children: ReactNode }) {
     }),
     [store.scenario, store.run, store.benchmark.data, store.dataSources],
   )
+
+  // Presenter view in another window: publish a snapshot, accept commands.
+  const snapshot = useMemo<PresenterSnapshot>(() => {
+    const next = STEPS[state.index + 1]
+    return {
+      state,
+      steps: STEPS.map((s) => ({ id: s.id, title: s.title })),
+      caption: step.caption(context),
+      notes: step.notes(context),
+      next: next ? { title: next.title, caption: next.caption(context) } : null,
+      remaining: remaining(MACHINE_CONFIG, state),
+      actionLabel: step.actionLabel ?? null,
+      mode: store.mode,
+    }
+  }, [state, step, context, store.mode])
+  const channel = useRef<BroadcastChannel | null>(null)
+  const latestSnapshot = useRef(snapshot)
+  latestSnapshot.current = snapshot
+
+  useEffect(() => {
+    if (typeof BroadcastChannel === 'undefined') return
+    const ch = new BroadcastChannel(CHANNEL_NAME)
+    channel.current = ch
+    const publish = () => ch.postMessage({ kind: 'snapshot', snapshot: latestSnapshot.current } satisfies AudienceMessage)
+    ch.onmessage = (event: MessageEvent) => {
+      const message = parsePresenterMessage(event.data)
+      if (!message) return
+      if (message.kind === 'hello') publish()
+      else dispatch(message.event)
+    }
+    // A heartbeat lets the presenter view tell a quiet window from a closed one.
+    const heartbeat = window.setInterval(publish, 1000)
+    return () => {
+      window.clearInterval(heartbeat)
+      ch.close()
+      channel.current = null
+    }
+  }, [])
+
+  useEffect(() => {
+    channel.current?.postMessage({ kind: 'snapshot', snapshot } satisfies AudienceMessage)
+  }, [snapshot])
 
   const openPreflight = useCallback(() => setPreflightOpen(true), [])
   const closePreflight = useCallback(() => setPreflightOpen(false), [])

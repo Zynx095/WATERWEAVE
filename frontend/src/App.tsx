@@ -8,6 +8,7 @@ import { OverviewPage } from './pages/OverviewPage'
 import { WorkspacePage } from './pages/WorkspacePage'
 import { PresentButton } from './presentation/PresentButton'
 import { PresentationProvider } from './presentation/PresentationProvider'
+import { PresenterPage } from './presentation/PresenterPage'
 import { StoreProvider } from './state/store'
 
 export function AppRoutes() {
@@ -28,11 +29,20 @@ export function AppRoutes() {
 export function App() {
   return (
     <BrowserRouter>
-      <StoreProvider>
-        <PresentationProvider>
-          <AppRoutes />
-        </PresentationProvider>
-      </StoreProvider>
+      <Routes>
+        {/* The presenter view only mirrors and commands the main window. */}
+        <Route path="presenter" element={<PresenterPage />} />
+        <Route
+          path="*"
+          element={
+            <StoreProvider>
+              <PresentationProvider>
+                <AppRoutes />
+              </PresentationProvider>
+            </StoreProvider>
+          }
+        />
+      </Routes>
     </BrowserRouter>
   )
 }

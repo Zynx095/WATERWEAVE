@@ -57,8 +57,9 @@ function ConstraintNotes() {
         </li>
       </ul>
       <p className="field__hint">
-        Greedy and exact search only accept plans that follow these rules. QAOA also meets plans that break them,
-        priced with a large penalty so that they score badly.
+        Greedy and exact search only accept plans that follow these rules. The QAOA circuit can also produce plans
+        that break them; those carry a large penalty, so they score badly, and the solver keeps a valid sample
+        whenever it drew one.
       </p>
     </aside>
   )

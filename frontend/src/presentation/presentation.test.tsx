@@ -138,6 +138,23 @@ describe('guided presentation', () => {
     expect(where()).toContain('Quantum optimisation')
   })
 
+  it('runs the solvers when the presenter jumps to the results without any on screen', async () => {
+    const fetchMock = mockApi()
+    await startPresentation()
+    const solveCalls = () => fetchMock.mock.calls.filter(([url]) => String(url) === '/api/solve').length
+    const before = solveCalls() // the preflight check
+    fireEvent.click(within(bar()).getByRole('button', { name: 'Go to step 6: Results and fairness' }))
+    await flush()
+    expect(solveCalls()).toBe(before + 1)
+    expect(screen.getByRole('table', { name: /Share of each neighborhood/ })).toBeInTheDocument()
+    // With results on screen, entering the step again does not run anything.
+    fireEvent.click(within(bar()).getByRole('button', { name: 'Go to step 7: Data integrity' }))
+    await flush()
+    fireEvent.click(within(bar()).getByRole('button', { name: 'Previous step' }))
+    await flush()
+    expect(solveCalls()).toBe(before + 1)
+  })
+
   it('shows presenter notes on demand', async () => {
     mockApi()
     await startPresentation()

@@ -9,7 +9,13 @@ import { formatNumber, formatPercent, formatSeconds } from '../lib/format'
 import type { ScenarioFacts } from '../lib/scenario'
 import { numberWord } from '../lib/scenario'
 
-export type StepAction = 'load-default' | 'run-classical' | 'run-quantum' | 'fetch-data' | 'load-benchmark'
+export type StepAction =
+  | 'load-default'
+  | 'run-classical'
+  | 'run-quantum'
+  | 'ensure-results'
+  | 'fetch-data'
+  | 'load-benchmark'
 
 export interface StepContext {
   facts: ScenarioFacts | null
@@ -153,6 +159,9 @@ export const STEPS: StepDef[] = [
     route: '/workspace',
     target: 'fairness',
     durationMs: 28_000,
+    // Only runs if the presenter jumped here without results on screen.
+    action: 'ensure-results',
+    actionLabel: 'Running the solvers, because there are no results on screen yet.',
     caption: ({ run }) => {
       const exact = result(run, 'exact')
       const nothing = run?.reference.deliver_nothing

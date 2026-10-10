@@ -40,30 +40,34 @@ def solve_greedy(
     fairness_weight: float = 2.0,
     penalty_weight: float | None = None,
 ) -> SolverResult:
-    """Greedy priority-first allocation heuristic.
+    """Objective-aware greedy allocation heuristic with deterministic local refinement.
 
-    Allocates available supply slot-by-slot, giving water to neighborhoods
-    in descending order of priority_weight until slot supply is exhausted
-    or neighborhood storage capacity is reached.
-    Allocations are discrete binary decisions (at most 1 unit per slot),
-    matching the exact decision space of the exact and QAOA solvers.
+    Constructs a feasible allocation by forward greedy selection guided by marginal
+    objective reduction (balancing weighted shortage and service-level disparity),
+    evaluates against the priority-first heuristic and zero-allocation baseline to prevent
+    dominated outcomes, and applies deterministic 1-opt local refinement.
+    Allocations are discrete binary decisions (at most 1 unit per slot), matching the exact
+    decision space of the exact and QAOA solvers.
     """
     t0 = time.perf_counter()
     if penalty_weight is None:
         penalty_weight = compute_default_penalty_weight(scenario, fairness_weight=fairness_weight)
 
-    allocation: dict[str, dict[str, int]] = {
+    empty_alloc: dict[str, dict[str, int]] = {
         n.id: {s: 0 for s in scenario.slots}
         for n in scenario.neighborhoods
     }
 
-    # Sort neighborhoods descending by priority weight
+    # 1. Candidate A: Pure priority-first allocation
+    pf_alloc = {
+        n.id: {s: 0 for s in scenario.slots}
+        for n in scenario.neighborhoods
+    }
     sorted_neighbors = sorted(
         scenario.neighborhoods,
         key=lambda n: n.priority_weight,
         reverse=True,
     )
-
     for slot in scenario.slots:
         supply_left = scenario.supply_by_slot.get(slot, 0)
         for n in sorted_neighbors:
@@ -72,34 +76,125 @@ def solve_greedy(
             demand = n.demand_by_slot.get(slot, 0)
             if demand <= 0:
                 continue
-
-            current_alloc = sum(allocation[n.id].values())
-            room = max(0, n.storage_capacity_units - current_alloc)
+            cur = sum(pf_alloc[n.id].values())
+            room = max(0, n.storage_capacity_units - cur)
             units = min(1, demand, supply_left, room)
             if units > 0:
-                allocation[n.id][slot] = units
+                pf_alloc[n.id][slot] = units
                 supply_left -= units
 
+    # 2. Candidate B: Forward greedy selection minimizing total objective F(x)
+    fwd_alloc = {
+        n.id: {s: 0 for s in scenario.slots}
+        for n in scenario.neighborhoods
+    }
+    while True:
+        cur_obj = evaluate_objective(
+            scenario, fwd_alloc, fairness_weight=fairness_weight, penalty_weight=penalty_weight
+        )
+        best_cand = None
+        for n in scenario.neighborhoods:
+            for s in scenario.slots:
+                if fwd_alloc[n.id][s] == 0 and n.demand_by_slot.get(s, 0) > 0:
+                    cand = {nid: dict(slots) for nid, slots in fwd_alloc.items()}
+                    cand[n.id][s] = 1
+                    m = evaluate_allocation(scenario, cand)
+                    if m["feasible"] == 1.0:
+                        cand_obj = evaluate_objective(
+                            scenario, cand, fairness_weight=fairness_weight, penalty_weight=penalty_weight
+                        )
+                        if cand_obj < cur_obj - 1e-9:
+                            if best_cand is None or cand_obj < best_cand[0]:
+                                best_cand = (cand_obj, n.id, s)
+        if best_cand is not None:
+            fwd_alloc[best_cand[1]][best_cand[2]] = 1
+        else:
+            break
+
+    # 3. Select best feasible candidate among Empty, Priority-First, and Forward Greedy
+    candidates = [empty_alloc, pf_alloc, fwd_alloc]
+    evaluated_candidates = []
+    for cand in candidates:
+        m = evaluate_allocation(scenario, cand)
+        if m["feasible"] == 1.0:
+            obj = evaluate_objective(
+                scenario, cand, fairness_weight=fairness_weight, penalty_weight=penalty_weight
+            )
+            evaluated_candidates.append((obj, cand))
+
+    if not evaluated_candidates:
+        chosen_alloc = empty_alloc
+    else:
+        evaluated_candidates.sort(key=lambda item: item[0])
+        chosen_alloc = evaluated_candidates[0][1]
+
+    # 4. Deterministic 1-opt local refinement (swaps and removals)
+    while True:
+        cur_obj = evaluate_objective(
+            scenario, chosen_alloc, fairness_weight=fairness_weight, penalty_weight=penalty_weight
+        )
+        best_improvement = None
+
+        # Check 1-unit removals
+        for n1 in scenario.neighborhoods:
+            for s1 in scenario.slots:
+                if chosen_alloc[n1.id][s1] == 1:
+                    cand = {nid: dict(slots) for nid, slots in chosen_alloc.items()}
+                    cand[n1.id][s1] = 0
+                    m = evaluate_allocation(scenario, cand)
+                    if m["feasible"] == 1.0:
+                        c_obj = evaluate_objective(
+                            scenario, cand, fairness_weight=fairness_weight, penalty_weight=penalty_weight
+                        )
+                        if c_obj < cur_obj - 1e-9:
+                            if best_improvement is None or c_obj < best_improvement[0]:
+                                best_improvement = (c_obj, cand)
+
+        # Check 1-unit swaps
+        for n1 in scenario.neighborhoods:
+            for s1 in scenario.slots:
+                if chosen_alloc[n1.id][s1] == 1:
+                    for n2 in scenario.neighborhoods:
+                        for s2 in scenario.slots:
+                            if chosen_alloc[n2.id][s2] == 0 and n2.demand_by_slot.get(s2, 0) > 0:
+                                cand = {nid: dict(slots) for nid, slots in chosen_alloc.items()}
+                                cand[n1.id][s1] = 0
+                                cand[n2.id][s2] = 1
+                                m = evaluate_allocation(scenario, cand)
+                                if m["feasible"] == 1.0:
+                                    c_obj = evaluate_objective(
+                                        scenario, cand, fairness_weight=fairness_weight, penalty_weight=penalty_weight
+                                    )
+                                    if c_obj < cur_obj - 1e-9:
+                                        if best_improvement is None or c_obj < best_improvement[0]:
+                                            best_improvement = (c_obj, cand)
+
+        if best_improvement is not None:
+            chosen_alloc = best_improvement[1]
+        else:
+            break
+
     runtime = time.perf_counter() - t0
-    metrics = evaluate_allocation(scenario, allocation)
+    metrics = evaluate_allocation(scenario, chosen_alloc)
     objective = evaluate_objective(
-        scenario, allocation, fairness_weight=fairness_weight, penalty_weight=penalty_weight
+        scenario, chosen_alloc, fairness_weight=fairness_weight, penalty_weight=penalty_weight
     )
 
     return SolverResult(
         solver_name="Greedy (Priority-First)",
-        allocation=allocation,
+        allocation=chosen_alloc,
         objective_value=float(objective),
         feasible=bool(metrics["feasible"] == 1.0),
         metrics=metrics,
         runtime_seconds=float(runtime),
         metadata={
             "solver_type": "classical_heuristic",
-            "heuristic": "priority_first",
+            "heuristic": "objective_aware_greedy_with_local_search",
             "is_demo": False,
             "description": (
-                "Priority-first greedy allocation. Prioritizes high-weight "
-                "neighborhoods, which may result in higher service disparity."
+                "Objective-aware greedy heuristic with deterministic 1-opt local search. "
+                "Evaluates allocations against the shared objective (shortage, disparity, penalties) "
+                "and guards against returning solutions dominated by the zero-allocation baseline."
             ),
         },
     )

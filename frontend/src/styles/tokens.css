@@ -1,0 +1,75 @@
+/*
+ * Design tokens. Palette after natural dyes (indigo, ochre, madder) because
+ * an allocation is drawn as a weave; see docs/FRONTEND_ARCHITECTURE.md.
+ * Contrast ratios are for text on --sheet (#fff) and --paper (#eef2f1).
+ */
+:root {
+  /* surfaces */
+  --paper: #eef2f1;
+  --sheet: #ffffff;
+  --sheet-sunk: #f6f8f8;
+  --rule: #cfd8dd;
+  --rule-strong: #9eabb5;
+
+  /* text */
+  --ink: #13213c; /* 16.0:1 on sheet, 14.2:1 on paper */
+  --ink-2: #44526b; /* 7.9:1 on sheet, 7.0:1 on paper */
+  --ink-3: #56647a; /* 6.0:1 on sheet, 5.3:1 on paper */
+
+  /* dyes */
+  --indigo: #1f3fb4; /* delivered water, primary action, exact solver; 8.7:1 */
+  --indigo-strong: #172f87;
+  --indigo-soft: #dfe5fb;
+  --indigo-thread: #2b4fd6;
+  --ochre: #8a5f00; /* QAOA text; 5.7:1, 5.0:1 on ochre-soft */
+  --ochre-fill: #f2cf6b;
+  --ochre-soft: #fbf0cf;
+  --madder: #b3261e; /* unmet demand, errors; 6.5:1, 5.2:1 on madder-soft */
+  --madder-soft: #f8e0dd;
+  --slate: #526178; /* greedy solver; 6.2:1, 5.1:1 on slate-soft */
+  --slate-soft: #e3e8ef;
+  --verdigris: #0b6b5e; /* verified live data; 6.4:1, 5.4:1 on verdigris-soft */
+  --verdigris-soft: #d9f0ec;
+
+  /* threads */
+  --warp: #b8c4d3;
+  --warp-edge: #8e9db2;
+  --weft: #d9dfe6;
+
+  /* type */
+  --font-display: 'Barlow Condensed', 'Arial Narrow', sans-serif-condensed, sans-serif;
+  --font-body: 'Atkinson Hyperlegible Next Variable', 'Atkinson Hyperlegible', 'Segoe UI', sans-serif;
+
+  /* modular scale, ratio 1.25, base 18px */
+  --step--1: 0.9rem; /* 14.4px */
+  --step-0: 1.125rem; /* 18px */
+  --step-1: 1.406rem; /* 22.5px */
+  --step-2: 1.758rem; /* 28.1px */
+  --step-3: 2.197rem; /* 35.2px */
+  --step-4: 2.747rem; /* 43.9px */
+  --step-5: 3.433rem; /* 54.9px */
+  --step-6: 4.292rem; /* 68.7px */
+
+  /* spacing, 4px grid */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4.5rem;
+  --space-9: 6rem;
+
+  --radius-control: 6px;
+  --radius-panel: 10px;
+  --measure: 68ch;
+  --page-max: 78rem;
+  --header-h: 4rem;
+  --gutter: clamp(1rem, 3vw, 2rem);
+
+  --focus: 0 0 0 3px var(--sheet), 0 0 0 6px var(--indigo);
+  --spotlight: #a87600; /* 3.5:1 against paper, for the presentation outline */
+
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+}

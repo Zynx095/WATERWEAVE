@@ -4,8 +4,9 @@ from ..models import Scenario, Neighborhood
 from .models import Observation
 
 class ScenarioBuilder:
-    def __init__(self, seed: int = 42):
+    def __init__(self, seed: int = 42, apply_hypothetical_rainfall_heuristic: bool = False):
         self.seed = seed
+        self.apply_hypothetical_rainfall_heuristic = apply_hypothetical_rainfall_heuristic
         # Base synthetic schema to fall back on or modify
         self.base_demand = {
             "N1": {"morning": 1, "evening": 1},
@@ -47,11 +48,12 @@ class ScenarioBuilder:
                     population_by_ward[obs.geographic_id] = obs.value
         
         # 2. Adjust Supply based on Rainfall
-        # For every 5mm of rain, we heuristically add 1 unit of supply to the evening slot
+        # This is a hypothetical assumption, disabled by default.
+        # Rainfall does not directly/instantly translate to BWSSB municipal pipe supply.
         supply_morning = 2
         supply_evening = 2
         
-        if rainfall_mm >= 5.0:
+        if self.apply_hypothetical_rainfall_heuristic and rainfall_mm >= 5.0:
             supply_evening += int(rainfall_mm // 5.0)
             
         # Cap supply to not exceed total demand (7) otherwise it's not a scarcity problem
@@ -81,9 +83,9 @@ class ScenarioBuilder:
         mode = "LIVE/DATA-DRIVEN" if has_live_data else "STATIC DATA-DRIVEN"
         sources = ", ".join(sorted(list(data_sources))) if data_sources else "None (Fallback)"
         desc = (
-            f"[{mode}] Scenario driven by real-world data constraints. "
+            f"[{mode}] Scenario integrating real-world observations. "
             f"Sources: {sources}. Rainfall: {rainfall_mm}mm. "
-            f"Priorities scaled by population."
+            f"Note: Priorities are estimated heuristics based on illustrative population counts."
         )
         
         return Scenario(

@@ -86,8 +86,12 @@ $$\sum_{t: (i,t) \in \mathcal{V}} x_{i,t} \le C_i \quad \forall i \in \mathcal{N
 ### 4.3 Slack-Variable QUBO Encoding
 In QUBO / Ising formulations, inequalities $\sum_v x_v \le B$ cannot use step-functions directly. We introduce binary slack variables $s \in \{0, 1\}$ to convert the inequality into an exact equality:
 $$\sum_{v} x_v + \sum_{m=1}^{B} s_m = B$$
-Then, we penalize squared violations:
+Then, each constraint is penalized independently by its squared violation:
 $$P \cdot \left( \sum_v x_v + \sum_m s_m - B \right)^2$$
+
+In the theoretical evaluation, the penalties are similarly summed across individual squared violations:
+$$\text{Penalties}(x) = P \cdot \left[ \sum_{t \in \mathcal{T}} (\text{supply\_viol}_t)^2 + \sum_{i \in \mathcal{N}} (\text{storage\_viol}_i)^2 + \sum_{i, t} (\text{demand\_viol}_{i, t})^2 \right]$$
+This guarantees exact algebraic consistency between the minimum QUBO slack energy and the evaluated objective across both feasible and infeasible configurations.
 
 **Expansion**:
 $$\left( \sum_u c_u z_u - B \right)^2 = B^2 + \sum_u (c_u^2 - 2 B c_u) z_u + 2 \sum_{u < v} c_u c_v z_u z_v$$
@@ -108,13 +112,13 @@ In the default scenario:
 ## 5. Penalty Bound Derivation
 
 To guarantee that no infeasible allocation can ever beat a feasible allocation in energy:
-$$\Delta \text{Shortage}_{\max} \le \max_i w_i = 2.0$$
-$$\Delta (\alpha \cdot \text{Disparity})_{\max} \le \alpha \cdot 1.0 = 2.0$$
-The maximum benefit any infeasible allocation could gain in the base objective is at most $2.0 + 2.0 = 4.0$.
+$$\Delta \text{Shortage}_{\max} \le \max_i w_i$$
+$$\Delta (\alpha \cdot \text{Disparity})_{\max} \le \alpha \cdot 1.0$$
+The maximum benefit any infeasible allocation could gain in the base objective from an illegal unit allocation is at most $\max_i w_i + \alpha$.
 A single constraint violation of 1 unit produces an inequality penalty of $P \cdot 1^2 = P$.
-Therefore, choosing:
-$$P = 15.0 \gg 4.0$$
-strictly guarantees that every feasible allocation has lower energy than any infeasible state:
+Therefore, to guarantee penalty dominance across arbitrary priority weights:
+$$P \ge \max\left(15.0, 2.0 \cdot \max_i w_i + \alpha\right)$$
+For the default scenario ($\max w_i = 2.0, \alpha = 2.0$), $P = 15.0 \gg 4.0$, which strictly guarantees:
 - Ground state feasible energy: $6.0$
 - Lowest infeasible energy: $19.5$
 

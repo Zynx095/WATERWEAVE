@@ -16,7 +16,7 @@ def run_comparison(
     scenario: Scenario,
     include_qaoa: bool = True,
     fairness_weight: float = 2.0,
-    penalty_weight: float = 15.0,
+    penalty_weight: float | None = None,
     shots: int = 1024,
     p: int = 1,
     **kwargs: Any,

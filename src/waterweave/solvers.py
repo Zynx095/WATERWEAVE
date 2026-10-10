@@ -25,9 +25,11 @@ except ImportError:
 from waterweave.formulation import (
     OptimizationModel,
     build_model,
+    compute_default_penalty_weight,
     decode_allocation,
     evaluate_objective,
     evaluate_qubo_energy,
+    to_sparse_pauli_op,
 )
 from waterweave.metrics import evaluate_allocation
 from waterweave.models import Scenario, SolverResult
@@ -36,15 +38,19 @@ from waterweave.models import Scenario, SolverResult
 def solve_greedy(
     scenario: Scenario,
     fairness_weight: float = 2.0,
-    penalty_weight: float = 15.0,
+    penalty_weight: float | None = None,
 ) -> SolverResult:
     """Greedy priority-first allocation heuristic.
 
     Allocates available supply slot-by-slot, giving water to neighborhoods
     in descending order of priority_weight until slot supply is exhausted
     or neighborhood storage capacity is reached.
+    Allocations are discrete binary decisions (at most 1 unit per slot),
+    matching the exact decision space of the exact and QAOA solvers.
     """
     t0 = time.perf_counter()
+    if penalty_weight is None:
+        penalty_weight = compute_default_penalty_weight(scenario, fairness_weight=fairness_weight)
 
     allocation: dict[str, dict[str, int]] = {
         n.id: {s: 0 for s in scenario.slots}
@@ -69,7 +75,7 @@ def solve_greedy(
 
             current_alloc = sum(allocation[n.id].values())
             room = max(0, n.storage_capacity_units - current_alloc)
-            units = min(demand, supply_left, room)
+            units = min(1, demand, supply_left, room)
             if units > 0:
                 allocation[n.id][slot] = units
                 supply_left -= units
@@ -102,7 +108,7 @@ def solve_greedy(
 def solve_exact(
     scenario: Scenario,
     fairness_weight: float = 2.0,
-    penalty_weight: float = 15.0,
+    penalty_weight: float | None = None,
 ) -> SolverResult:
     """Exact classical solver using exhaustive enumeration of eligible binary decisions.
 
@@ -110,6 +116,9 @@ def solve_exact(
     (Weighted Shortage + alpha * Disparity + P * Violations).
     """
     t0 = time.perf_counter()
+    if penalty_weight is None:
+        penalty_weight = compute_default_penalty_weight(scenario, fairness_weight=fairness_weight)
+
     model = build_model(
         scenario, fairness_weight=fairness_weight, penalty_weight=penalty_weight
     )
@@ -154,12 +163,20 @@ def solve_exact(
 
         is_feas = (m["feasible"] == 1.0)
         if is_feas:
-            if not best_feasible or obj < best_obj:
+            if (
+                not best_feasible
+                or obj < best_obj - 1e-9
+                or (
+                    abs(obj - best_obj) <= 1e-9
+                    and best_metrics is not None
+                    and m["fairness_score"] > best_metrics["fairness_score"]
+                )
+            ):
                 best_obj = obj
                 best_alloc = alloc
                 best_metrics = m
                 best_feasible = True
-        elif not best_feasible and obj < best_obj:
+        elif not best_feasible and obj < best_obj - 1e-9:
             best_obj = obj
             best_alloc = alloc
             best_metrics = m
@@ -239,28 +256,32 @@ def solve_qaoa(
     shots: int = 1024,
     maxiter: int = 25,
     fairness_weight: float = 2.0,
-    penalty_weight: float = 15.0,
+    penalty_weight: float | None = None,
     seed: int = 42,
 ) -> SolverResult:
     """Quantum Approximate Optimization Algorithm (QAOA) solver using Qiskit.
 
     Executes a p-layer QAOA workflow:
     1. Builds QUBO/Ising model with slack-variable encoding.
-    2. Optimizes variational parameters (gamma, beta) using classical optimizer (COBYLA).
+    2. Optimizes variational parameters (gamma, beta) using classical optimizer (COBYLA)
+       with grid warm-start to escape shallow local minima.
     3. Simulates the optimal circuit and samples bitstrings using StatevectorSampler.
-    4. Decodes sampled bitstrings into water allocations and validates feasibility.
+    4. Decodes sampled bitstrings into water allocations, enforces constraint validation,
+       and verifies objective-energy consistency on candidate states.
     5. Returns transparent metrics, sampling statistics, and circuit metadata.
     """
     t0 = time.perf_counter()
 
     if not HAS_QISKIT:
         empty_alloc = {n.id: {s: 0 for s in scenario.slots} for n in scenario.neighborhoods}
+        empty_m = evaluate_allocation(scenario, empty_alloc)
+        empty_m["feasible"] = 0.0
         return SolverResult(
             solver_name="QAOA (Quantum Heuristic)",
             allocation=empty_alloc,
             objective_value=float("inf"),
             feasible=False,
-            metrics=evaluate_allocation(scenario, empty_alloc),
+            metrics=empty_m,
             runtime_seconds=0.0,
             metadata={
                 "solver_type": "quantum_approximate",
@@ -270,6 +291,9 @@ def solve_qaoa(
         )
 
     try:
+        if penalty_weight is None:
+            penalty_weight = compute_default_penalty_weight(scenario, fairness_weight=fairness_weight)
+
         model = build_model(
             scenario, fairness_weight=fairness_weight, penalty_weight=penalty_weight
         )
@@ -295,34 +319,55 @@ def solve_qaoa(
 
         n = model.n_vars
 
-        # Precompute diagonal Hamiltonian energy vector for fast classical parameter optimization
-        states = np.arange(2 ** n)
-        bits_matrix = ((states[:, None] >> np.arange(n)) & 1).astype(float)
-        energy_vector = (
-            model.offset
-            + bits_matrix @ model.linear_coeffs
-            + np.sum((bits_matrix @ model.quadratic_matrix) * bits_matrix, axis=1)
-        )
-
         # Variational objective function: expectation value <H_C>
-        def expectation_cost(params: np.ndarray) -> float:
-            gammas = list(params[:p])
-            betas = list(params[p:])
-            qc = _build_qaoa_circuit(model, gammas, betas)
-            sv = Statevector.from_instruction(qc)
-            probs = sv.probabilities()
-            return float(np.dot(probs, energy_vector))
+        if n <= 14:
+            # For small instances, precompute diagonal Hamiltonian energy vector for fast evaluation
+            states = np.arange(2 ** n)
+            bits_matrix = ((states[:, None] >> np.arange(n)) & 1).astype(float)
+            energy_vector = (
+                model.offset
+                + bits_matrix @ model.linear_coeffs
+                + np.sum((bits_matrix @ model.quadratic_matrix) * bits_matrix, axis=1)
+            )
 
-        # Classical parameter optimization
+            def expectation_cost(params: np.ndarray) -> float:
+                gammas = list(params[:p])
+                betas = list(params[p:])
+                qc = _build_qaoa_circuit(model, gammas, betas)
+                sv = Statevector.from_instruction(qc)
+                probs = sv.probabilities()
+                return float(np.dot(probs, energy_vector))
+        else:
+            # For larger instances, use native SparsePauliOp expectation value to avoid large memory tables
+            hamiltonian_op = to_sparse_pauli_op(model)
+
+            def expectation_cost(params: np.ndarray) -> float:
+                gammas = list(params[:p])
+                betas = list(params[p:])
+                qc = _build_qaoa_circuit(model, gammas, betas)
+                sv = Statevector.from_instruction(qc)
+                return float(sv.expectation_value(hamiltonian_op).real)
+
+        # Warm-start search for initial variational parameters to avoid poor local minima
         np.random.seed(seed)
-        init_params = np.concatenate([
-            np.full(p, 0.3),
-            np.full(p, 0.3),
-        ])
+        best_init = np.concatenate([np.full(p, 0.3), np.full(p, 0.3)])
+        best_init_cost = float("inf")
 
+        # Fast grid evaluation over (gamma, beta)
+        g_candidates = np.linspace(0.2, 1.2, 6)
+        b_candidates = np.linspace(0.2, 1.2, 6)
+        for g_val in g_candidates:
+            for b_val in b_candidates:
+                cand = np.concatenate([np.full(p, g_val), np.full(p, b_val)])
+                c_val = expectation_cost(cand)
+                if c_val < best_init_cost:
+                    best_init_cost = c_val
+                    best_init = cand
+
+        # Classical parameter optimization starting from warm-start basin
         opt_res = scipy.optimize.minimize(
             expectation_cost,
-            init_params,
+            best_init,
             method="COBYLA",
             options={"maxiter": maxiter},
         )
@@ -335,21 +380,22 @@ def solve_qaoa(
         meas_circuit = circuit.copy()
         meas_circuit.measure_all()
 
+        if shots <= 0:
+            raise ValueError(f"Measurement shots must be positive (received {shots}).")
+
         sampler = StatevectorSampler(seed=seed)
         job = sampler.run([(meas_circuit, [])], shots=shots)
         pub_res = job.result()[0]
         counts = pub_res.data.meas.get_counts()
 
-        # Evaluate all sampled bitstrings
-        best_alloc: dict[str, dict[str, int]] | None = None
-        best_obj = float("inf")
-        best_metrics: dict[str, float] | None = None
-        best_feasible = False
-        best_bitstring = ""
-        best_qubo_energy = float("inf")
+        if not counts:
+            raise ValueError("StatevectorSampler returned empty measurement counts.")
 
-        feasible_shot_count = 0
         modal_bitstring = max(counts.items(), key=lambda kv: kv[1])[0]
+
+        # Evaluate all sampled bitstrings
+        feasible_shot_count = 0
+        candidate_results: list[dict[str, Any]] = []
 
         for bs, count in counts.items():
             alloc = decode_allocation(model, bs)
@@ -362,39 +408,45 @@ def solve_qaoa(
             is_feas = (m["feasible"] == 1.0)
             if is_feas:
                 feasible_shot_count += count
-                if not best_feasible or obj < best_obj:
-                    best_obj = obj
-                    best_alloc = alloc
-                    best_metrics = m
-                    best_feasible = True
-                    best_bitstring = bs
-                    best_qubo_energy = q_energy
-            elif not best_feasible and obj < best_obj:
-                best_obj = obj
-                best_alloc = alloc
-                best_metrics = m
-                best_bitstring = bs
-                best_qubo_energy = q_energy
+
+            is_consistent = is_feas and (abs(q_energy - obj) < 1e-5)
+            candidate_results.append({
+                "bitstring": bs,
+                "count": count,
+                "allocation": alloc,
+                "metrics": m,
+                "objective": obj,
+                "qubo_energy": q_energy,
+                "feasible": is_feas,
+                "slack_consistent": is_consistent,
+            })
+
+        # Selection priority:
+        # 1. Feasible allocations
+        # 2. Consistent slack variables (objective matches QUBO energy)
+        # 3. Lowest objective value, breaking ties by lowest QUBO energy and higher count
+        feasible_candidates = [c for c in candidate_results if c["feasible"]]
+        if feasible_candidates:
+            consistent_feasible = [c for c in feasible_candidates if c["slack_consistent"]]
+            if consistent_feasible:
+                consistent_feasible.sort(key=lambda c: (c["objective"], -c["count"]))
+                chosen = consistent_feasible[0]
+            else:
+                feasible_candidates.sort(key=lambda c: (c["objective"], c["qubo_energy"], -c["count"]))
+                chosen = feasible_candidates[0]
+        else:
+            candidate_results.sort(key=lambda c: (c["objective"], c["qubo_energy"], -c["count"]))
+            chosen = candidate_results[0]
 
         runtime = time.perf_counter() - t0
-
-        if best_alloc is None or best_metrics is None:
-            best_alloc = decode_allocation(model, modal_bitstring)
-            best_metrics = evaluate_allocation(scenario, best_alloc)
-            best_obj = evaluate_objective(
-                scenario, best_alloc, fairness_weight=fairness_weight, penalty_weight=penalty_weight
-            )
-            best_bitstring = modal_bitstring
-            best_qubo_energy = evaluate_qubo_energy(model, modal_bitstring)
-
         feasible_ratio = feasible_shot_count / float(shots) if shots > 0 else 0.0
 
         return SolverResult(
             solver_name="QAOA (Quantum Heuristic)",
-            allocation=best_alloc,
-            objective_value=float(best_obj),
-            feasible=bool(best_feasible),
-            metrics=best_metrics,
+            allocation=chosen["allocation"],
+            objective_value=float(chosen["objective"]),
+            feasible=bool(chosen["feasible"]),
+            metrics=chosen["metrics"],
             runtime_seconds=float(runtime),
             metadata={
                 "solver_type": "quantum_approximate",
@@ -409,8 +461,9 @@ def solve_qaoa(
                 "sampled_unique_bitstrings": len(counts),
                 "feasible_samples_ratio": float(feasible_ratio),
                 "modal_bitstring": modal_bitstring,
-                "best_bitstring": best_bitstring,
-                "qubo_energy": float(best_qubo_energy),
+                "best_bitstring": chosen["bitstring"],
+                "qubo_energy": float(chosen["qubo_energy"]),
+                "slack_consistent": bool(chosen["slack_consistent"]),
                 "is_demo": False,
                 "quantum_advantage_claimed": False,
                 "notes": (
@@ -424,12 +477,14 @@ def solve_qaoa(
     except Exception as exc:
         runtime = time.perf_counter() - t0
         empty_alloc = {n.id: {s: 0 for s in scenario.slots} for n in scenario.neighborhoods}
+        empty_metrics = evaluate_allocation(scenario, empty_alloc)
+        empty_metrics["feasible"] = 0.0  # Clearly mark as non-feasible on solver failure
         return SolverResult(
             solver_name="QAOA (Quantum Heuristic)",
             allocation=empty_alloc,
             objective_value=float("inf"),
             feasible=False,
-            metrics=evaluate_allocation(scenario, empty_alloc),
+            metrics=empty_metrics,
             runtime_seconds=float(runtime),
             metadata={
                 "solver_type": "quantum_approximate",

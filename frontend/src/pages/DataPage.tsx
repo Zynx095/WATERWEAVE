@@ -10,16 +10,38 @@ import { scenarioFacts } from '../lib/scenario'
 import { useStore } from '../state/store'
 import { ScrollRegion } from '../components/ScrollRegion'
 
-function ObservationRow({ obs, data }: { obs: Observation; data: DataSourcesResponse }) {
+function ObservationRow({
+  obs,
+  data,
+  names,
+}: {
+  obs: Observation
+  data: DataSourcesResponse
+  names: Record<string, string>
+}) {
   const label = observationLabel(obs)
   const isRain = obs.variable === 'rainfall_mm'
-  const place = obs.geographic_level === 'city' ? capitalise(obs.geographic_id) : obs.geographic_id
+  const illustrative = label.kind === 'illustrative'
+  const place =
+    obs.geographic_level === 'city'
+      ? capitalise(obs.geographic_id)
+      : names[obs.geographic_id]
+        ? `${names[obs.geographic_id]} (${obs.geographic_id})`
+        : obs.geographic_id
   return (
     <tr>
       <th scope="row">
         {VARIABLE_LABEL[obs.variable] ?? obs.variable}, {place}
         <span className="ledger__provider">
-          {obs.provider.name} (<code>{obs.provider.id}</code>)
+          {illustrative ? (
+            <>
+              Illustrative values in <code>{obs.provider.id}</code>, not census records
+            </>
+          ) : (
+            <>
+              {obs.provider.name} (<code>{obs.provider.id}</code>)
+            </>
+          )}
         </span>
       </th>
       <td>
@@ -33,18 +55,16 @@ function ObservationRow({ obs, data }: { obs: Observation; data: DataSourcesResp
         )}
       </td>
       <td>
-        {obs.source_timestamp ? (
-          isRain ? (
-            <>
-              {formatDateTime(obs.source_timestamp)}
-              <span className="ledger__sub">{formatAge(obs.source_age_seconds)} old</span>
-            </>
-          ) : (
-            <>
-              Reference date {formatDateTime(obs.source_timestamp).replace(/,.*$/, '')}
-              <span className="ledger__sub">set by the provider; the values are not dated records</span>
-            </>
-          )
+        {illustrative ? (
+          <>
+            Not dated
+            <span className="ledger__sub">Made-up values; they were never observed</span>
+          </>
+        ) : obs.source_timestamp ? (
+          <>
+            {formatDateTime(obs.source_timestamp)}
+            <span className="ledger__sub">{formatAge(obs.source_age_seconds)} old</span>
+          </>
         ) : (
           'No observation time'
         )}
@@ -138,6 +158,9 @@ export function DataPage() {
           .join(' + ')} units of supply, storage ${Math.min(...storage)} to ${Math.max(...storage)}`
       })()
     : null
+  const neighborhoodNames = Object.fromEntries(
+    (defaultScenario?.neighborhoods ?? []).map((n) => [n.id, shortName(n.name)]),
+  )
   const rain = data?.observations.find((o) => o.variable === 'rainfall_mm')
   const skippedRain = data?.skipped.find((s) => s.provider.id === 'open_meteo')
 
@@ -223,14 +246,19 @@ export function DataPage() {
                         </span>
                       </th>
                       <td>
-                        <ProvenanceTag kind="error" label="Not fetched" />
+                        <ProvenanceTag kind="skipped" label={data.offline_mode ? 'Not fetched: offline mode' : 'Not fetched yet'} />
                       </td>
                       <td colSpan={2}>{skippedRain.reason}</td>
                       <td>Context only. Not used by any scenario.</td>
                     </tr>
                   )}
                   {data.observations.map((obs) => (
-                    <ObservationRow key={`${obs.provider.id}-${obs.geographic_id}-${obs.variable}`} obs={obs} data={data} />
+                    <ObservationRow
+                      key={`${obs.provider.id}-${obs.geographic_id}-${obs.variable}`}
+                      obs={obs}
+                      data={data}
+                      names={neighborhoodNames}
+                    />
                   ))}
                   <tr>
                     <th scope="row">

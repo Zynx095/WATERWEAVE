@@ -42,6 +42,13 @@ describe('DataPage', () => {
     expect(fetchMock.mock.calls.some(([url]) => String(url) === '/api/data-sources?live=false&refresh=false')).toBe(true)
     expect(row(/Rainfall, Bengaluru/)).toHaveTextContent('Not fetched')
     expect(within(ledger()).getAllByText('Illustrative')).toHaveLength(4)
+    // Illustrative figures are not credited to a census or given a census date.
+    const hillview = row(/Population, Hillview \(N1\)/)
+    expect(hillview).toHaveTextContent('not census records')
+    expect(hillview).toHaveTextContent('Not dated')
+    expect(ledger()).not.toHaveTextContent('2011')
+    expect(ledger()).not.toHaveTextContent('BBMP Ward Census')
+    expect(row(/Rainfall, Bengaluru/)).toHaveTextContent('Not fetched yet')
     expect(row(/Demand, supply and storage/)).toHaveTextContent('7 requests, 2 + 2 units of supply, storage 1 to 2')
     expect(row(/Reservoir levels/)).toHaveTextContent('No public source')
   })

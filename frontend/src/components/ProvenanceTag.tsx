@@ -1,6 +1,6 @@
-import { FlaskConical, History, Radio, TriangleAlert, Users } from 'lucide-react'
+import { CloudOff, FlaskConical, History, Radio, TriangleAlert, Users } from 'lucide-react'
 
-export type ProvenanceKind = 'synthetic' | 'illustrative' | 'live' | 'cached' | 'recorded' | 'error'
+export type ProvenanceKind = 'synthetic' | 'illustrative' | 'live' | 'cached' | 'recorded' | 'skipped' | 'error'
 
 const LABELS: Record<ProvenanceKind, string> = {
   synthetic: 'Synthetic',
@@ -8,6 +8,7 @@ const LABELS: Record<ProvenanceKind, string> = {
   live: 'Live observation',
   cached: 'Cached observation',
   recorded: 'Recorded run',
+  skipped: 'Not fetched yet',
   error: 'Unavailable',
 }
 
@@ -17,6 +18,7 @@ const ICONS = {
   live: Radio,
   cached: History,
   recorded: History,
+  skipped: CloudOff,
   error: TriangleAlert,
 }
 
@@ -26,6 +28,7 @@ const CLASS: Record<ProvenanceKind, string> = {
   live: 'tag--live',
   cached: 'tag--recorded',
   recorded: 'tag--recorded',
+  skipped: 'tag--synthetic',
   error: 'tag--error',
 }
 

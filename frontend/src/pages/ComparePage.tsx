@@ -8,6 +8,7 @@ import { benchmarkFacts, CONTROL_NAME, EXACT_NAME, GREEDY_NAME, QAOA_NAME } from
 import { formatDateTime, formatNumber, formatPercent, formatSeconds } from '../lib/format'
 import { SOLVER_ORDER, SOLVERS } from '../lib/solvers'
 import { useStore } from '../state/store'
+import { ScrollRegion } from '../components/ScrollRegion'
 
 function rowLabel(row: BenchmarkSummaryRow): string {
   if (row.solver_name === GREEDY_NAME) return 'Greedy'
@@ -72,7 +73,7 @@ function LiveComparison() {
         .{' '}
         {run.source === 'recorded' ? <ProvenanceTag kind="recorded" /> : <>Run at {formatDateTime(run.executed_at)}.</>}
       </p>
-      <div className="table-scroll">
+      <ScrollRegion className="table-scroll" label="Solver results table">
         <table className="data-table">
           <caption className="sr-only">Solver results on the same scenario and objective</caption>
           <thead>
@@ -144,7 +145,7 @@ function LiveComparison() {
             </tr>
           </tbody>
         </table>
-      </div>
+      </ScrollRegion>
       {ratio !== null && (
         <p className="callout">
           On this run QAOA took about <strong className="num">{Math.round(ratio).toLocaleString('en-GB')} times</strong>{' '}
@@ -161,7 +162,7 @@ function BenchmarkTable({ bench }: { bench: BenchmarkInstance }) {
   const facts = bench.audit_facts ?? {}
   return (
     <>
-      <div className="table-scroll">
+      <ScrollRegion className="table-scroll" label="Recorded benchmark table">
         <table className="data-table">
           <caption className="sr-only">Recorded benchmark: {bench.instance}</caption>
           <thead>
@@ -199,7 +200,7 @@ function BenchmarkTable({ bench }: { bench: BenchmarkInstance }) {
             })}
           </tbody>
         </table>
-      </div>
+      </ScrollRegion>
       <p className="field__hint">
         Recorded {formatDateTime(bench.timestamp_utc)} by <code>scripts/benchmark.py</code> into{' '}
         <code>{bench.file}</code>: seeds {bench.parameters.seeds.join(', ')}, layers {bench.parameters.p_values.join(', ')},{' '}

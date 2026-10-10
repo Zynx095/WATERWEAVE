@@ -116,8 +116,8 @@ transition is unit-tested without timers.
   carry the token and are ignored if the presenter has moved on; the request
   is also aborted.
 * A step with a pending action does not auto-advance until the action
-  succeeds or fails. Failures are shown with a retry button and do not block
-  Next.
+  succeeds or fails. A failure pauses the walkthrough and shows the reason
+  with a Retry button; Next still works.
 * Exit returns to normal navigation on the current page.
 
 Steps (about four minutes at the default pace): problem, scenario,

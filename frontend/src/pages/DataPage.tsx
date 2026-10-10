@@ -8,6 +8,7 @@ import { capitalise, formatAge, formatDateTime, formatNumber, shortName } from '
 import { observationLabel, VARIABLE_LABEL } from '../lib/provenance'
 import { scenarioFacts } from '../lib/scenario'
 import { useStore } from '../state/store'
+import { ScrollRegion } from '../components/ScrollRegion'
 
 function ObservationRow({ obs, data }: { obs: Observation; data: DataSourcesResponse }) {
   const label = observationLabel(obs)
@@ -200,7 +201,7 @@ export function DataPage() {
                 weather.
               </p>
             )}
-            <div className="table-scroll">
+            <ScrollRegion className="table-scroll" label="Data inputs table">
               <table className="data-table ledger">
                 <caption className="sr-only">Data inputs, their status and how they are used</caption>
                 <thead>
@@ -269,7 +270,7 @@ export function DataPage() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollRegion>
           </>
         )}
       </section>

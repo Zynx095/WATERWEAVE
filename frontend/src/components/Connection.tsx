@@ -60,8 +60,8 @@ export function ConnectionBanner() {
           <History aria-hidden size={20} className="banner__icon" />
           <p>
             <strong>Recorded run.</strong> Results on screen were captured from the real engine on{' '}
-            {formatDateTime(p.capturedAt)} (commit <code>{p.gitCommit.slice(0, 7)}</code>, Qiskit{' '}
-            {p.engine.qiskit}). Nothing is being executed now.
+            {formatDateTime(p.capturedAt)} (commit <code>{p.gitCommit.slice(0, 7)}</code>
+            {p.gitDirty ? ' plus uncommitted changes' : ''}, Qiskit {p.engine.qiskit}). Nothing is being executed now.
           </p>
           <button type="button" className="button button--quiet" disabled={busy} onClick={() => act(actions.switchToLive)}>
             <RotateCw aria-hidden size={16} /> Use the live engine

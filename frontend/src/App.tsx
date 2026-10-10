@@ -1,7 +1,8 @@
 import { BrowserRouter, Route, Routes } from 'react-router'
 import { AppShell } from './components/AppShell'
 import { OverviewPage } from './pages/OverviewPage'
-import { ComparePage, DataPage, LabPage, NotFoundPage } from './pages/stubs'
+import { ComparePage } from './pages/ComparePage'
+import { DataPage, LabPage, NotFoundPage } from './pages/stubs'
 import { WorkspacePage } from './pages/WorkspacePage'
 import { StoreProvider } from './state/store'
 

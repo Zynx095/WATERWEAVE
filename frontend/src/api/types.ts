@@ -259,7 +259,20 @@ export interface BenchmarkInstance {
   seed_note: string
   provenance: Record<string, string | boolean>
   summary: BenchmarkSummaryRow[]
-  audit_checks: { name: string; status: string }[]
+  audit_checks: { name: string; status: string; detail: string | null }[]
+  /** Facts from the benchmark's exhaustive enumeration; empty if the audit was skipped. */
+  audit_facts: Partial<{
+    n_states: number
+    n_feasible_states: number
+    n_optimal_ties: number
+    optimal_objective: number
+    uniform_p_feasible_pattern: number
+    uniform_p_optimal_pattern: number
+    best_infeasible_objective: number
+    serve_nobody_alpha_threshold: number
+    n_qubits: number
+    n_slack_vars: number
+  }>
   limitations: string[]
 }
 

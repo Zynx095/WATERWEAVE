@@ -11,9 +11,6 @@ function Stub({ title, intro }: { title: string; intro: string }) {
   )
 }
 
-export const ComparePage = () => (
-  <Stub title="Classical vs quantum" intro="Greedy, exact and QAOA on the same scenario and the same objective." />
-)
 export const DataPage = () => <Stub title="Data sources" intro="Which inputs are live, illustrative or synthetic." />
 export const LabPage = () => <Stub title="Quantum lab" intro="How the allocation problem becomes a quantum circuit." />
 

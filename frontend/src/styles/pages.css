@@ -82,3 +82,151 @@
     padding: var(--space-4) var(--space-3);
   }
 }
+
+/* ---- tables and comparison -------------------------------------------- */
+
+.table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  background: var(--sheet);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-panel);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 44rem;
+}
+
+.data-table th,
+.data-table td {
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--rule);
+}
+
+.data-table thead th {
+  font-size: var(--step--1);
+  font-weight: 650;
+  color: var(--ink-2);
+  background: var(--sheet-sunk);
+}
+
+.data-table tbody th {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--step-1);
+  white-space: nowrap;
+}
+
+.data-table tbody tr:last-child th,
+.data-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.data-table tr[data-solver='greedy'] th {
+  box-shadow: inset 4px 0 0 var(--slate);
+}
+
+.data-table tr[data-solver='exact'] th {
+  box-shadow: inset 4px 0 0 var(--indigo);
+}
+
+.data-table tr[data-solver='qaoa'] th {
+  box-shadow: inset 4px 0 0 var(--ochre-fill);
+}
+
+.data-table tr[data-control] th,
+.data-table__reference th,
+.data-table__reference td {
+  color: var(--ink-2);
+}
+
+.data-table tr[data-control] {
+  background: var(--sheet-sunk);
+}
+
+.score-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 9rem;
+  height: 1.9rem;
+}
+
+.score-bar__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--indigo-soft);
+  border-right: 3px solid var(--indigo);
+  border-radius: 3px 0 0 3px;
+}
+
+.score-bar__fill--reference {
+  background: var(--sheet-sunk);
+  border-right-color: var(--rule-strong);
+}
+
+.score-bar .num {
+  position: relative;
+  padding-left: var(--space-2);
+  font-weight: 700;
+}
+
+.callout {
+  margin-top: var(--space-5);
+  padding: var(--space-4) var(--space-5);
+  border-left: 4px solid var(--ochre-fill);
+  background: var(--sheet);
+  max-width: 76ch;
+}
+
+.check-list {
+  margin: var(--space-3) 0 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: var(--space-2);
+  font-size: var(--step--1);
+  color: var(--ink-2);
+}
+
+.honest,
+.conclusion {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-5) var(--space-7);
+}
+
+.conclusion {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.honest h3,
+.conclusion h3 {
+  font-size: var(--step-2);
+  margin-bottom: var(--space-3);
+}
+
+.honest ul {
+  margin: 0;
+  padding-left: 1.2rem;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.honest > div:first-child li::marker {
+  color: var(--indigo);
+}
+
+.honest > div:last-child li::marker {
+  color: var(--madder);
+}
+
+@media (max-width: 960px) {
+  .honest,
+  .conclusion {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

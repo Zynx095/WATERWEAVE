@@ -2,6 +2,7 @@ import { Menu, X } from 'lucide-react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router'
 import { ConnectionBanner, ConnectionPill } from './Connection'
+import { ErrorBoundary } from './ErrorBoundary'
 import { WeaveMark } from './Wordmark'
 
 export const NAV_ITEMS = [
@@ -78,7 +79,9 @@ export function AppShell({ actions }: { actions?: ReactNode }) {
       </header>
       <ConnectionBanner />
       <main id="main" ref={mainRef} tabIndex={-1} className="shell-main">
-        <Outlet />
+        <ErrorBoundary resetKey={location.pathname}>
+          <Outlet />
+        </ErrorBoundary>
       </main>
       <footer className="shell-footer">
         <div className="shell-footer__inner">

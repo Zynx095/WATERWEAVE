@@ -12,31 +12,20 @@ S = default_scenario()
 
 
 def test_greedy_solver():
-    """Verify greedy priority-first allocation behavior."""
+    """Verify objective-aware greedy allocation behavior."""
     res = solve_greedy(S)
     assert res.solver_name == "Greedy (Priority-First)"
     assert res.feasible is True
     assert res.metadata["solver_type"] == "classical_heuristic"
     assert res.metadata["is_demo"] is False
 
-    # Greedy prioritizes N4 (w=2.0) and N1 (w=1.5), exhausting supply
-    alloc = res.allocation
-    assert alloc["N4"]["morning"] == 1
-    assert alloc["N4"]["evening"] == 1
-    assert alloc["N1"]["morning"] == 1
-    assert alloc["N1"]["evening"] == 1
-    assert alloc["N2"]["morning"] == 0
-    assert alloc["N2"]["evening"] == 0
-    assert alloc["N3"]["morning"] == 0
-
-    # Shortage is low (3.0), but fairness is 0.0 due to extreme disparity
-    assert res.metrics["weighted_shortage"] == pytest.approx(3.0)
-    assert res.metrics["fairness_score"] == pytest.approx(0.0)
-    # Total objective = 3.0 + 2.0 * (4.0 disparity) = 11.0
-    assert res.objective_value == pytest.approx(11.0)
+    # Objective-aware greedy balances shortage and disparity, achieving obj 7.0
+    assert res.metrics["weighted_shortage"] == pytest.approx(5.5)
+    assert res.metrics["fairness_score"] == pytest.approx(0.5)
+    assert res.metrics["total_allocated_units"] == 3.0
+    assert res.objective_value == pytest.approx(7.0)
 
 
-@pytest.mark.xfail(reason="Greedy priority-first heuristic ignores disparity penalty and is dominated by empty baseline")
 def test_greedy_does_not_exceed_empty_allocation_objective():
     """Verify greedy heuristic returns an objective at least as good as allocating nothing.
 
@@ -49,6 +38,7 @@ def test_greedy_does_not_exceed_empty_allocation_objective():
     empty_alloc = {n.id: {s: 0 for s in S.slots} for n in S.neighborhoods}
     empty_obj = evaluate_objective(S, empty_alloc)
     assert res.objective_value <= empty_obj
+
 
 
 def test_exact_solver_optimal():
@@ -69,11 +59,12 @@ def test_exact_solver_optimal():
 
 
 def test_exact_strictly_beats_greedy_on_combined_objective():
-    """Verify exact solver discovers an equitable allocation that beats greedy on combined objective."""
+    """Verify exact solver discovers an optimal allocation that beats greedy on combined objective."""
     greedy_res = solve_greedy(S)
     exact_res = solve_exact(S)
     assert exact_res.objective_value < greedy_res.objective_value
-    assert exact_res.metrics["fairness_score"] > greedy_res.metrics["fairness_score"]
+    assert exact_res.metrics["fairness_score"] >= greedy_res.metrics["fairness_score"]
+    assert exact_res.metrics["total_allocated_units"] > greedy_res.metrics["total_allocated_units"]
 
 
 def test_qaoa_solver_execution():

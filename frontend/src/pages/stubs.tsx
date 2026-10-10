@@ -11,9 +11,6 @@ function Stub({ title, intro }: { title: string; intro: string }) {
   )
 }
 
-export const OverviewPage = () => (
-  <Stub title="Who gets water when there is not enough?" intro="WATERWEAVE compares three ways of rationing scarce water between neighborhoods and delivery slots." />
-)
 export const WorkspacePage = () => (
   <Stub title="Workspace" intro="Set the scenario, run the solvers and read the allocation." />
 )

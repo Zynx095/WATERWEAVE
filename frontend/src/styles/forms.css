@@ -104,6 +104,14 @@
   border-color: var(--madder);
 }
 
+.stepper--compact .stepper__button {
+  width: 1.9rem;
+}
+
+.stepper--compact .stepper__input {
+  width: 2.6rem;
+}
+
 /* range */
 
 .range {
@@ -219,18 +227,13 @@
 
 /* editor table */
 
-.weave--editor .weave__slot {
-  padding-bottom: var(--space-4) !important;
-}
-
-.weave--editor .weave__slot .stepper {
+.editor__supply .stepper {
   justify-items: center;
-  margin-top: var(--space-2);
 }
 
-.weave--editor .weave__slot .stepper__label {
+.editor__supply-note {
+  padding: var(--space-4) 0 0 var(--space-3) !important;
   font-size: var(--step--1);
-  font-weight: 400;
   color: var(--ink-2);
 }
 

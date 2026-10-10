@@ -26,6 +26,7 @@ import type {
   SolveSettings,
 } from '../api/types'
 import { loadRecording, type Recording } from '../data/recorded'
+import { canonical } from '../lib/canonical'
 
 export type LoadStatus = 'idle' | 'loading' | 'ready' | 'error'
 
@@ -247,6 +248,8 @@ export function StoreProvider({ children, autoConnect = true }: { children: Reac
       ...(options.includeQaoa === undefined ? {} : { include_qaoa: options.includeQaoa }),
     }
     const id = ++runCounter.current
+    // Keep the visible settings in step with what is actually being run.
+    if (canonical(settings) !== canonical(current.settings)) dispatch({ type: 'settings', settings })
     dispatch({ type: 'slice/loading', key: 'run', label: options.label ?? null })
 
     if (current.mode === 'recorded') {

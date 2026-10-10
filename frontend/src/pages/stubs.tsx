@@ -11,9 +11,6 @@ function Stub({ title, intro }: { title: string; intro: string }) {
   )
 }
 
-export const WorkspacePage = () => (
-  <Stub title="Workspace" intro="Set the scenario, run the solvers and read the allocation." />
-)
 export const ComparePage = () => (
   <Stub title="Classical vs quantum" intro="Greedy, exact and QAOA on the same scenario and the same objective." />
 )

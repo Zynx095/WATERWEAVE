@@ -9,6 +9,7 @@ import './styles/components.css'
 import './styles/forms.css'
 import './styles/weave.css'
 import './styles/pages.css'
+import './styles/workspace.css'
 
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'

@@ -14,6 +14,8 @@ export interface NumberStepperProps {
   onChange: (value: number) => void
   disabled?: boolean
   hint?: string
+  /** Narrower control for table cells. */
+  compact?: boolean
 }
 
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v))
@@ -34,6 +36,7 @@ export function NumberStepper({
   onChange,
   disabled = false,
   hint,
+  compact = false,
 }: NumberStepperProps) {
   const id = useId()
   const [draft, setDraft] = useState(value.toFixed(digits))
@@ -69,7 +72,7 @@ export function NumberStepper({
   const describedBy = [hint ? `${id}-hint` : null, error ? `${id}-error` : null].filter(Boolean).join(' ')
 
   return (
-    <div className="stepper" data-invalid={error ? true : undefined}>
+    <div className={compact ? 'stepper stepper--compact' : 'stepper'} data-invalid={error ? true : undefined}>
       {visibleLabel !== '' && (
         <label htmlFor={id} className="stepper__label">
           {visibleLabel ?? label}

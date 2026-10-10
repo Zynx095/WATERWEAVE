@@ -102,11 +102,13 @@ export function Weave({ scenario, allocation, caption, captionHidden = false, an
             {slots.map((slot) => (
               <th scope="col" key={slot} className="weave__slot">
                 <span className="weave__slot-name">{capitalise(slot)}</span>
-                <span className="weave__slot-meta">{scenario.supply_by_slot[slot] ?? 0} units available</span>
+                {!compact && (
+                  <span className="weave__slot-meta">{scenario.supply_by_slot[slot] ?? 0} units available</span>
+                )}
               </th>
             ))}
             <th scope="col" className="weave__summary-head">
-              {allocation === null ? 'Requested' : 'Served'}
+              {allocation === null ? 'Requested' : compact ? 'Met' : 'Served'}
             </th>
           </tr>
         </thead>
@@ -123,9 +125,11 @@ export function Weave({ scenario, allocation, caption, captionHidden = false, an
               <tr key={n.id}>
                 <th scope="row" className="weave__row-head">
                   <span className="weave__name">{shortName(n.name)}</span>
-                  <span className="weave__meta">
-                    Weight {n.priority_weight}, storage {n.storage_capacity_units}
-                  </span>
+                  {!compact && (
+                    <span className="weave__meta">
+                      Weight {n.priority_weight}, storage {n.storage_capacity_units}
+                    </span>
+                  )}
                 </th>
                 {slots.map((slot) => {
                   const state = cellState(n.demand_by_slot[slot] ?? 0, allocated(n.id, slot))
@@ -170,7 +174,7 @@ export function Weave({ scenario, allocation, caption, captionHidden = false, an
             <td className="weave__foot num">
               {allocation === null
                 ? `${totalDemand} in total`
-                : `${slotUse.reduce((a, b) => a + b, 0)} of ${totalDemand} requested`}
+                : `${slotUse.reduce((a, b) => a + b, 0)} of ${totalDemand}${compact ? '' : ' requested'}`}
             </td>
           </tr>
         </tfoot>

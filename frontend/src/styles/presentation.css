@@ -523,3 +523,29 @@ li[data-status='fail'] .preflight__result {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* ---- clean audience view ------------------------------------------------- */
+
+body[data-clean-view='true'] .primary-nav,
+body[data-clean-view='true'] .menu-toggle,
+body[data-clean-view='true'] .shell-header__status .button {
+  display: none;
+}
+
+.present-bar[data-clean] .present-bar__status {
+  display: none;
+}
+
+.present-bar[data-clean] .present-bar__row {
+  grid-template-columns: minmax(10rem, 16rem) 1fr auto;
+}
+
+.present-btn--quiet {
+  border-color: transparent;
+  opacity: 0.6;
+}
+
+.present-btn--quiet:hover,
+.present-btn--quiet:focus-visible {
+  opacity: 1;
+}

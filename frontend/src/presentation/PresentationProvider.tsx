@@ -46,6 +46,9 @@ export interface PresentationValue {
   closePreflight: () => void
   notesOpen: boolean
   setNotesOpen: (open: boolean) => void
+  /** Audience view: hides navigation and controls, leaving content and caption. */
+  cleanView: boolean
+  setCleanView: (clean: boolean) => void
 }
 
 const PresentationContext = createContext<PresentationValue | null>(null)
@@ -96,6 +99,7 @@ export function PresentationProvider({ children }: { children: ReactNode }) {
   const [liveData, setLiveData] = useState(true)
   const [preflightOpen, setPreflightOpen] = useState(false)
   const [notesOpen, setNotesOpen] = useState(false)
+  const [cleanView, setCleanView] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
   const active = state.status !== 'idle'
@@ -183,6 +187,19 @@ export function PresentationProvider({ children }: { children: ReactNode }) {
     }
   }, [active])
 
+  // The clean audience view ends with the presentation.
+  useEffect(() => {
+    if (!active) setCleanView(false)
+  }, [active])
+
+  useEffect(() => {
+    if (!cleanView) return
+    document.body.dataset.cleanView = 'true'
+    return () => {
+      delete document.body.dataset.cleanView
+    }
+  }, [cleanView])
+
   // Keyboard shortcuts while presenting (presentation clickers send Page Up/Down).
   useEffect(() => {
     if (!active) return
@@ -199,6 +216,7 @@ export function PresentationProvider({ children }: { children: ReactNode }) {
         Home: () => dispatch({ type: 'RESTART' }),
         Escape: () => dispatch({ type: 'EXIT' }),
         n: () => setNotesOpen((open) => !open),
+        h: () => setCleanView((clean) => !clean),
       }
       const handler = keys[event.key]
       if (!handler) return
@@ -277,8 +295,10 @@ export function PresentationProvider({ children }: { children: ReactNode }) {
       closePreflight,
       notesOpen,
       setNotesOpen,
+      cleanView,
+      setCleanView,
     }),
-    [state, context, liveData, preflightOpen, openPreflight, closePreflight, notesOpen],
+    [state, context, liveData, preflightOpen, openPreflight, closePreflight, notesOpen, cleanView],
   )
 
   return <PresentationContext.Provider value={value}>{children}</PresentationContext.Provider>

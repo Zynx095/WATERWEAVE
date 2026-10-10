@@ -10,7 +10,8 @@ from fastapi.responses import JSONResponse
 
 from waterweave.api import service
 from waterweave.api.presets import PRESETS
-from waterweave.api.schemas import SolveRequest
+from waterweave.api.schemas import EvaluateRequest, ModelRequest, SolveRequest
+from waterweave.formulation import build_model
 
 
 def create_app() -> FastAPI:
@@ -62,6 +63,23 @@ def create_app() -> FastAPI:
             return service.solve(scenario, request.settings)
         except service.SolverBusyError as exc:
             raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+    @app.post("/api/model")
+    def model(request: ModelRequest) -> dict[str, Any]:
+        scenario = service.scenario_from_input(request.scenario)
+        built = build_model(
+            scenario,
+            fairness_weight=request.fairness_weight,
+            penalty_weight=request.penalty_weight,
+        )
+        return service.json_safe(service.model_details(built))
+
+    @app.post("/api/evaluate")
+    def evaluate(request: EvaluateRequest) -> dict[str, Any]:
+        scenario = service.scenario_from_input(request.scenario)
+        return service.evaluate(
+            scenario, request.allocation, request.fairness_weight, request.penalty_weight
+        )
 
     @app.api_route("/api/{rest:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
     def unknown_api(rest: str) -> None:

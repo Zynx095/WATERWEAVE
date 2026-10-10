@@ -145,7 +145,7 @@
   min-width: 0;
 }
 
-.fieldset legend {
+.fieldset > legend {
   padding: 0 var(--space-2);
   font-family: var(--font-display);
   font-weight: 600;

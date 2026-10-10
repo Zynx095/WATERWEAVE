@@ -85,7 +85,12 @@ export function LabPage() {
         </p>
       </header>
 
-      {!model ? (
+      {model && model.n_decision === 0 ? (
+        <p className="notice notice--info">
+          This scenario has no requests, so there is nothing to optimise. Add a request in the{' '}
+          <Link to="/workspace">workspace</Link>.
+        </p>
+      ) : !model ? (
         <p className="loading-line">
           {state.model.status === 'error'
             ? state.model.error

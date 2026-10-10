@@ -127,14 +127,17 @@ export function SolverPanel({ outcome, scenario, source, runId }: SolverPanelPro
           </dl>
           <RulesLine outcome={outcome} />
           <GapLine outcome={outcome} />
-          {outcome.key === 'qaoa' && (
-            <>
-              <QaoaFacts outcome={outcome} />
-              <p className="solver__link">
-                <Link to="/lab#circuit">Inspect this circuit in the quantum lab</Link>
-              </p>
-            </>
-          )}
+          {outcome.key === 'qaoa' &&
+            (outcome.metadata.num_qubits === 0 ? (
+              <p className="field__hint">Nothing was requested, so the circuit had nothing to decide.</p>
+            ) : (
+              <>
+                <QaoaFacts outcome={outcome} />
+                <p className="solver__link">
+                  <Link to="/lab#circuit">Inspect this circuit in the quantum lab</Link>
+                </p>
+              </>
+            ))}
         </>
       ) : outcome.status === 'skipped' ? (
         <div className="notice notice--info" role="status">

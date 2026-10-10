@@ -40,6 +40,7 @@
 }
 
 .brand {
+  flex: none;
   display: inline-flex;
   align-items: center;
   gap: var(--space-3);
@@ -191,6 +192,19 @@
 @media (max-width: 560px) {
   .brand__name {
     display: none;
+  }
+
+  .pill__text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+
+  .pill {
+    padding: 0.45rem;
   }
 
   .shell-header__inner {

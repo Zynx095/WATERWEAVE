@@ -11,7 +11,6 @@ function Stub({ title, intro }: { title: string; intro: string }) {
   )
 }
 
-export const DataPage = () => <Stub title="Data sources" intro="Which inputs are live, illustrative or synthetic." />
 export const LabPage = () => <Stub title="Quantum lab" intro="How the allocation problem becomes a quantum circuit." />
 
 export function NotFoundPage() {

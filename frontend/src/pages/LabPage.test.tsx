@@ -73,3 +73,31 @@ describe('LabPage', () => {
     expect(within(chosen).getAllByRole('listitem')).toHaveLength(12)
   })
 })
+
+describe('LabPage without the API', () => {
+  it('shows the recorded model and circuit, labelled as recorded', async () => {
+    const { offlineApi } = await import('../test/utils')
+    const { useStore } = await import('../state/store')
+    offlineApi()
+    const user = userEvent.setup()
+    function UseRecording() {
+      const { actions } = useStore()
+      return (
+        <button type="button" onClick={() => void actions.switchToRecording()}>
+          use recording
+        </button>
+      )
+    }
+    renderWithStore(
+      <>
+        <UseRecording />
+        <LabPage />
+      </>,
+    )
+    await user.click(screen.getByRole('button', { name: 'use recording' }))
+    expect(await screen.findByRole('img', { name: /QUBO coefficients for 12 binary variables/ })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Run QAOA on this scenario' }))
+    expect(await screen.findByRole('img', { name: /QAOA circuit on 12 qubits/ })).toBeInTheDocument()
+    expect(screen.getByText(/in the recorded run/)).toBeInTheDocument()
+  })
+})

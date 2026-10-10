@@ -16,6 +16,8 @@ import type {
 export interface RecordingProvenance {
   capturedAt: string
   gitCommit: string
+  /** True if the source tree had uncommitted changes when recorded. */
+  gitDirty: boolean
   command: string
   engine: { python: string; qiskit: string | null }
 }
@@ -34,6 +36,7 @@ interface RawRecording {
   kind: string
   captured_at: string
   git_commit: string
+  git_dirty: boolean
   command: string
   responses: {
     presets: Preset[]
@@ -63,6 +66,7 @@ export function parseRecording(raw: unknown): Recording {
     provenance: {
       capturedAt: r.captured_at,
       gitCommit: r.git_commit,
+      gitDirty: Boolean(r.git_dirty),
       command: r.command,
       engine: { python: res.solve_quantum.engine.python, qiskit: res.solve_quantum.engine.qiskit },
     },

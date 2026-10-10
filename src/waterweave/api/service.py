@@ -1,0 +1,346 @@
+"""Engine calls and JSON conversion for the WATERWEAVE API.
+
+Nothing in this module computes an objective, a metric or an allocation of
+its own. It converts requests into ``Scenario`` objects, calls the engine,
+and turns the results into JSON-safe dictionaries. A solver that fails is
+reported as failed; its result is never replaced by another solver's.
+"""
+
+from __future__ import annotations
+
+import math
+import platform
+import threading
+import time
+import uuid
+from datetime import UTC, datetime
+from typing import Any
+
+import numpy as np
+import scipy
+
+from waterweave.api.schemas import ScenarioIn, SolveSettings
+from waterweave.formulation import (
+    OptimizationModel,
+    build_model,
+    compute_default_penalty_weight,
+    decode_allocation,
+    evaluate_objective,
+)
+from waterweave.metrics import evaluate_allocation
+from waterweave.models import Neighborhood, Scenario, SolverResult
+from waterweave.optimization import run_comparison
+
+try:
+    import qiskit
+
+    QISKIT_VERSION: str | None = getattr(qiskit, "__version__", "unknown")
+except ImportError:  # pragma: no cover - qiskit is a hard dependency
+    QISKIT_VERSION = None
+
+# Live QAOA statevector simulation above this size takes longer than a
+# presentation can wait (measured: 0.45 s at 12 qubits, 3.9 s at 15, more
+# than a minute at 18 for p = 1).
+MAX_QAOA_QUBITS = 15
+
+SOLVER_KEYS = {
+    "Greedy (Priority-First)": "greedy",
+    "Exact Classical (Optimal)": "exact",
+    "QAOA (Quantum Heuristic)": "qaoa",
+}
+
+_SOLVE_LOCK = threading.Lock()
+
+
+class SolverBusyError(RuntimeError):
+    """Raised when another solver run holds the lock for too long."""
+
+
+def utc_now() -> datetime:
+    return datetime.now(UTC)
+
+
+def json_safe(value: Any) -> Any:
+    """Convert numpy scalars, tuples and non-finite floats into JSON values."""
+    if isinstance(value, dict):
+        return {str(k): json_safe(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [json_safe(v) for v in value]
+    if isinstance(value, np.ndarray):
+        return [json_safe(v) for v in value.tolist()]
+    if isinstance(value, (bool, np.bool_)):
+        return bool(value)
+    if isinstance(value, (int, np.integer)):
+        return int(value)
+    if isinstance(value, (float, np.floating)):
+        f = float(value)
+        return f if math.isfinite(f) else None
+    if isinstance(value, datetime):
+        return value.isoformat()
+    return value
+
+
+def engine_info() -> dict[str, Any]:
+    return {
+        "python": platform.python_version(),
+        "qiskit": QISKIT_VERSION,
+        "numpy": np.__version__,
+        "scipy": scipy.__version__,
+        "max_qaoa_qubits": MAX_QAOA_QUBITS,
+    }
+
+
+# ---- scenarios -----------------------------------------------------------
+
+def scenario_from_input(data: ScenarioIn) -> Scenario:
+    slots = tuple(data.slots)
+    neighborhoods = tuple(
+        Neighborhood(
+            id=n.id,
+            name=n.name,
+            demand_by_slot={s: int(n.demand_by_slot.get(s, 0)) for s in slots},
+            priority_weight=float(n.priority_weight),
+            storage_capacity_units=int(n.storage_capacity_units),
+        )
+        for n in data.neighborhoods
+    )
+    return Scenario(
+        name=data.name,
+        slots=slots,
+        neighborhoods=neighborhoods,
+        supply_by_slot={s: int(data.supply_by_slot.get(s, 0)) for s in slots},
+        description=data.description,
+        seed=data.seed,
+    )
+
+
+def scenario_to_dict(scenario: Scenario) -> dict[str, Any]:
+    return {
+        "name": scenario.name,
+        "description": scenario.description,
+        "slots": list(scenario.slots),
+        "supply_by_slot": {s: int(scenario.supply_by_slot.get(s, 0)) for s in scenario.slots},
+        "neighborhoods": [
+            {
+                "id": n.id,
+                "name": n.name,
+                "demand_by_slot": {s: int(n.demand_by_slot.get(s, 0)) for s in scenario.slots},
+                "priority_weight": float(n.priority_weight),
+                "storage_capacity_units": int(n.storage_capacity_units),
+            }
+            for n in scenario.neighborhoods
+        ],
+        "seed": int(scenario.seed),
+    }
+
+
+# ---- model and circuit ---------------------------------------------------
+
+def model_summary(model: OptimizationModel) -> dict[str, Any]:
+    return {
+        "n_decision": model.n_decision,
+        "n_slack": model.n_slack,
+        "n_vars": model.n_vars,
+        "fairness_weight": float(model.fairness_weight),
+        "penalty_weight": float(model.penalty_weight),
+        "decision_vars": [
+            {"index": k, "neighborhood_id": nid, "slot": slot, "name": model.var_names[k]}
+            for k, (nid, slot) in enumerate(model.decision_vars)
+        ],
+        "slack_vars": [
+            {"index": model.n_decision + j, "name": name} for j, name in enumerate(model.slack_vars)
+        ],
+        "qaoa_within_budget": model.n_vars <= MAX_QAOA_QUBITS,
+        "max_qaoa_qubits": MAX_QAOA_QUBITS,
+    }
+
+
+def _circuit(model: OptimizationModel, gammas: list[float], betas: list[float]):
+    from waterweave.solvers import _build_qaoa_circuit
+
+    return _build_qaoa_circuit(model, gammas, betas)
+
+
+def circuit_details(model: OptimizationModel, gammas: list[float], betas: list[float]) -> dict[str, Any]:
+    """Rebuild the executed QAOA circuit from the reported angles."""
+    qc = _circuit(model, gammas, betas)
+    gates = []
+    for instruction in qc.data:
+        op = instruction.operation
+        gates.append(
+            {
+                "name": op.name,
+                "qubits": [qc.find_bit(q).index for q in instruction.qubits],
+                "params": [float(p) for p in op.params],
+            }
+        )
+    return {
+        "num_qubits": qc.num_qubits,
+        "depth": qc.depth(),
+        "gate_counts": dict(qc.count_ops()),
+        "layers": len(gammas),
+        "gammas": [float(g) for g in gammas],
+        "betas": [float(b) for b in betas],
+        "gates": gates,
+    }
+
+
+# ---- solving -------------------------------------------------------------
+
+def _decode_bits(model: OptimizationModel, bitstring: str | None) -> dict[str, Any] | None:
+    """Split a Qiskit (little-endian) bitstring into decision and slack bits."""
+    if not bitstring:
+        return None
+    bits = [int(ch) for ch in reversed(bitstring)]
+    return {
+        "bitstring": bitstring,
+        "decision_bits": bits[: model.n_decision],
+        "slack_bits": bits[model.n_decision :],
+        "allocation": decode_allocation(model, bitstring),
+    }
+
+
+def _outcome(
+    result: SolverResult,
+    scenario: Scenario,
+    model: OptimizationModel,
+    exact_objective: float | None,
+) -> dict[str, Any]:
+    key = SOLVER_KEYS.get(result.solver_name, result.solver_name)
+    metadata = dict(result.metadata or {})
+    error = metadata.get("error")
+    objective = result.objective_value if math.isfinite(result.objective_value) else None
+    failed = error is not None or objective is None
+    outcome: dict[str, Any] = {
+        "key": key,
+        "solver_name": result.solver_name,
+        "status": "error" if failed else "ok",
+        "error": (error or "The solver returned no finite objective value.") if failed else None,
+        # A failed run's placeholder allocation is not a result; do not show it.
+        "allocation": None if failed else result.allocation,
+        "objective_value": None if failed else objective,
+        "feasible": False if failed else bool(result.feasible),
+        "metrics": None if failed else result.metrics,
+        "runtime_seconds": float(result.runtime_seconds),
+        "gap_to_exact": None,
+        "metadata": metadata,
+        "circuit": None,
+        "samples": None,
+    }
+    if not failed and exact_objective is not None:
+        outcome["gap_to_exact"] = objective - exact_objective
+    if key == "qaoa" and not failed:
+        gammas = metadata.get("optimal_gammas")
+        betas = metadata.get("optimal_betas")
+        if gammas and betas:
+            outcome["circuit"] = circuit_details(model, list(gammas), list(betas))
+        outcome["samples"] = {
+            "best": _decode_bits(model, metadata.get("best_bitstring")),
+            "modal": _decode_bits(model, metadata.get("modal_bitstring")),
+        }
+    return json_safe(outcome)
+
+
+def reference_outcomes(scenario: Scenario, fairness_weight: float, penalty_weight: float) -> dict[str, Any]:
+    """Score the 'deliver nothing' allocation with the shared objective and metrics.
+
+    Shown next to solver results so a fairness score of 1.0 is not mistaken
+    for a good allocation.
+    """
+    empty = {n.id: {s: 0 for s in scenario.slots} for n in scenario.neighborhoods}
+    return json_safe(
+        {
+            "deliver_nothing": {
+                "allocation": empty,
+                "objective_value": evaluate_objective(
+                    scenario, empty, fairness_weight=fairness_weight, penalty_weight=penalty_weight
+                ),
+                "metrics": evaluate_allocation(scenario, empty),
+            }
+        }
+    )
+
+
+def solve(scenario: Scenario, settings: SolveSettings, lock_timeout: float = 30.0) -> dict[str, Any]:
+    """Run ``run_comparison`` and describe every result, including failures."""
+    penalty = (
+        settings.penalty_weight
+        if settings.penalty_weight is not None
+        else compute_default_penalty_weight(scenario, fairness_weight=settings.fairness_weight)
+    )
+    model = build_model(scenario, fairness_weight=settings.fairness_weight, penalty_weight=penalty)
+    run_qaoa = settings.include_qaoa and model.n_vars <= MAX_QAOA_QUBITS
+    seed = scenario.seed if settings.seed is None else settings.seed
+
+    if not _SOLVE_LOCK.acquire(timeout=lock_timeout):
+        raise SolverBusyError("Another solver run is still in progress. Try again in a moment.")
+    try:
+        started = time.perf_counter()
+        results = run_comparison(
+            scenario,
+            include_qaoa=run_qaoa,
+            fairness_weight=settings.fairness_weight,
+            penalty_weight=penalty,
+            shots=settings.shots,
+            p=settings.p,
+            maxiter=settings.maxiter,
+            seed=seed,
+        )
+        wall = time.perf_counter() - started
+    finally:
+        _SOLVE_LOCK.release()
+
+    exact = next((r for r in results if SOLVER_KEYS.get(r.solver_name) == "exact"), None)
+    exact_objective = (
+        exact.objective_value
+        if exact is not None and math.isfinite(exact.objective_value) and exact.feasible
+        else None
+    )
+    outcomes = [_outcome(r, scenario, model, exact_objective) for r in results]
+
+    if settings.include_qaoa and not run_qaoa:
+        outcomes.append(
+            {
+                "key": "qaoa",
+                "solver_name": "QAOA (Quantum Heuristic)",
+                "status": "skipped",
+                "error": (
+                    f"Not run: this scenario needs {model.n_vars} qubits "
+                    f"({model.n_decision} decisions + {model.n_slack} slack). Live statevector "
+                    f"simulation is limited to {MAX_QAOA_QUBITS} qubits so results return in seconds."
+                ),
+                "allocation": None,
+                "objective_value": None,
+                "feasible": False,
+                "metrics": None,
+                "runtime_seconds": 0.0,
+                "gap_to_exact": None,
+                "metadata": {},
+                "circuit": None,
+                "samples": None,
+            }
+        )
+
+    return json_safe(
+        {
+            "run_id": uuid.uuid4().hex[:12],
+            "executed_at": utc_now(),
+            "source": "live",
+            "scenario": scenario_to_dict(scenario),
+            "settings": {
+                "include_qaoa": settings.include_qaoa,
+                "fairness_weight": settings.fairness_weight,
+                "penalty_weight": penalty,
+                "penalty_weight_was_default": settings.penalty_weight is None,
+                "p": settings.p,
+                "shots": settings.shots,
+                "maxiter": settings.maxiter,
+                "seed": seed,
+            },
+            "model": model_summary(model),
+            "results": outcomes,
+            "reference": reference_outcomes(scenario, settings.fairness_weight, penalty),
+            "wall_seconds": wall,
+            "engine": engine_info(),
+        }
+    )

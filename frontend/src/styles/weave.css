@@ -1,0 +1,280 @@
+/* ---- the weave -------------------------------------------------------- */
+
+.weave-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.weave {
+  --cell-w: 7rem;
+  --cell-h: 4.5rem;
+  border-collapse: collapse;
+  border-spacing: 0;
+  background: var(--sheet);
+}
+
+.weave__caption {
+  caption-side: top;
+  text-align: left;
+  padding-bottom: var(--space-3);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--step-1);
+}
+
+.weave th,
+.weave td {
+  padding: 0;
+  vertical-align: middle;
+}
+
+.weave__corner {
+  width: 1px;
+}
+
+.weave__slot {
+  position: relative;
+  width: var(--cell-w);
+  padding-bottom: var(--space-4) !important;
+  text-align: center;
+  font-weight: normal;
+}
+
+/* Slot threads start under their label. */
+.weave__slot::after,
+.weave__foot:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  /* same width as the 16-unit thread in the 72-unit-high crossing */
+  width: calc(var(--cell-h) * 16 / 72);
+  margin-left: calc(var(--cell-h) * -8 / 72);
+  background: var(--weft);
+}
+
+.weave__slot::after {
+  bottom: 0;
+  height: var(--space-3);
+  border-radius: 3px 3px 0 0;
+}
+
+.weave__slot-name {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--step-1);
+  line-height: 1.1;
+}
+
+.weave__slot-meta {
+  display: block;
+  font-size: var(--step--1);
+  line-height: 1.25;
+  color: var(--ink-2);
+}
+
+.weave__row-head {
+  padding-right: var(--space-4) !important;
+  text-align: left;
+  font-weight: normal;
+  white-space: nowrap;
+}
+
+.weave__name {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--step-1);
+  line-height: 1.1;
+}
+
+.weave__meta {
+  display: block;
+  font-size: var(--step--1);
+  color: var(--ink-2);
+}
+
+.weave__cell {
+  width: var(--cell-w);
+  height: var(--cell-h);
+  line-height: 0;
+}
+
+.weave__svg {
+  width: var(--cell-w);
+  height: var(--cell-h);
+  overflow: visible;
+}
+
+.weave__warp {
+  stroke: var(--warp);
+  stroke-linecap: butt;
+}
+
+.weave__weft {
+  stroke: var(--weft);
+  stroke-linecap: butt;
+}
+
+.weave__halo {
+  stroke: var(--sheet);
+  stroke-linecap: butt;
+}
+
+.weave__float {
+  stroke: var(--indigo-thread);
+  stroke-linecap: round;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: weave-float-in 560ms var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 55ms);
+}
+
+.weave__float--over {
+  stroke: var(--madder);
+}
+
+@keyframes weave-float-in {
+  from {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+  to {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+.weave__ring {
+  fill: var(--sheet);
+  stroke-width: 3.5;
+}
+
+.weave__ring--unmet {
+  stroke: var(--madder);
+}
+
+.weave__ring--requested {
+  stroke: var(--indigo);
+  stroke-dasharray: 3 3;
+}
+
+.weave__summary,
+.weave__summary-head {
+  padding-left: var(--space-4) !important;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.weave__summary-head {
+  font-weight: 650;
+  font-size: var(--step--1);
+  color: var(--ink-2);
+  vertical-align: bottom !important;
+  padding-bottom: var(--space-4) !important;
+}
+
+.weave__summary {
+  font-weight: 650;
+}
+
+.weave__foot {
+  position: relative;
+  padding-top: var(--space-4) !important;
+  text-align: center;
+  font-size: var(--step--1);
+  font-weight: 650;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+
+.weave__foot:not(:last-child)::before {
+  top: 0;
+  height: var(--space-3);
+  border-radius: 0 0 3px 3px;
+}
+
+.weave__foot:last-child {
+  text-align: left;
+  padding-left: var(--space-4) !important;
+}
+
+.weave__foot-head {
+  padding-top: var(--space-4) !important;
+  font-size: var(--step--1);
+  font-weight: 650;
+  color: var(--ink-2);
+}
+
+.weave__warn {
+  display: block;
+  color: var(--madder);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.weave__summary[data-over],
+.weave__foot[data-over] {
+  color: var(--madder);
+}
+
+.weave-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--step--1);
+  color: var(--ink-2);
+}
+
+.weave-legend li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.weave-legend svg {
+  width: 40px;
+  height: 24px;
+  flex: none;
+  background: var(--sheet);
+}
+
+.weave-legend .weave__float {
+  animation: none;
+}
+
+.weave--compact {
+  --cell-w: 5.25rem;
+  --cell-h: 3.375rem;
+}
+
+@media (max-width: 560px) {
+  .weave {
+    --cell-w: 4.375rem;
+    --cell-h: 2.8125rem;
+  }
+
+  .weave__name,
+  .weave__slot-name {
+    font-size: var(--step-0);
+  }
+
+  .weave__row-head {
+    padding-right: var(--space-2) !important;
+  }
+
+  .weave__meta {
+    white-space: normal;
+    font-size: 0.8rem;
+  }
+
+  .weave__summary,
+  .weave__summary-head,
+  .weave__foot:last-child {
+    padding-left: var(--space-2) !important;
+    white-space: normal;
+  }
+}

@@ -36,6 +36,21 @@ def test_greedy_solver():
     assert res.objective_value == pytest.approx(11.0)
 
 
+@pytest.mark.xfail(reason="Greedy priority-first heuristic ignores disparity penalty and is dominated by empty baseline")
+def test_greedy_does_not_exceed_empty_allocation_objective():
+    """Verify greedy heuristic returns an objective at least as good as allocating nothing.
+
+    Regression test: on default scenario, pure priority-first allocation
+    allocates 4 units but scores objective 11.0 due to high disparity, whereas
+    the trivial zero-allocation baseline scores 10.0.
+    """
+    from waterweave.formulation import evaluate_objective
+    res = solve_greedy(S)
+    empty_alloc = {n.id: {s: 0 for s in S.slots} for n in S.neighborhoods}
+    empty_obj = evaluate_objective(S, empty_alloc)
+    assert res.objective_value <= empty_obj
+
+
 def test_exact_solver_optimal():
     """Verify exact solver achieves global optimum balancing shortage and fairness."""
     res = solve_exact(S)

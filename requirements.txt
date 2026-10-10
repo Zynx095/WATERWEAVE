@@ -1,0 +1,19 @@
+# WATERWEAVE: Dependencies for Qiskit Fall Fest 2026 Hackathon (Track 2)
+
+# Core Quantum & Scientific Stack
+qiskit~=2.5.2
+numpy>=2.0
+scipy>=1.13
+
+# Application & Interactive Dashboard
+streamlit>=1.32.0
+pandas>=2.2
+plotly>=5.24
+
+# Interactive Walkthrough Notebooks
+jupyter>=1.0.0
+ipykernel>=6.29.0
+nbformat>=5.9.0
+
+# Testing & Development
+pytest>=8.0

@@ -29,7 +29,7 @@ class OpenMeteoProvider(DataProvider):
     @ttl_cache(ttl_seconds=300) # Cache for 5 minutes
     def fetch(self) -> List[Observation]:
         retrieval_time = datetime.now(timezone.utc)
-        url = f"https://api.open-meteo.com/v1/forecast?latitude={self.LAT}&longitude={self.LON}&current=precipitation,weathercode&timezone=auto"
+        url = f"https://api.open-meteo.com/v1/forecast?latitude={self.LAT}&longitude={self.LON}&current=precipitation,weathercode&timezone=UTC"
         
         try:
             req = urllib.request.Request(url, headers={'User-Agent': 'WATERWEAVE-Research/1.0'})

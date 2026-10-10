@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="7" fill="#13213c"/>
+  <g stroke-linecap="round" stroke-width="4.5">
+    <path d="M6 11H26M6 21H26" stroke="#9aaccc"/>
+    <path d="M11 5V27" stroke="#eef2f1"/>
+    <path d="M21 5V27" stroke="#7d96ff"/>
+  </g>
+  <!-- Where the warp passes over, cut the weft with a background halo. -->
+  <path d="M18 11H24M8 21H14" stroke="#13213c" stroke-width="8"/>
+  <path d="M17 11H25M7 21H15" stroke="#9aaccc" stroke-width="4.5"/>
+</svg>

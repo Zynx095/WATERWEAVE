@@ -229,7 +229,7 @@ export function WorkspacePage() {
         </div>
       </section>
 
-      <section className="section ws-section" aria-labelledby="results-title" data-present-id="results">
+      <section className="section ws-section" aria-labelledby="results-title">
         <h2 id="results-title">Results</h2>
         {!result ? (
           <p className="section-intro">Run the solvers to see their plans here, side by side.</p>
@@ -245,7 +245,7 @@ export function WorkspacePage() {
               Same {result.scenario.neighborhoods.length} neighborhoods, same rules, same scoring (fairness weight{' '}
               {result.settings.fairness_weight}, penalty {result.settings.penalty_weight}). Lower scores are better.
             </p>
-            <div className="solvers">
+            <div className="solvers" data-present-id="results">
               {ordered.map((outcome) => (
                 <SolverPanel
                   key={outcome.key}

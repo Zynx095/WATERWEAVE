@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { MemoryRouter } from 'react-router'
 import { vi } from 'vitest'
 import recorded from '../data/recordedRun.json'
+import { PresentationProvider } from '../presentation/PresentationProvider'
 import { StoreProvider } from '../state/store'
 
 /** Real API responses captured by scripts/export_demo_snapshot.py. */
@@ -54,7 +55,9 @@ export function offlineApi() {
 export function renderWithStore(ui: ReactNode, route = '/') {
   return render(
     <MemoryRouter initialEntries={[route]}>
-      <StoreProvider>{ui}</StoreProvider>
+      <StoreProvider>
+        <PresentationProvider>{ui}</PresentationProvider>
+      </StoreProvider>
     </MemoryRouter>,
   )
 }

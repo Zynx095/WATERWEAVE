@@ -19,27 +19,48 @@ def run_comparison(
     penalty_weight: float | None = None,
     shots: int = 1024,
     p: int = 1,
+    maxiter: int = 25,
+    seed: int | None = None,
     **kwargs: Any,
 ) -> list[SolverResult]:
     """Execute allocation solvers and return a list of SolverResult instances.
 
     Always includes:
-    1. Greedy baseline (Priority-first classical heuristic)
+    1. Greedy baseline (Objective-aware classical heuristic)
     2. Exact baseline (Global optimal classical enumeration)
     3. QAOA (Parameterized quantum alternating operator ansatz, if include_qaoa=True)
 
     Args:
         scenario: The water allocation Scenario to solve.
         include_qaoa: Whether to execute the quantum QAOA solver.
-        fairness_weight: Weight for the service disparity penalty (alpha).
-        penalty_weight: Weight for supply/storage constraint violations (P).
-        shots: Number of quantum circuit measurement shots.
-        p: Number of QAOA variational layers.
-        **kwargs: Additional parameters passed to solvers.
+        fairness_weight: Weight for the service disparity penalty (alpha >= 0.0).
+        penalty_weight: Weight for supply/storage constraint violations (P > 0.0).
+        shots: Number of quantum circuit measurement shots (>= 1).
+        p: Number of QAOA variational layers (>= 1).
+        maxiter: Maximum classical optimizer iterations (>= 1).
+        seed: Random seed for sampling reproducibility.
+        **kwargs: Must be empty; unexpected arguments raise ValueError.
 
     Returns:
         List of SolverResult objects matching docs/INTERFACES.md.
     """
+    if kwargs:
+        raise ValueError(f"Unsupported keyword argument(s): {', '.join(sorted(kwargs.keys()))}")
+
+    if not isinstance(p, int) or p < 1:
+        raise ValueError(f"p must be a positive integer (received {p}).")
+    if not isinstance(shots, int) or shots < 1:
+        raise ValueError(f"shots must be a positive integer (received {shots}).")
+    if not isinstance(maxiter, int) or maxiter < 1:
+        raise ValueError(f"maxiter must be a positive integer (received {maxiter}).")
+    if not isinstance(fairness_weight, (int, float)) or fairness_weight < 0:
+        raise ValueError(f"fairness_weight must be non-negative (received {fairness_weight}).")
+    if penalty_weight is not None and (not isinstance(penalty_weight, (int, float)) or penalty_weight <= 0):
+        raise ValueError(f"penalty_weight must be positive (received {penalty_weight}).")
+    if seed is not None and (not isinstance(seed, int) or seed < 0):
+        raise ValueError(f"seed must be a non-negative integer (received {seed}).")
+
+    effective_seed = scenario.seed if seed is None else seed
     results: list[SolverResult] = []
 
     # 1. Greedy baseline
@@ -60,8 +81,6 @@ def run_comparison(
 
     # 3. QAOA quantum heuristic
     if include_qaoa:
-        maxiter = kwargs.get("maxiter", 25)
-        seed = kwargs.get("seed", scenario.seed)
         qaoa_res = solve_qaoa(
             scenario,
             p=p,
@@ -69,7 +88,7 @@ def run_comparison(
             maxiter=maxiter,
             fairness_weight=fairness_weight,
             penalty_weight=penalty_weight,
-            seed=seed,
+            seed=effective_seed,
         )
         results.append(qaoa_res)
 

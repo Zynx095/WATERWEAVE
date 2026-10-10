@@ -386,6 +386,16 @@ def solve_qaoa(
         )
 
     try:
+        if not isinstance(p, int) or p < 1:
+            raise ValueError(f"p must be a positive integer (received {p}).")
+        if not isinstance(shots, int) or shots < 1:
+            raise ValueError(f"shots must be a positive integer (received {shots}).")
+        if not isinstance(maxiter, int) or maxiter < 1:
+            raise ValueError(f"maxiter must be a positive integer (received {maxiter}).")
+        if not isinstance(fairness_weight, (int, float)) or fairness_weight < 0:
+            raise ValueError(f"fairness_weight must be non-negative (received {fairness_weight}).")
+        if penalty_weight is not None and (not isinstance(penalty_weight, (int, float)) or penalty_weight <= 0):
+            raise ValueError(f"penalty_weight must be positive (received {penalty_weight}).")
         if penalty_weight is None:
             penalty_weight = compute_default_penalty_weight(scenario, fairness_weight=fairness_weight)
 
@@ -536,6 +546,15 @@ def solve_qaoa(
         runtime = time.perf_counter() - t0
         feasible_ratio = feasible_shot_count / float(shots) if shots > 0 else 0.0
 
+        modal_alloc = decode_allocation(model, modal_bitstring)
+        modal_m = evaluate_allocation(scenario, modal_alloc)
+        modal_obj = evaluate_objective(
+            scenario, modal_alloc, fairness_weight=fairness_weight, penalty_weight=penalty_weight
+        )
+        modal_feasible = bool(modal_m["feasible"] == 1.0)
+        opt_converged = bool(opt_res.nfev < maxiter)
+        opt_status = "converged" if opt_converged else "maxiter_reached"
+
         return SolverResult(
             solver_name="QAOA (Quantum Heuristic)",
             allocation=chosen["allocation"],
@@ -547,18 +566,29 @@ def solve_qaoa(
                 "solver_type": "quantum_approximate",
                 "layers_p": p,
                 "shots": shots,
+                "seed": seed,
                 "num_qubits": model.n_vars,
                 "circuit_depth": circuit.depth(),
                 "optimizer": "COBYLA",
                 "optimizer_iterations": int(opt_res.nfev),
+                "optimizer_converged": opt_converged,
+                "optimizer_status": opt_status,
+                "grid_evaluations": 36,
+                "total_evaluations": 36 + int(opt_res.nfev),
                 "optimal_gammas": opt_gammas,
                 "optimal_betas": opt_betas,
                 "sampled_unique_bitstrings": len(counts),
                 "feasible_samples_ratio": float(feasible_ratio),
                 "modal_bitstring": modal_bitstring,
+                "modal_bitstring_feasible": modal_feasible,
+                "modal_bitstring_objective": float(modal_obj),
+                "modal_bitstring_count": int(counts[modal_bitstring]),
+                "selection_rule": "best_feasible_slack_consistent",
                 "best_bitstring": chosen["bitstring"],
                 "qubo_energy": float(chosen["qubo_energy"]),
                 "slack_consistent": bool(chosen["slack_consistent"]),
+                "fairness_weight": float(fairness_weight),
+                "penalty_weight": float(penalty_weight),
                 "is_demo": False,
                 "quantum_advantage_claimed": False,
                 "notes": (

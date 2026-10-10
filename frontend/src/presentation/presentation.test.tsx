@@ -166,6 +166,28 @@ describe('guided presentation', () => {
     expect(screen.queryByRole('heading', { name: 'Presenter notes' })).not.toBeInTheDocument()
   })
 
+  it('offers a clean audience view without navigation or controls', async () => {
+    mockApi()
+    await startPresentation()
+    fireEvent.click(within(bar()).getByRole('button', { name: 'Clean audience view' }))
+    expect(document.body.dataset.cleanView).toBe('true')
+    expect(within(bar()).queryByRole('button', { name: 'Pause' })).not.toBeInTheDocument()
+    expect(bar()).toHaveTextContent('Seven deliveries are requested')
+    // Keys keep working, and H or the remaining button brings the controls back.
+    fireEvent.keyDown(window, { key: 'ArrowRight' })
+    await flush()
+    expect(where()).toContain('The scenario')
+    fireEvent.keyDown(window, { key: 'h' })
+    expect(within(bar()).getByRole('button', { name: 'Pause' })).toBeInTheDocument()
+    fireEvent.keyDown(window, { key: 'h' })
+    fireEvent.click(within(bar()).getByRole('button', { name: 'Show controls' }))
+    expect(document.body.dataset.cleanView).toBeUndefined()
+    fireEvent.keyDown(window, { key: 'h' })
+    fireEvent.keyDown(window, { key: 'Escape' })
+    await flush()
+    expect(document.body.dataset.cleanView).toBeUndefined()
+  })
+
   it('goes to the step page again after the presenter wanders off', async () => {
     mockApi()
     await startPresentation()

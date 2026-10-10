@@ -1,5 +1,7 @@
 import {
   CircleAlert,
+  Eye,
+  EyeOff,
   LoaderCircle,
   NotebookText,
   Pause,
@@ -20,7 +22,7 @@ export function formatClock(ms: number) {
 
 /** Audience-facing caption and controls, fixed to the bottom of the window. */
 export function PresentationBar() {
-  const { state, dispatch, context, notesOpen, setNotesOpen } = usePresentation()
+  const { state, dispatch, context, notesOpen, setNotesOpen, cleanView, setCleanView } = usePresentation()
   if (state.status === 'idle') return null
 
   const step = STEPS[state.index]
@@ -41,8 +43,8 @@ export function PresentationBar() {
             : 'Paused'
 
   return (
-    <section className="present-bar" aria-label="Presentation controls">
-      {notesOpen && (
+    <section className="present-bar" data-clean={cleanView || undefined} aria-label="Presentation controls">
+      {notesOpen && !cleanView && (
         <div className="present-notes" id="presenter-notes">
           <h2 className="present-notes__title">Presenter notes</h2>
           <ul>
@@ -120,73 +122,94 @@ export function PresentationBar() {
             )}
           </p>
 
-          <div className="present-bar__controls">
+          {cleanView ? (
             <button
               type="button"
-              className="present-btn"
-              aria-label="Previous step"
-              title="Previous step (Left arrow)"
-              disabled={state.index === 0}
-              onClick={() => dispatch({ type: 'PREV' })}
+              className="present-btn present-btn--quiet"
+              aria-label="Show controls"
+              title="Show controls (H)"
+              onClick={() => setCleanView(false)}
             >
-              <SkipBack aria-hidden size={20} />
+              <Eye aria-hidden size={18} />
             </button>
-            {state.status === 'finished' ? (
-              <button type="button" className="present-btn present-btn--main" onClick={() => dispatch({ type: 'RESTART' })}>
-                <RotateCcw aria-hidden size={20} /> Restart
-              </button>
-            ) : (
+          ) : (
+            <div className="present-bar__controls">
               <button
                 type="button"
-                className="present-btn present-btn--main"
-                aria-label={playing ? 'Pause' : 'Resume'}
-                title={playing ? 'Pause (Space)' : 'Resume (Space)'}
-                onClick={() => dispatch({ type: 'TOGGLE' })}
+                className="present-btn"
+                aria-label="Previous step"
+                title="Previous step (Left arrow)"
+                disabled={state.index === 0}
+                onClick={() => dispatch({ type: 'PREV' })}
               >
-                {playing ? <Pause aria-hidden size={20} /> : <Play aria-hidden size={20} />}
-                {playing ? 'Pause' : 'Resume'}
+                <SkipBack aria-hidden size={20} />
               </button>
-            )}
-            <button
-              type="button"
-              className="present-btn"
-              aria-label="Next step"
-              title="Next step (Right arrow)"
-              disabled={state.status === 'finished'}
-              onClick={() => dispatch({ type: 'NEXT' })}
-            >
-              <SkipForward aria-hidden size={20} />
-            </button>
-            <button
-              type="button"
-              className="present-btn"
-              aria-label="Restart from the beginning"
-              title="Restart (Home)"
-              onClick={() => dispatch({ type: 'RESTART' })}
-            >
-              <RotateCcw aria-hidden size={20} />
-            </button>
-            <button
-              type="button"
-              className="present-btn"
-              aria-expanded={notesOpen}
-              aria-controls="presenter-notes"
-              aria-label="Presenter notes"
-              title="Presenter notes (N)"
-              onClick={() => setNotesOpen(!notesOpen)}
-            >
-              <NotebookText aria-hidden size={20} />
-            </button>
-            <button
-              type="button"
-              className="present-btn present-btn--exit"
-              aria-label="Exit presentation"
-              title="Exit (Esc)"
-              onClick={() => dispatch({ type: 'EXIT' })}
-            >
-              <X aria-hidden size={20} /> Exit
-            </button>
-          </div>
+              {state.status === 'finished' ? (
+                <button type="button" className="present-btn present-btn--main" onClick={() => dispatch({ type: 'RESTART' })}>
+                  <RotateCcw aria-hidden size={20} /> Restart
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="present-btn present-btn--main"
+                  aria-label={playing ? 'Pause' : 'Resume'}
+                  title={playing ? 'Pause (Space)' : 'Resume (Space)'}
+                  onClick={() => dispatch({ type: 'TOGGLE' })}
+                >
+                  {playing ? <Pause aria-hidden size={20} /> : <Play aria-hidden size={20} />}
+                  {playing ? 'Pause' : 'Resume'}
+                </button>
+              )}
+              <button
+                type="button"
+                className="present-btn"
+                aria-label="Next step"
+                title="Next step (Right arrow)"
+                disabled={state.status === 'finished'}
+                onClick={() => dispatch({ type: 'NEXT' })}
+              >
+                <SkipForward aria-hidden size={20} />
+              </button>
+              <button
+                type="button"
+                className="present-btn"
+                aria-label="Restart from the beginning"
+                title="Restart (Home)"
+                onClick={() => dispatch({ type: 'RESTART' })}
+              >
+                <RotateCcw aria-hidden size={20} />
+              </button>
+              <button
+                type="button"
+                className="present-btn"
+                aria-expanded={notesOpen}
+                aria-controls="presenter-notes"
+                aria-label="Presenter notes"
+                title="Presenter notes (N)"
+                onClick={() => setNotesOpen(!notesOpen)}
+              >
+                <NotebookText aria-hidden size={20} />
+              </button>
+              <button
+                type="button"
+                className="present-btn"
+                aria-label="Clean audience view"
+                title="Hide navigation and controls (H)"
+                onClick={() => setCleanView(true)}
+              >
+                <EyeOff aria-hidden size={20} />
+              </button>
+              <button
+                type="button"
+                className="present-btn present-btn--exit"
+                aria-label="Exit presentation"
+                title="Exit (Esc)"
+                onClick={() => dispatch({ type: 'EXIT' })}
+              >
+                <X aria-hidden size={20} /> Exit
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </section>

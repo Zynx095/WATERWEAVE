@@ -118,15 +118,18 @@ In the default scenario:
 ## 5. Penalty Bound Derivation
 
 To guarantee that no infeasible allocation can ever beat a feasible allocation in energy:
-$$\Delta \text{Shortage}_{\max} \le \max_i w_i$$
-$$\Delta (\alpha \cdot \text{Disparity})_{\max} \le \alpha \cdot 1.0$$
-The maximum benefit any infeasible allocation could gain in the base objective from an illegal unit allocation is at most $\max_i w_i + \alpha$.
-A single constraint violation of 1 unit produces an inequality penalty of $P \cdot 1^2 = P$.
-Therefore, to guarantee penalty dominance across arbitrary priority weights:
-$$P \ge \max\left(15.0, 2.0 \cdot \max_i w_i + \alpha\right)$$
-For the default scenario ($\max w_i = 2.0, \alpha = 2.0$), $P = 15.0 \gg 4.0$, which strictly guarantees:
+1. Every feasible allocation has objective bounded above by the empty (unserved) allocation:
+   $$F(x_{\text{feasible}}) \le F(\text{empty}) = \sum_{i \in \mathcal{N}} w_i D_i$$
+2. Every infeasible state has at least one constraint violation of magnitude $\ge 1$, which adds penalty $P \cdot 1^2 = P$.
+3. Since base unpenalized shortage and disparity are non-negative ($F_{\text{base}}(x) \ge 0$):
+   $$F(x_{\text{infeasible}}) \ge P$$
+4. Therefore, setting:
+   $$P \ge \max\left(15.0, \sum_{i \in \mathcal{N}} w_i D_i + 1.0, 2.0 \cdot \max_i w_i + \alpha\right)$$
+   strictly and universally guarantees that every infeasible state has higher energy than the empty allocation and thus strictly dominates the optimal feasible state across any scenario instance.
+
+For the default synthetic 4x2 scenario ($\sum w_i D_i = 10.0, \max w_i = 2.0, \alpha = 2.0$), $P = 15.0 > 10.0$, strictly guaranteeing:
 - Ground state feasible energy: $6.0$
-- Lowest infeasible energy: $19.5$
+- Lowest infeasible energy: $19.5$ (penalty margin $\Delta E = 13.5$)
 
 ---
 

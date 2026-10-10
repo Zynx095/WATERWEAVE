@@ -125,11 +125,12 @@ constraints, classical solvers (live run), QAOA (live run), results and
 fairness, data integrity (live fetch or offline fallback), honest
 comparison, conclusion.
 
-Audience view: the real app with a caption bar (step, progress, controls).
+Audience view: the real app with a caption bar (step, progress, controls); a
+clean view (H) hides navigation and controls for two-screen setups.
 Presenter view: `/presenter` in a second window, synchronised over
 `BroadcastChannel`, with notes, next step, timers and controls. Keys: Space
 pause/resume, Right or Page Down next, Left or Page Up previous, Home
-restart, Esc exit, N notes.
+restart, Esc exit, N notes, H clean view.
 
 Preflight before starting checks the backend, the solver engine and Qiskit
 (a real p=1 run), live data (optional) and the recorded fallback. If the

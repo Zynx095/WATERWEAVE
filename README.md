@@ -1,85 +1,94 @@
-﻿# WATERWEAVE
+# WATERWEAVE
 
-Fair and resilient water allocation using Qiskit optimization.
+**Fair and resilient municipal water allocation using Qiskit quantum optimization.**
 
-WATERWEAVE is a hackathon prototype that compares a QAOA-based
-quantum optimization workflow against greedy and exact classical
-baselines on small, transparent water-allocation scenarios.
+WATERWEAVE is a Qiskit Fall Fest Track 2 hackathon project comparing a Quantum Approximate Optimization Algorithm (QAOA) workflow against greedy and exact classical baselines on transparent, constrained water-allocation scenarios.
 
-All demonstration data is synthetic unless explicitly cited.
-This prototype is not an operational water-distribution controller.
+> **Important Notice on Data and Hardware:**
+> - All demonstration and benchmark data is **strictly synthetic**. It does not represent live municipal water distribution networks and should not be used as an operational water controller.
+> - QAOA execution is simulated classically using Qiskit's `StatevectorSampler`. **No quantum advantage is claimed or inferred.** Exact classical enumeration solves these small instances in milliseconds, while NISQ circuit simulation carries higher classical simulation overhead.
 
-## Quick start
+---
 
-1. Create a Python virtual environment.
-2. Install `pip install -e ".[dev]"`.
-3. Run tests with `pytest`.
-4. Launch the dashboard with `streamlit run app.py`.
+## Quick Start
 
-See `docs/PROJECT_SPEC.md` and `docs/INTERFACES.md`.
-
-## Methodology
-
-The optimisation model, QUBO/Ising mapping, QAOA circuit and decoding as
-actually implemented are described in `docs/QUANTUM_METHOD.md`. The review of
-the objective, its incentives and open issues is in `docs/VALIDATION.md`.
-Solvers are compared on the **same objective** (weighted shortage +
-`alpha` x pairwise service-level disparity + squared constraint
-violations). The reported `fairness_score` (higher is better, range based) is
-a different quantity from the disparity term that is optimised; see
-`docs/VALIDATION.md` section 2.1.
-
-QAOA here is a noiseless statevector simulation on a tiny synthetic
-instance. No quantum advantage is claimed and none can be inferred from it.
-
-## Reproducing the benchmark
-
-Needs the optimisation engine (`waterweave.optimization.run_comparison`,
-currently on branch `codex/optimization`) in addition to this branch's
-scenario and metrics modules.
-
+### 1. Environment Setup
 ```bash
-git clone <repository-url> waterweave && cd waterweave
-git checkout codex/optimization      # engine; or main once it is merged
 python -m venv .venv
-source .venv/bin/activate            # Windows: .venv\Scripts\activate
-pip install -e ".[dev]"
+# Linux/macOS:
+source .venv/bin/activate
+# Windows:
+.venv\Scripts\activate
 
-python -m pytest                     # unit tests (engine-dependent ones skip if absent)
-python scripts/benchmark.py          # default 4x2 instance, p=1..3, seeds 0..4
-python scripts/benchmark.py --instance small   # reduced 3x2 instance
+pip install -e ".[dev]"
 ```
 
-Outputs are written to `benchmark_results/benchmark_<instance>.csv` and
-`.json` (override with `--out-dir`). The JSON records the engine's git
-commit, library versions, command line, all parameters, the independent
-audit results, per-run rows and summary statistics. Exit code `2` means the
-engine could not be imported (nothing is written); `3` means a QAOA run
-failed or was not returned (recorded, never replaced by a classical result);
-`4` means an audit check failed.
+### 2. Run Test Suite
+Run the full test suite (unit tests, validation checks, UI adapter, and headless Streamlit execution):
+```bash
+pytest
+```
 
-Useful options: `--seeds 0 1 2`, `--p-values 1 2`, `--shots 2048`,
-`--maxiter 50`, `--fairness-weight 2.0`, `--penalty-weight 15`,
-`--skip-audit`, `--no-random-control`. Python >= 3.11, Qiskit 2.5.x.
-The committed results were produced with Python 3.12, Qiskit 2.5.2,
-NumPy 2.4.6, SciPy 1.18.0 on Windows 11.
+### 3. Run Optimization CLI
+Run the integrated solver orchestrator directly from the terminal:
+```bash
+python -m waterweave.optimization
+```
+This executes the Greedy baseline, Exact classical baseline, and QAOA quantum heuristic on the default synthetic scenario and prints allocation tables, runtimes, objective values, fairness scores, and disparity metrics.
 
-Note: if `pytest` fails with "Invalid statement at line 1, column 1" for
-`pyproject.toml`, the file begins with a UTF-8 byte-order mark; remove it
-(already fixed on `codex/optimization`).
+### 4. Run Reproducible Benchmarks
+Execute the automated benchmark runner and independent audit suite:
+```bash
+# Default synthetic 4x2 scenario (7 decision bits, 12 qubits with slacks)
+python scripts/benchmark.py
 
-## Attribution
+# Small synthetic 3x2 scenario (5 decision bits, 8 qubits with slacks)
+python scripts/benchmark.py --instance small
+```
+Benchmark outputs are written to `benchmark_results/` in CSV and JSON formats, recording hardware metadata, engine git commit provenance, independent audit results, and random-control baselines.
 
-* The pipeline structure (binary variables, penalised cost, Ising mapping,
-  QAOA with COBYLA and a statevector sampler, comparison with brute force,
-  approximation ratio and feasibility-yield metrics) follows the Track 2
-  reference guide in
-  [Qiskit-Fall-Fest-2026-IIITKottayam-Hackathon-Template](https://github.com/Shanwis/Qiskit-Fall-Fest-2026-IIITKottayam-Hackathon-Template/tree/main/references/track-2-optimization)
-  (MIT licence). Its starter notebook (B. Tirado, BasQ Qiskit Fall Fest 2026;
-  code Apache-2.0, text CC BY 4.0) is the pattern for the sampling and
-  little-endian decoding steps. No code from the notebook was copied into
-  `scripts/benchmark.py` or the validation modules; the engine's authors
-  should confirm what, if anything, they adapted.
-* E. Farhi, J. Goldstone, S. Gutmann, *A Quantum Approximate Optimization
-  Algorithm*, 2014, [arXiv:1411.4028](https://arxiv.org/abs/1411.4028).
-* Qiskit, NumPy and SciPy under their own licences.
+### 5. Launch Interactive Dashboard
+Launch the Streamlit decision-support dashboard:
+```bash
+streamlit run app.py
+```
+The dashboard provides:
+* **Multi-Solver Comparison:** Side-by-side KPI cards, objective analysis, and runtime comparisons.
+* **Neighborhood Allocation Schedules:** Detailed delivery matrices, reservoir capacity utilization, and interactive heatmaps.
+* **Scenario Studio:** Customizable neighborhood demands, priority weights, reservoir supply, and cistern storage capacities.
+* **Quantum Inspector:** Verified circuit telemetry, gate breakdowns ($R_{ZZ}$, $R_Z$, $R_X$, $H$), optimal variational parameters ($\vec{\gamma}, \vec{\beta}$), and ASCII circuit diagrams.
+* **System Diagnostics:** Live engine import verification, dependency status, and error tracing.
+
+---
+
+## Mathematical & Quantum Methodology
+
+Solvers are evaluated against a shared quadratic objective:
+$$\min_{x} F(x) = \text{Weighted Shortage}(x) + \alpha \cdot \text{Disparity}(x) + P \cdot \text{Violations}(x)$$
+
+* **Binary Variables:** $x_{i,t} \in \{0, 1\}$ represents delivering 1 unit of water to neighborhood $i$ in slot $t$. Variables are created only where demand exists ($d_{i,t} \ge 1$).
+* **Constraint Slack Encoding:** Inequality constraints for reservoir supply ($\sum_i x_{i,t} \le S_t$) and cistern storage ($\sum_t x_{i,t} \le C_i$) are converted to exact quadratic penalties using unary binary slack bits: $P(\sum x + \sum s - B)^2$.
+* **Fairness Score vs. Disparity:** The reported `fairness_score` ($1 - (\max s - \min s) \in [0, 1]$, higher is better) measures range-based equality, while the QUBO minimizes pairwise squared disparity ($\sum_{i<j}(s_i - s_j)^2$, lower is better). Both metrics are exposed and distinguished to prevent conflation.
+* **QAOA Variational Loop:** Handcrafted ansatz with $p$ alternating layers of cost evolution ($e^{-i\gamma H_C}$) and transverse-field mixer rotations ($e^{-i\beta H_M}$), optimized classically via COBYLA with a deterministic grid warm start.
+* **Measurement & Decoding:** Computational Z-basis measurement with classical post-selection of the best feasible candidate among sampled bitstrings.
+
+---
+
+## Documentation Index
+
+| Document | Description |
+|---|---|
+| [`docs/FORMULATION.md`](docs/FORMULATION.md) | Full mathematical specification, binary variables, QUBO matrices, Ising mapping, and penalty bound derivations. |
+| [`docs/QUANTUM_METHOD.md`](docs/QUANTUM_METHOD.md) | Deep dive into QAOA ansatz construction, gate decompositions, parameter optimization, measurement decoding, and aliasing caveats. |
+| [`docs/VALIDATION.md`](docs/VALIDATION.md) | Independent mathematical audit, formulation checklist review, fairness score vs. disparity ranking proofs, and resolution tracking. |
+| [`docs/BENCHMARK_FINDINGS.md`](docs/BENCHMARK_FINDINGS.md) | Empirical benchmark results, objective-aware greedy resolution, random-control comparison, and statevector probability mass analysis. |
+| [`docs/INTERFACES.md`](docs/INTERFACES.md) | Shared contracts, Python models (`Scenario`, `Neighborhood`, `SolverResult`, `Allocation`), solver entry point signature, and telemetry keys. |
+| [`docs/PROJECT_SPEC.md`](docs/PROJECT_SPEC.md) | Original hackathon requirements, track specifications, and architectural guidelines. |
+
+---
+
+## Attribution & References
+
+* **Hackathon Reference Guide:** The problem formulation (binary decisions, quadratic constraint penalties, Ising mapping, QAOA simulation, comparison with exact baselines, and feasibility yield metrics) follows the Track 2 educational reference guide in [Qiskit-Fall-Fest-2026-IIITKottayam-Hackathon-Template](https://github.com/Shanwis/Qiskit-Fall-Fest-2026-IIITKottayam-Hackathon-Template/tree/main/references/track-2-optimization) (MIT License).
+* **Quantum Algorithm:** E. Farhi, J. Goldstone, S. Gutmann, *A Quantum Approximate Optimization Algorithm*, 2014, [arXiv:1411.4028](https://arxiv.org/abs/1411.4028).
+* **Software Libraries:** [Qiskit](https://github.com/Qiskit/qiskit) (Apache 2.0), [NumPy](https://numpy.org/) (BSD), [SciPy](https://scipy.org/) (BSD), [Streamlit](https://streamlit.io/) (Apache 2.0), [Plotly](https://plotly.com/) (MIT).

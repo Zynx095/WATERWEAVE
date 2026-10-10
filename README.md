@@ -160,6 +160,7 @@ print(f"Circuit width: {qc.num_qubits} qubits, Depth: {qc.depth()}, Gate counts:
    python -m waterweave.api          # API on port 8000
    cd frontend && npm run dev        # http://localhost:5173, proxies /api to port 8000
    ```
+   If the API runs elsewhere, set `WATERWEAVE_API` (for example `WATERWEAVE_API=http://127.0.0.1:8080`) before `npm run dev`.
 
 8. **Other entry points:**
    ```bash
@@ -220,6 +221,7 @@ Each step navigates to its page, scrolls to and outlines the element it is about
 | Jump to a step | Progress segments | |
 | Restart | Restart | Home |
 | Presenter notes | Notes button | N |
+| Clean audience view (hides navigation and controls) | Eye button | H |
 | Exit | Exit | Esc |
 
 * **Automatic or manual:** progression is automatic by default; switch *Advance automatically* off in the preflight to move only by hand. The pace (quick check about 1 minute, brisk, standard about 4 minutes, relaxed, slow) is set in the preflight.

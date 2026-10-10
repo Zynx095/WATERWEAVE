@@ -5,7 +5,8 @@ import type { BenchmarkInstance, BenchmarkSummaryRow, SolverOutcome } from '../a
 import { ProvenanceTag } from '../components/ProvenanceTag'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { benchmarkFacts, CONTROL_NAME, EXACT_NAME, GREEDY_NAME, QAOA_NAME } from '../lib/benchmark'
-import { formatDateTime, formatNumber, formatPercent, formatSeconds } from '../lib/format'
+import { formatDateTime, formatNumber, formatPercent, formatRelative, formatSeconds } from '../lib/format'
+import { useNow } from '../hooks/useNow'
 import { SOLVER_ORDER, SOLVERS } from '../lib/solvers'
 import { useStore } from '../state/store'
 import { ScrollRegion } from '../components/ScrollRegion'
@@ -25,6 +26,7 @@ function rowOrder(row: BenchmarkSummaryRow): number {
 
 function LiveComparison() {
   const { state, actions } = useStore()
+  const now = useNow()
   const run = state.run.status === 'ready' ? state.run.data : null
   const running = state.run.status === 'loading'
 
@@ -71,7 +73,14 @@ function LiveComparison() {
         {run.settings.include_qaoa &&
           `, QAOA with ${run.settings.p} ${run.settings.p === 1 ? 'layer' : 'layers'} and ${run.settings.shots} samples`}
         .{' '}
-        {run.source === 'recorded' ? <ProvenanceTag kind="recorded" /> : <>Run at {formatDateTime(run.executed_at)}.</>}
+        {run.source === 'recorded' ? (
+          <ProvenanceTag kind="recorded" />
+        ) : (
+          <>
+            <ProvenanceTag kind="live" label="Live engine run" /> {formatDateTime(run.executed_at)},{' '}
+            {formatRelative(run.executed_at, now)}.
+          </>
+        )}
       </p>
       <ScrollRegion className="table-scroll" label="Solver results table">
         <table className="data-table">

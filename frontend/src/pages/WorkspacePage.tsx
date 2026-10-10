@@ -8,7 +8,8 @@ import { SettingsForm } from '../components/SettingsForm'
 import { SolverPanel } from '../components/SolverPanel'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { canonical } from '../lib/canonical'
-import { capitalise, formatDateTime, formatNumber, formatSeconds, formatTime } from '../lib/format'
+import { capitalise, formatDateTime, formatNumber, formatRelative, formatSeconds, formatTime } from '../lib/format'
+import { useNow } from '../hooks/useNow'
 import { scenarioFacts } from '../lib/scenario'
 import { SOLVER_ORDER } from '../lib/solvers'
 import { useStore } from '../state/store'
@@ -67,6 +68,7 @@ function ConstraintNotes() {
 
 function RunStatus({ settings }: { settings: SolveSettings }) {
   const { state } = useStore()
+  const now = useNow()
   const { run } = state
   if (run.status === 'loading') {
     return (
@@ -94,7 +96,8 @@ function RunStatus({ settings }: { settings: SolveSettings }) {
       </p>
     ) : (
       <p>
-        Ran at {formatTime(run.data.executed_at)}; all solvers together took {formatSeconds(run.data.wall_seconds)}.
+        <ProvenanceTag kind="live" label="Live engine run" /> at {formatTime(run.data.executed_at)} (
+        {formatRelative(run.data.executed_at, now)}); all solvers together took {formatSeconds(run.data.wall_seconds)}.
       </p>
     )
   }

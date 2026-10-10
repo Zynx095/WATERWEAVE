@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router'
 import type { DataSourcesResponse, Observation } from '../api/types'
 import { ProvenanceTag } from '../components/ProvenanceTag'
 import { usePageTitle } from '../hooks/usePageTitle'
-import { capitalise, formatAge, formatDateTime, formatNumber, shortName } from '../lib/format'
+import { capitalise, formatAge, formatDateTime, formatNumber, formatRelative, shortName } from '../lib/format'
+import { useNow } from '../hooks/useNow'
 import { observationLabel, VARIABLE_LABEL } from '../lib/provenance'
 import { scenarioFacts } from '../lib/scenario'
 import { useStore } from '../state/store'
@@ -139,6 +140,7 @@ function EffectSummary({ data }: { data: DataSourcesResponse }) {
 export function DataPage() {
   usePageTitle('Data sources')
   const { state, actions } = useStore()
+  const now = useNow()
   const { dataSources } = state
   const data = dataSources.data
   const loading = dataSources.status === 'loading'
@@ -201,7 +203,7 @@ export function DataPage() {
                 ? dataSources.error
                 : data
                   ? `${data.requested_live ? 'Live fetch' : 'Offline view'} at ${formatDateTime(data.fetched_at)}${
-                      dataSources.source === 'recorded' ? ' (recorded run)' : ''
+                      dataSources.source === 'recorded' ? ' (recorded run)' : `, ${formatRelative(data.fetched_at, now)}`
                     }.`
                   : canFetch
                     ? 'Loading.'

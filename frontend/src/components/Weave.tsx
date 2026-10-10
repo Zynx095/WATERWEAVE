@@ -30,7 +30,7 @@ const CX = W / 2
 const CY = H / 2
 const THREAD = 16
 
-function Crossing({ state, index }: { state: CellState; index: number }) {
+export function Crossing({ state, index }: { state: CellState; index: number }) {
   const weftOver = state === 'delivered' || state === 'over'
   return (
     <svg

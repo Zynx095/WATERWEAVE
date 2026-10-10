@@ -39,17 +39,6 @@ export function ScenarioEditor({ scenario, onChange, disabled = false }: Scenari
             {slots.map((slot) => (
               <th scope="col" key={slot} className="weave__slot">
                 <span className="weave__slot-name">{capitalise(slot)}</span>
-                <NumberStepper
-                  label={`${slot} supply`}
-                  visibleLabel="Supply"
-                  value={scenario.supply_by_slot[slot] ?? 0}
-                  min={0}
-                  max={neighborhoods.length}
-                  onChange={(value) =>
-                    onChange((s) => ({ ...s, supply_by_slot: { ...s.supply_by_slot, [slot]: value } }))
-                  }
-                  disabled={disabled}
-                />
               </th>
             ))}
             <th scope="col" className="editor__head">
@@ -104,6 +93,7 @@ export function ScenarioEditor({ scenario, onChange, disabled = false }: Scenari
                     digits={1}
                     onChange={(value) => onChange((s) => updateNeighborhood(s, n.id, (m) => ({ ...m, priority_weight: value })))}
                     disabled={disabled}
+                    compact
                   />
                 </td>
                 <td className="editor__cell">
@@ -117,12 +107,39 @@ export function ScenarioEditor({ scenario, onChange, disabled = false }: Scenari
                       onChange((s) => updateNeighborhood(s, n.id, (m) => ({ ...m, storage_capacity_units: value })))
                     }
                     disabled={disabled}
+                    compact
                   />
                 </td>
               </tr>
             )
           })}
         </tbody>
+        <tfoot>
+          <tr>
+            <th scope="row" className="weave__row-head weave__foot-head">
+              Supply
+            </th>
+            {slots.map((slot) => (
+              <td key={slot} className="weave__foot editor__supply">
+                <NumberStepper
+                  label={`${slot} supply`}
+                  visibleLabel=""
+                  value={scenario.supply_by_slot[slot] ?? 0}
+                  min={0}
+                  max={neighborhoods.length}
+                  onChange={(value) =>
+                    onChange((s) => ({ ...s, supply_by_slot: { ...s.supply_by_slot, [slot]: value } }))
+                  }
+                  disabled={disabled}
+                  compact
+                />
+              </td>
+            ))}
+            <td colSpan={2} className="editor__supply-note">
+              units per slot
+            </td>
+          </tr>
+        </tfoot>
       </table>
     </div>
   )

@@ -251,6 +251,16 @@
   --cell-h: 3.375rem;
 }
 
+.weave--compact .weave__slot-name,
+.weave--compact .weave__name {
+  font-size: var(--step-0);
+}
+
+.weave--compact .weave__slot {
+  padding-left: var(--space-1) !important;
+  padding-right: var(--space-1) !important;
+}
+
 @media (max-width: 560px) {
   .weave {
     --cell-w: 4.375rem;

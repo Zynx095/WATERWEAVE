@@ -95,7 +95,7 @@ export const STEPS: StepDef[] = [
       facts
         ? `${facts.requests} yes-or-no decisions give ${facts.plans} possible plans.`
         : 'Each request is a yes-or-no decision.',
-      'The classical solvers only accept plans that follow the rules; QAOA meets rule-breaking plans priced with a large penalty.',
+      'The classical solvers only accept plans that follow the rules; the QAOA circuit can also produce rule-breaking plans, which carry a large penalty.',
     ],
   },
   {

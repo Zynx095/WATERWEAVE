@@ -650,3 +650,16 @@
     white-space: normal;
   }
 }
+
+/* ---- per-solver score bars ------------------------------------------------ */
+
+/* Each solver's bar in its own colour, matching its row marker and its panel. */
+.data-table tr[data-solver='greedy'] .score-bar__fill {
+  background: var(--slate-soft);
+  border-right-color: var(--slate);
+}
+
+.data-table tr[data-solver='qaoa'] .score-bar__fill {
+  background: var(--ochre-soft);
+  border-right-color: var(--ochre);
+}

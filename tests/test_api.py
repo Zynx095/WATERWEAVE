@@ -416,3 +416,10 @@ def test_oversized_allocation_is_rejected(client, default_payload):
     resp = client.post("/api/evaluate", json={"scenario": default_payload, "allocation": allocation})
     assert resp.status_code == 422
     assert resp.json()["problems"][0]["field"] == "allocation"
+
+
+def test_interactive_schema_page_is_not_blocked_by_the_policy(client):
+    resp = client.get("/docs")
+    assert resp.status_code == 200
+    assert "content-security-policy" not in resp.headers
+    assert resp.headers["x-content-type-options"] == "nosniff"

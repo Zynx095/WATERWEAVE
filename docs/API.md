@@ -61,5 +61,11 @@ metrics. The response also echoes the scenario and effective settings (with
 the penalty weight used), the model size, a `reference.deliver_nothing`
 scored with the same metrics, the wall time and the engine versions.
 
+Every response carries `Content-Security-Policy` (own scripts, styles and
+fonts only; not on `/docs`), `X-Content-Type-Options: nosniff`,
+`X-Frame-Options: DENY` and `Referrer-Policy: no-referrer`. There is no CORS
+configuration: the app and API share one origin. `POST /api/evaluate`
+accepts at most 20 neighborhoods and 10 slots in `allocation`.
+
 Concurrent solve requests are serialised; one that waits more than 30 s
 returns 503 with an explanation.

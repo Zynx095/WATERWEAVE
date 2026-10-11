@@ -130,6 +130,36 @@ test.describe('guided presentation', () => {
     expectClean(problems)
   })
 
+  test('with several app windows open, only the window the presenter chose runs the show', async ({ page, context, problems }) => {
+    await page.goto('/')
+    const other = await context.newPage()
+    await other.goto('/compare')
+    const third = await context.newPage()
+    await third.goto('/data')
+    const presenter = await context.newPage()
+    await presenter.goto('/presenter')
+    await expect(presenter.getByRole('status')).toContainText('Linked', { timeout: 15_000 })
+
+    // Home must not start anything.
+    await presenter.keyboard.press('Home')
+    await page.waitForTimeout(1500)
+    for (const p of [page, other, third]) await expect(bar(p)).toHaveCount(0)
+
+    await presenter.getByRole('button', { name: 'Start without preflight' }).click()
+    await expect(presenter.getByRole('heading', { level: 2, name: 'The problem' })).toBeVisible({ timeout: 15_000 })
+    await page.waitForTimeout(1500)
+    const counts = await Promise.all([page, other, third].map((p) => bar(p).count()))
+    expect(counts.reduce((a, b) => a + b, 0), 'exactly one window presents').toBe(1)
+
+    // And it keeps obeying the presenter, while the others stay idle.
+    await presenter.getByRole('button', { name: /Next/ }).click()
+    await expect(presenter.getByRole('heading', { level: 2, name: 'The scenario' })).toBeVisible()
+    const after = await Promise.all([page, other, third].map((p) => bar(p).count()))
+    expect(after.reduce((a, b) => a + b, 0)).toBe(1)
+    await presenter.getByRole('button', { name: 'Exit presentation' }).click()
+    expectClean(problems)
+  })
+
   test('without the API the walkthrough runs on the labelled recorded run', async ({ page, problems }) => {
     await page.route('**/api/**', (route) => route.abort('connectionrefused'))
     await page.goto('/')

@@ -18,6 +18,10 @@ export function PresenterPage() {
   const [lastSeen, setLastSeen] = useState(0)
   const [now, setNow] = useState(() => Date.now())
   const channel = useRef<BroadcastChannel | null>(null)
+  // The app window this view controls. It is chosen once and kept until that
+  // window goes quiet, or until another window starts presenting while this
+  // one is idle, so commands never depend on which window answered last.
+  const target = useRef<{ id: string; at: number; presenting: boolean } | null>(null)
   const supported = typeof BroadcastChannel !== 'undefined'
 
   useEffect(() => {
@@ -27,8 +31,19 @@ export function PresenterPage() {
     ch.onmessage = (event: MessageEvent) => {
       const message = parseAudienceMessage(event.data)
       if (!message) return
-      setSnapshot(message.snapshot)
-      setLastSeen(Date.now())
+      const incoming = message.snapshot
+      const presenting = incoming.state.status !== 'idle'
+      const current = target.current
+      const now = Date.now()
+      const gone = !current || now - current.at > STALE_MS
+      if (!gone && incoming.tabId !== current.id) {
+        // Another window answered. Switch only to a window that is presenting
+        // while the pinned one is not.
+        if (!(presenting && !current.presenting)) return
+      }
+      target.current = { id: incoming.tabId, at: now, presenting }
+      setSnapshot(incoming)
+      setLastSeen(now)
     }
     ch.postMessage({ kind: 'hello' } satisfies PresenterMessage)
     const id = window.setInterval(() => setNow(Date.now()), 1000)
@@ -42,8 +57,10 @@ export function PresenterPage() {
     }
   }, [supported])
 
-  const send = (event: PresentationEvent) =>
-    channel.current?.postMessage({ kind: 'command', event } satisfies PresenterMessage)
+  const send = (event: PresentationEvent) => {
+    const id = target.current?.id
+    if (id) channel.current?.postMessage({ kind: 'command', target: id, event } satisfies PresenterMessage)
+  }
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -59,7 +76,8 @@ export function PresenterPage() {
       const event = map[e.key]
       if (!event) return
       e.preventDefault()
-      channel.current?.postMessage({ kind: 'command', event } satisfies PresenterMessage)
+      const id = target.current?.id
+      if (id) channel.current?.postMessage({ kind: 'command', target: id, event } satisfies PresenterMessage)
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)

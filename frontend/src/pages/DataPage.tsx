@@ -226,7 +226,7 @@ export function DataPage() {
                 weather.
               </p>
             )}
-            <ScrollRegion className="table-scroll" label="Data inputs table">
+            <ScrollRegion className="table-scroll" label="Data inputs table" hint>
               <table className="data-table ledger">
                 <caption className="sr-only">Data inputs, their status and how they are used</caption>
                 <thead>

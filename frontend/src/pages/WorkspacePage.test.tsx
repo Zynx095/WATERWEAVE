@@ -56,7 +56,10 @@ describe('WorkspacePage', () => {
 
     const chart = screen.getByRole('table', { name: /Share of each neighborhood/ })
     expect(within(chart).getByRole('rowheader', { name: /Market/ }).closest('tr')).toHaveTextContent('0%')
-    expect(document.querySelector('.service__reference')).toHaveTextContent('worse than every plan above')
+    const note = document.querySelector('.service__reference') as HTMLElement
+    expect(note).toHaveTextContent('worse than every plan above')
+    // The note must not scroll sideways with the table on a phone.
+    expect(screen.getByRole('region', { name: 'Share of requests met' })).not.toContainElement(note)
   })
 
   it('reports a failed QAOA run without substituting another result', async () => {

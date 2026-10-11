@@ -663,3 +663,56 @@
   background: var(--ochre-soft);
   border-right-color: var(--ochre);
 }
+
+/* ---- wide tables on phones ------------------------------------------------- */
+
+.scroll-hint {
+  display: none;
+  margin: 0 0 var(--space-2);
+  font-size: var(--step--1);
+  color: var(--ink-2);
+}
+
+/* On phones the first column stays put while the rest scrolls, so every row keeps its name.
+   The data ledger is left out: its first column is too wide to pin on a phone. */
+@media (max-width: 760px) {
+  .scroll-hint {
+    display: block;
+  }
+
+  /* Separate borders move with the pinned cells; collapsed ones stay with the table. */
+  .data-table:not(.ledger) {
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .data-table:not(.ledger) th:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    width: 9rem;
+    min-width: 9rem;
+    padding-inline: var(--space-3);
+    white-space: normal;
+    background: var(--sheet);
+  }
+
+  .data-table:not(.ledger) tbody th {
+    font-size: var(--step-0);
+  }
+
+  .data-table:not(.ledger) thead th:first-child,
+  .data-table tr[data-control] th:first-child {
+    background: var(--sheet-sunk);
+  }
+
+  .data-table:not(.ledger) th:first-child::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--rule);
+  }
+}

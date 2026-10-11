@@ -212,6 +212,11 @@
   align-items: center;
   gap: var(--space-2);
   font-weight: 650;
+  white-space: nowrap;
+}
+
+.rules svg {
+  flex: none;
 }
 
 .rules--ok {
@@ -297,6 +302,9 @@
   background: var(--sheet);
   border: 1px solid var(--rule);
   border-radius: var(--radius-panel);
+}
+
+.service__scroll {
   overflow-x: auto;
 }
 
@@ -444,5 +452,20 @@
   .ws-scenario__main,
   .service {
     padding: var(--space-4) var(--space-3);
+  }
+}
+
+@media (max-width: 760px) {
+  /* Neighborhood names stay in view while the solver columns scroll. */
+  .service__table th:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: var(--sheet);
+    box-shadow: inset -1px 0 0 var(--rule);
+  }
+
+  .service__table thead th:first-child {
+    width: 8.5rem;
   }
 }

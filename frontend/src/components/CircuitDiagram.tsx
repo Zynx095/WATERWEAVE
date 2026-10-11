@@ -85,7 +85,6 @@ export function layoutCircuit(circuit: CircuitInfo): { gates: PlacedGate[]; phas
 
 const COL = 34
 const ROW = 34
-const LABEL = 196
 const TOP = 58
 
 export function CircuitDiagram({ circuit, labels }: { circuit: CircuitInfo; labels: string[] }) {
@@ -100,14 +99,15 @@ export function CircuitDiagram({ circuit, labels }: { circuit: CircuitInfo; labe
 
   return (
     <div className="circuit-figure">
-      {/* Qubit names stay in view while the gates scroll sideways. */}
-      <svg className="circuit-labels" viewBox={`0 0 ${LABEL} ${height}`} width={LABEL} height={height} aria-hidden="true">
+      {/* Qubit names stay in view while the gates scroll sideways. They are HTML so they can wrap on phones;
+          each row is exactly one wire high. */}
+      <ol className="circuit-labels" style={{ paddingTop: TOP }} aria-hidden="true">
         {labels.slice(0, circuit.num_qubits).map((label, q) => (
-          <text key={q} className="circuit__qubit" x={LABEL - 12} y={y(q) + 5} textAnchor="end">
+          <li key={q} style={{ height: ROW }}>
             {label}
-          </text>
+          </li>
         ))}
-      </svg>
+      </ol>
       <ScrollRegion className="circuit-wrap" label="QAOA circuit diagram">
         <svg
           className="circuit"

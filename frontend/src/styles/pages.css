@@ -376,11 +376,6 @@
   stroke-width: 2;
 }
 
-.circuit__qubit {
-  font-size: 14px;
-  fill: var(--ink-2);
-}
-
 .circuit__phase {
   fill: var(--sheet-sunk);
   stroke: var(--rule);
@@ -595,6 +590,20 @@
 
 .circuit-labels {
   flex: none;
+  margin: 0;
+  padding: 0 var(--space-3) 0 0;
+  list-style: none;
+  font-size: 14px;
+  line-height: 1.15;
+  color: var(--ink-2);
+}
+
+.circuit-labels li {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  text-align: right;
+  white-space: nowrap;
 }
 
 .matrix__key {
@@ -633,6 +642,11 @@
 
 @media (max-width: 560px) {
   .circuit-labels {
-    width: 9.5rem;
+    width: 7.5rem;
+    font-size: 12px;
+  }
+
+  .circuit-labels li {
+    white-space: normal;
   }
 }

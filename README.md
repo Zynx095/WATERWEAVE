@@ -311,3 +311,13 @@ Scenario: synthetic-4x2 (4 neighborhoods, 2 delivery slots)
 </details>
 
 ---
+
+## 5. Classical vs. Quantum Comparison
+
+* **Classical Baseline / Counterpart:**
+  Three contenders, one shared score, one scenario.
+
+  * **Greedy.** Hands out one delivery at a time, always taking the move that lowers the score most, then tidies up with a local search. We built it after finding that the naive "highest priority first" rule scores 11.0, which is worse than delivering nothing at all (10.0). So our baseline is not a strawman: it scores 7.0 in under a millisecond.
+  * **Exact search.** Checks all 2^7 = 128 plans and returns the true best: a score of 6.0 in about 3.5 ms. This is the yardstick for everything else.
+  * **QAOA.** The 12-qubit circuit above, simulated on a laptop.
+  * **A random-guess control.** The same number of samples (1,024) drawn uniformly at random from the same 12-qubit space, with the same filtering. It exists to answer one question honestly: does QAOA beat just guessing?

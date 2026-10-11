@@ -217,6 +217,32 @@ describe('guided presentation', () => {
     expect(where()).toContain('The problem')
   })
 
+  it('halfway through a playing step, scrolls on to the end of a target taller than the screen', async () => {
+    mockApi()
+    const scrollTo = vi.spyOn(window, 'scrollTo')
+    await startPresentation()
+    const rect = (top: number, bottom: number) =>
+      ({ top, bottom, height: bottom - top, left: 0, right: 0, width: 0, x: 0, y: top }) as DOMRect
+    // The target runs 300 px past the top of the caption bar.
+    document.querySelector<HTMLElement>('[data-spotlight]')!.getBoundingClientRect = () => rect(24, 1000)
+    document.querySelector<HTMLElement>('.present-bar')!.getBoundingClientRect = () => rect(700, 820)
+    scrollTo.mockClear()
+
+    // Paused before the halfway point: nothing moves, however long it waits.
+    await flush(STEPS[0].durationMs * 0.5 - 2000)
+    fireEvent.click(within(bar()).getByRole('button', { name: 'Pause' }))
+    await flush(60_000)
+    expect(scrollTo).not.toHaveBeenCalled()
+
+    fireEvent.click(within(bar()).getByRole('button', { name: 'Resume' }))
+    await flush(2400)
+    expect(scrollTo).toHaveBeenCalledTimes(1)
+    expect(scrollTo).toHaveBeenCalledWith({ top: 1000 - (700 - 24), behavior: 'smooth' })
+    await flush(3000)
+    expect(scrollTo).toHaveBeenCalledTimes(1)
+    scrollTo.mockRestore()
+  })
+
   it('leaves no timers running when the app unmounts mid-presentation', async () => {
     mockApi()
     await startPresentation()

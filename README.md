@@ -203,3 +203,18 @@ WATERWEAVE
 </details>
 
 ---
+
+## 4. Implementation Walkthrough & Live Demo
+
+* **Walkthrough of Gameplay / Optimization Pipeline:**
+  The app has five pages, and each one answers a question a sceptical judge would ask.
+
+  | Page | The question it answers |
+  | :--- | :--- |
+  | **Overview** | What is the problem, in numbers? Seven deliveries requested, water for four, drawn as a grid of "who wants what, when". |
+  | **Workspace** | Can I change it and watch? Click a crossing to add or remove a request, set supply, priority and storage, then run greedy, exact and QAOA. Every plan is drawn as a weave with its score, requests met, fairness and how far it is from the best possible. |
+  | **Classical vs quantum** | Does the quantum solver actually help? All three on the same scenario and score, plus the recorded benchmark with a random-sampling control and six audit checks. |
+  | **Data sources** | What is real and what is invented? Every input is labelled live, cached, illustrative, synthetic or unavailable. |
+  | **Quantum lab** | What is the circuit really doing? Eight steps from yes/no decisions to measurement, with plain words first and the maths behind a click. It draws the exact circuit QAOA ran. |
+
+  **Reading the weave.** A blue thread crossing is a delivered unit. An open red ring is a request that was not met. Every crossing also has a text state for screen readers. If a solver fails, it is shown as failed with the reason; no other solver's answer is put in its place.

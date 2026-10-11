@@ -97,3 +97,36 @@ print(f"Circuit width: {qc.num_qubits} qubits, Depth: {qc.depth()}, "
 ```
 
 ---
+
+## 3. Repository Structure & How to Run
+
+### Project Structure
+```text
+WATERWEAVE
+├── README.md                  this file
+├── requirements.txt           Python dependencies
+├── pyproject.toml             installs the engine as the `waterweave` package
+├── app.py                     the original Streamlit dashboard
+├── HACKATHON_GUIDE.md         the official event guide
+│
+├── src/waterweave/            the engine
+│   ├── formulation.py         QUBO, slack bits, Ising model
+│   ├── solvers.py             exact, greedy and QAOA solvers
+│   ├── metrics.py             fairness, disparity, feasibility
+│   ├── optimization.py        run_comparison() and a small CLI
+│   ├── scenarios.py           the synthetic 4x2 scenario
+│   ├── api/                   FastAPI layer (python -m waterweave.api)
+│   └── data/                  live and static data providers, cache
+│
+├── frontend/                  React + TypeScript web app
+│   ├── src/pages/             overview, workspace, comparison, data, quantum lab
+│   ├── src/presentation/      the self-presenting walkthrough and presenter view
+│   └── e2e/                   Playwright browser tests
+│
+├── notebooks/                 executed demo notebooks (solution.ipynb)
+├── references/                Track 2 reference material from the template
+├── docs/                      formulation, validation, API, data, Windows setup
+├── scripts/                   benchmark runner, snapshot exporter
+├── benchmark_results/         reproducible benchmark data
+└── tests/                     pytest suite
+```

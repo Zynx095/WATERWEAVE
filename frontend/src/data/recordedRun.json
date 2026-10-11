@@ -1,7 +1,7 @@
 {
  "kind": "waterweave-recorded-run",
- "captured_at": "2026-10-11T04:12:59+00:00",
- "git_commit": "bb6245f0e7397c072be1fa1c58a271b92b455ccd",
+ "captured_at": "2026-10-11T04:20:24+00:00",
+ "git_commit": "7d22500087c6bcaaaf025efab026d2f8b99552f3",
  "git_dirty": false,
  "command": "python scripts/export_demo_snapshot.py",
  "note": "Raw responses of the WATERWEAVE API for the synthetic default scenario. Shown by the frontend only when the API is unreachable, and labelled as recorded.",
@@ -15,7 +15,7 @@
  "responses": {
   "health": {
    "status": "ok",
-   "server_time": "2026-10-11T04:12:59.256152+00:00",
+   "server_time": "2026-10-11T04:20:24.215649+00:00",
    "engine": {
     "python": "3.12.0",
     "qiskit": "2.5.2",
@@ -24,7 +24,7 @@
     "max_qaoa_qubits": 15
    },
    "offline_mode": false,
-   "frontend_built": false
+   "frontend_built": true
   },
   "presets": [
    {
@@ -334,8 +334,8 @@
    }
   ],
   "solve_classical": {
-   "run_id": "65e537776f54",
-   "executed_at": "2026-10-11T04:12:59.262788+00:00",
+   "run_id": "aa8e4dbcf92f",
+   "executed_at": "2026-10-11T04:20:24.228411+00:00",
    "source": "live",
    "scenario": {
     "name": "synthetic-4x2",
@@ -517,7 +517,7 @@
       "supply_violation_units": 0.0,
       "storage_violation_units": 0.0
      },
-     "runtime_seconds": 0.0007522999985667411,
+     "runtime_seconds": 0.0018149999996239785,
      "gap_to_exact": 1.0,
      "metadata": {
       "solver_type": "classical_heuristic",
@@ -567,7 +567,7 @@
       "supply_violation_units": 0.0,
       "storage_violation_units": 0.0
      },
-     "runtime_seconds": 0.0028798000021197367,
+     "runtime_seconds": 0.005081499999505468,
      "gap_to_exact": 0.0,
      "metadata": {
       "solver_type": "classical_exact",
@@ -617,7 +617,7 @@
      }
     }
    },
-   "wall_seconds": 0.0036699000011140015,
+   "wall_seconds": 0.0069614999993063975,
    "engine": {
     "python": "3.12.0",
     "qiskit": "2.5.2",
@@ -627,8 +627,8 @@
    }
   },
   "solve_quantum": {
-   "run_id": "d635829f9d48",
-   "executed_at": "2026-10-11T04:12:59.674017+00:00",
+   "run_id": "d323cf65712e",
+   "executed_at": "2026-10-11T04:20:24.560617+00:00",
    "source": "live",
    "scenario": {
     "name": "synthetic-4x2",
@@ -810,7 +810,7 @@
       "supply_violation_units": 0.0,
       "storage_violation_units": 0.0
      },
-     "runtime_seconds": 0.0008186000013665762,
+     "runtime_seconds": 0.0016940999994403683,
      "gap_to_exact": 1.0,
      "metadata": {
       "solver_type": "classical_heuristic",
@@ -860,7 +860,7 @@
       "supply_violation_units": 0.0,
       "storage_violation_units": 0.0
      },
-     "runtime_seconds": 0.002630499999213498,
+     "runtime_seconds": 0.006623600002058083,
      "gap_to_exact": 0.0,
      "metadata": {
       "solver_type": "classical_exact",
@@ -911,7 +911,7 @@
       "supply_violation_units": 0.0,
       "storage_violation_units": 0.0
      },
-     "runtime_seconds": 0.40443320000122185,
+     "runtime_seconds": 0.3183087000033993,
      "gap_to_exact": 0.0,
      "metadata": {
       "solver_type": "quantum_approximate",
@@ -946,7 +946,7 @@
       "penalty_weight": 15.0,
       "is_demo": false,
       "quantum_advantage_claimed": false,
-      "notes": "Genuine QAOA workflow with explicit Hamiltonian circuit execution. No quantum advantage claimed; NISQ simulation compares favorably in sampling diversity but has circuit overhead relative to exact classical solver."
+      "notes": "Genuine QAOA workflow with explicit Hamiltonian circuit execution. Executed on a classical statevector simulator, not quantum hardware. No quantum advantage is claimed. The reported allocation is the best feasible bitstring among the sampled shots, selected by classical post-processing; the most frequent bitstring is reported separately."
      },
      "circuit": {
       "num_qubits": 12,
@@ -1772,7 +1772,7 @@
      }
     }
    },
-   "wall_seconds": 0.4083759999994072,
+   "wall_seconds": 0.32715340000140714,
    "engine": {
     "python": "3.12.0",
     "qiskit": "2.5.2",
@@ -2319,7 +2319,7 @@
   "data_sources_offline": {
    "requested_live": false,
    "offline_mode": false,
-   "fetched_at": "2026-10-11T04:12:59.683460+00:00",
+   "fetched_at": "2026-10-11T04:20:24.570703+00:00",
    "observations": [
     {
      "provider": {
@@ -2335,7 +2335,7 @@
      "value": 35000.0,
      "unit": "count",
      "source_timestamp": null,
-     "retrieval_timestamp": "2026-10-11T04:12:59.683460+00:00",
+     "retrieval_timestamp": "2026-10-11T04:20:24.570703+00:00",
      "source_age_seconds": null,
      "retrieval_age_seconds": 0.0,
      "served_from_cache": false,
@@ -2359,7 +2359,7 @@
      "value": 42000.0,
      "unit": "count",
      "source_timestamp": null,
-     "retrieval_timestamp": "2026-10-11T04:12:59.683460+00:00",
+     "retrieval_timestamp": "2026-10-11T04:20:24.570703+00:00",
      "source_age_seconds": null,
      "retrieval_age_seconds": 0.0,
      "served_from_cache": false,
@@ -2383,7 +2383,7 @@
      "value": 28000.0,
      "unit": "count",
      "source_timestamp": null,
-     "retrieval_timestamp": "2026-10-11T04:12:59.683460+00:00",
+     "retrieval_timestamp": "2026-10-11T04:20:24.570703+00:00",
      "source_age_seconds": null,
      "retrieval_age_seconds": 0.0,
      "served_from_cache": false,
@@ -2407,7 +2407,7 @@
      "value": 51000.0,
      "unit": "count",
      "source_timestamp": null,
-     "retrieval_timestamp": "2026-10-11T04:12:59.683460+00:00",
+     "retrieval_timestamp": "2026-10-11T04:20:24.570703+00:00",
      "source_age_seconds": null,
      "retrieval_age_seconds": 0.0,
      "served_from_cache": false,

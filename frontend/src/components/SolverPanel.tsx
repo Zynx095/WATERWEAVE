@@ -56,8 +56,10 @@ function QaoaFacts({ outcome }: { outcome: SolverOutcome }) {
         <span className="num">{formatPercent(md.feasible_samples_ratio)}</span> of them followed the rules
       </li>
       <li>
-        Most frequent sample {md.modal_bitstring_feasible ? 'followed the rules' : 'broke a rule'}; the plan shown is
-        the best valid sample, picked classically
+        Most frequent sample {md.modal_bitstring_feasible ? 'followed the rules' : 'broke a rule'};{' '}
+        {outcome.feasible
+          ? 'the plan shown is the best valid sample, picked classically'
+          : 'no sample followed every rule, so the plan shown breaks one'}
       </li>
       <li>
         Optimiser: {md.optimizer}, <span className="num">{md.total_evaluations}</span> circuit evaluations (

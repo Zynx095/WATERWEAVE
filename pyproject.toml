@@ -1,4 +1,4 @@
-﻿[build-system]
+[build-system]
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
@@ -11,16 +11,19 @@ dependencies = [
     "qiskit~=2.5.2",
     "numpy>=2.0",
     "scipy>=1.13",
-    "streamlit>=1.40",
+    "streamlit>=1.32",
     "pandas>=2.2",
-    "plotly>=5.24"
+    "plotly>=5.24",
+    "fastapi>=0.115",
+    "uvicorn>=0.30"
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0", "ruff>=0.8"]
+dev = ["pytest>=8.0", "ruff>=0.8", "httpx2>=2.0"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["src"]

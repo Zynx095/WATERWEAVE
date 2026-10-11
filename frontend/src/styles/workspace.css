@@ -1,0 +1,471 @@
+/* ---- workspace -------------------------------------------------------- */
+
+.ws-section {
+  scroll-margin-top: calc(var(--header-h) + var(--space-5));
+}
+
+.ws-scenario {
+  display: grid;
+  grid-template-columns: minmax(0, auto) minmax(16rem, 1fr);
+  gap: var(--space-7);
+  align-items: start;
+}
+
+.ws-scenario__main {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  background: var(--sheet);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-panel);
+  min-width: 0;
+}
+
+.ws-preset {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.ws-preset .field {
+  grid-template-columns: auto minmax(12rem, 18rem);
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.ws-preset__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.constraints {
+  padding: var(--space-5) 0 0;
+  scroll-margin-top: calc(var(--header-h) + var(--space-5));
+}
+
+.constraints h3 {
+  font-size: var(--step-2);
+  margin-bottom: var(--space-4);
+}
+
+.constraints ul {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  list-style: none;
+}
+
+.constraints li {
+  padding-left: var(--space-4);
+  border-left: 3px solid var(--warp);
+  max-width: 48ch;
+}
+
+.settings {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: var(--space-6) var(--space-7);
+  align-items: start;
+}
+
+.settings__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, max-content));
+  gap: var(--space-5) var(--space-6);
+  margin-top: var(--space-4);
+}
+
+.model-size {
+  grid-column: 1 / -1;
+  max-width: 76ch;
+}
+
+.model-size p {
+  max-width: none;
+}
+
+.run-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-5);
+  margin-top: var(--space-6);
+  padding: var(--space-4) var(--space-5);
+  background: var(--sheet);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-panel);
+}
+
+.run-bar__status {
+  flex: 1 1 20rem;
+  color: var(--ink-2);
+}
+
+.run-error {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+  color: var(--madder);
+  font-weight: 650;
+}
+
+.run-error svg {
+  flex: none;
+  margin-top: 0.2rem;
+}
+
+.inline-icon {
+  display: inline;
+  vertical-align: -2px;
+  margin-right: 0.2rem;
+}
+
+/* ---- solver panels ---------------------------------------------------- */
+
+.solvers {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.solver {
+  --tone: var(--slate);
+  position: relative;
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-5) var(--space-4);
+  background: var(--sheet);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-panel);
+  min-width: 0;
+}
+
+/* Each solver is identified by a coloured thread along the top, plus its name. */
+.solver::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: var(--space-5);
+  right: var(--space-5);
+  height: 5px;
+  border-radius: 0 0 3px 3px;
+  background: var(--tone);
+}
+
+.solver--exact {
+  --tone: var(--indigo);
+}
+
+.solver--qaoa {
+  --tone: var(--ochre-fill);
+}
+
+.solver__head h3 {
+  font-size: var(--step-2);
+}
+
+.solver__short {
+  color: var(--ink-2);
+  font-size: var(--step--1);
+  margin-bottom: var(--space-2);
+}
+
+.solver__numbers {
+  display: grid;
+  gap: var(--space-4);
+  align-content: start;
+}
+
+.solver__metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3) var(--space-4);
+  margin: 0;
+}
+
+.solver__metrics dt {
+  font-size: var(--step--1);
+  color: var(--ink-2);
+}
+
+.solver__metrics dd {
+  margin: 0;
+  font-weight: 700;
+  font-size: var(--step-1);
+}
+
+.solver__score {
+  grid-column: 1 / -1;
+}
+
+.solver__score dd {
+  font-family: var(--font-display);
+  font-size: var(--step-4);
+  line-height: 1;
+}
+
+.rules {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.rules svg {
+  flex: none;
+}
+
+.rules--ok {
+  color: var(--verdigris);
+}
+
+.rules--broken {
+  color: var(--madder);
+}
+
+.gap {
+  font-weight: 650;
+}
+
+.gap--best {
+  color: var(--indigo);
+}
+
+.gap--worse {
+  color: var(--ink-2);
+}
+
+.qaoa-facts {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: var(--space-1);
+  font-size: var(--step--1);
+  color: var(--ink-2);
+}
+
+.solver__link {
+  font-size: var(--step--1);
+}
+
+.solver__details,
+.explain {
+  border-top: 1px solid var(--rule);
+  padding-top: var(--space-3);
+}
+
+.solver__details summary,
+.explain summary {
+  cursor: pointer;
+  font-weight: 650;
+  color: var(--indigo);
+}
+
+.solver__details[open] summary,
+.explain[open] summary {
+  margin-bottom: var(--space-2);
+}
+
+.solver__details p,
+.explain p {
+  font-size: var(--step--1);
+  color: var(--ink-2);
+}
+
+.solver__technical {
+  margin-top: var(--space-2);
+  font-style: italic;
+}
+
+.explain {
+  margin-top: var(--space-6);
+  max-width: 76ch;
+}
+
+.explain p {
+  font-size: var(--step-0);
+  margin-top: var(--space-3);
+}
+
+.breakdown {
+  font-weight: 650;
+}
+
+/* ---- service chart ----------------------------------------------------- */
+
+.service {
+  padding: var(--space-5);
+  background: var(--sheet);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-panel);
+}
+
+.service__scroll {
+  overflow-x: auto;
+}
+
+.service__table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 34rem;
+  /* Equal columns per solver, so bars are comparable at a glance. */
+  table-layout: fixed;
+}
+
+.service__table thead th:first-child {
+  width: 11rem;
+}
+
+.service__table th,
+.service__table td {
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.service__table tbody th {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--step-1);
+  white-space: nowrap;
+}
+
+.service__requested {
+  display: block;
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: var(--step--1);
+  color: var(--ink-2);
+}
+
+.service__solver {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--step-1);
+  border-bottom: 4px solid var(--slate);
+}
+
+.service__solver--exact {
+  border-bottom-color: var(--indigo);
+}
+
+.service__solver--qaoa {
+  border-bottom-color: var(--ochre-fill);
+}
+
+.service__bar {
+  position: relative;
+  height: 1.9rem;
+  background: var(--sheet-sunk);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.service__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--slate-soft);
+  border-right: 3px solid var(--slate);
+}
+
+.service__bar[data-solver='exact'] .service__fill {
+  background: var(--indigo-soft);
+  border-right-color: var(--indigo);
+}
+
+.service__bar[data-solver='qaoa'] .service__fill {
+  background: var(--ochre-soft);
+  border-right-color: var(--ochre);
+}
+
+.service__fill[style*='width: 0%'] {
+  border-right: 0;
+}
+
+.service__value {
+  position: relative;
+  display: block;
+  padding: 0 var(--space-2);
+  line-height: 1.9rem;
+  font-weight: 700;
+}
+
+.service__none {
+  color: var(--ink-3);
+  font-size: var(--step--1);
+}
+
+.service__table tfoot th,
+.service__table tfoot td {
+  border-top: 1px solid var(--rule);
+  font-weight: 650;
+}
+
+.service__table tfoot th {
+  font-size: var(--step--1);
+  color: var(--ink-2);
+}
+
+.service__reference {
+  margin-top: var(--space-4);
+  max-width: 76ch;
+}
+
+@media (max-width: 1100px) {
+  .ws-scenario,
+  .settings {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .solvers {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .solver {
+    grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+    column-gap: var(--space-6);
+  }
+
+  .solver > :not(.weave-wrap):not(.solver__numbers) {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 760px) {
+  .solver {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ws-preset .field {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .settings__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ws-scenario__main,
+  .service {
+    padding: var(--space-4) var(--space-3);
+  }
+}
+
+@media (max-width: 760px) {
+  /* Neighborhood names stay in view while the solver columns scroll. */
+  .service__table th:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: var(--sheet);
+    box-shadow: inset -1px 0 0 var(--rule);
+  }
+
+  .service__table thead th:first-child {
+    width: 8.5rem;
+  }
+}

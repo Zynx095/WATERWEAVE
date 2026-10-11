@@ -5,7 +5,7 @@ import type { BenchmarkInstance, BenchmarkSummaryRow, SolverOutcome } from '../a
 import { ProvenanceTag } from '../components/ProvenanceTag'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { benchmarkFacts, CONTROL_NAME, EXACT_NAME, GREEDY_NAME, QAOA_NAME } from '../lib/benchmark'
-import { formatDateTime, formatNumber, formatPercent, formatRelative, formatSeconds } from '../lib/format'
+import { formatDateTime, formatGap, formatNumber, formatPercent, formatRelative, formatSeconds } from '../lib/format'
 import { useNow } from '../hooks/useNow'
 import { SOLVER_ORDER, SOLVERS } from '../lib/solvers'
 import { useStore } from '../state/store'
@@ -121,7 +121,7 @@ function LiveComparison() {
                       ? 'n/a'
                       : Math.abs(r.gap_to_exact) < 1e-9
                         ? 'Same'
-                        : `+${formatNumber(r.gap_to_exact)}`}
+                        : (Math.abs(r.gap_to_exact) < 0.005 ? formatGap(r.gap_to_exact) : `+${formatNumber(r.gap_to_exact)}`)}
                 </td>
                 <td>
                   {r.status !== 'ok' ? 'n/a' : r.feasible ? (

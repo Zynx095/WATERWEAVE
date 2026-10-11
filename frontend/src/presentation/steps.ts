@@ -5,7 +5,7 @@
  */
 import type { DataSourcesResponse, SolveResponse, SolverOutcome } from '../api/types'
 import type { BenchmarkFacts } from '../lib/benchmark'
-import { formatNumber, formatPercent, formatSeconds } from '../lib/format'
+import { formatGap, formatNumber, formatPercent, formatSeconds } from '../lib/format'
 import type { ScenarioFacts } from '../lib/scenario'
 import { numberWord } from '../lib/scenario'
 
@@ -146,7 +146,7 @@ export const STEPS: StepDef[] = [
       const q = result(run, 'qaoa')
       if (!q) return 'QAOA turns the same problem into a quantum circuit, simulated here on a classical computer.'
       const gap = q.gap_to_exact
-      const versus = gap === null ? '' : Math.abs(gap) < 1e-9 ? ', the same as exact search' : `, ${formatNumber(gap)} worse than exact search`
+      const versus = gap === null ? '' : Math.abs(gap) < 1e-9 ? ', the same as exact search' : `, ${formatGap(gap)} worse than exact search`
       return `QAOA simulated a ${String(q.metadata.num_qubits)}-qubit circuit and scored ${formatNumber(q.objective_value)}${versus}, in ${formatSeconds(q.runtime_seconds)}.`
     },
     notes: ({ run }) => {

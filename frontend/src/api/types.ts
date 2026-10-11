@@ -208,7 +208,7 @@ export interface DataSourcesResponse {
   offline_mode: boolean
   fetched_at: string
   observations: Observation[]
-  skipped: { provider: { id: string; name: string; url: string }; reason: string }[]
+  skipped: { provider: { id: string; name: string; url: string }; reason: string; failed?: boolean }[]
   scenario_effect: {
     rainfall_heuristic_enabled: boolean
     supply_changed: boolean

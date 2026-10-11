@@ -248,7 +248,11 @@ export function DataPage() {
                         </span>
                       </th>
                       <td>
-                        <ProvenanceTag kind="skipped" label={data.offline_mode ? 'Not fetched: offline mode' : 'Not fetched yet'} />
+                        {skippedRain.failed ? (
+                          <ProvenanceTag kind="error" label="Unavailable: the provider failed" />
+                        ) : (
+                          <ProvenanceTag kind="skipped" label={data.offline_mode ? 'Not fetched: offline mode' : 'Not fetched yet'} />
+                        )}
                       </td>
                       <td colSpan={2}>{skippedRain.reason}</td>
                       <td>Context only. Not used by any scenario.</td>

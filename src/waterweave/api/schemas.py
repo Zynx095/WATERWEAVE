@@ -144,3 +144,12 @@ class EvaluateRequest(BaseModel):
     allocation: dict[str, dict[str, int]]
     fairness_weight: float = Field(2.0, ge=0.0, le=20.0)
     penalty_weight: float | None = Field(None, gt=0.0, le=1000.0)
+
+    @field_validator("allocation")
+    @classmethod
+    def _bounded_allocation(cls, value: dict[str, dict[str, int]]) -> dict[str, dict[str, int]]:
+        # Unknown ids and slots are scored as invalid entries rather than
+        # rejected, but the payload must stay the size of a real scenario.
+        if len(value) > 20 or any(len(slots) > 10 for slots in value.values()):
+            raise ValueError("allocation has more neighborhoods or slots than any accepted scenario")
+        return value

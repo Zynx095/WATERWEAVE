@@ -409,3 +409,10 @@ def test_static_file_requests_cannot_leave_the_build_folder(client):
     for path in ("/..%2f..%2fpyproject.toml", "/%2e%2e/%2e%2e/pyproject.toml", "/C:/Windows/win.ini"):
         body = client.get(path).text
         assert "[build-system]" not in body and "for 16-bit app support" not in body
+
+
+def test_oversized_allocation_is_rejected(client, default_payload):
+    allocation = {f"id{i}": {"morning": 1} for i in range(21)}
+    resp = client.post("/api/evaluate", json={"scenario": default_payload, "allocation": allocation})
+    assert resp.status_code == 422
+    assert resp.json()["problems"][0]["field"] == "allocation"

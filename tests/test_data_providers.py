@@ -24,6 +24,20 @@ def test_bbmp_static_fetch():
         assert obs.variable == "population"
         assert obs.value > 0
 
+def test_illustrative_population_is_not_presented_as_census_data():
+    """Regression: the provider once called itself a 2011 BBMP census."""
+    provider = registry.get_provider("bbmp_static")
+    identity = provider.identity
+    text = " ".join([identity.name, identity.organization, identity.url]).lower()
+    assert "census" not in text.replace("not census", "")
+    assert "bbmp" not in text and "opencity" not in text
+    assert "illustrative" in identity.name.lower()
+    for obs in provider.fetch():
+        assert obs.dataset_id == "ward_population_illustrative"
+        assert obs.source_timestamp is None  # no source, so no source date
+        assert obs.quality.status == "ILLUSTRATIVE"
+
+
 def test_normalization_and_freshness():
     now = datetime.now(timezone.utc)
     obs_fresh = Observation(

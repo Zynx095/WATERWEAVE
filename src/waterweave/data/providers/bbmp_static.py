@@ -6,25 +6,29 @@ from ..registry import DataProvider
 
 class BbmpStaticProvider(DataProvider):
     """
-    Provides static 2011 census estimates and ward coverage metrics 
-    for the default 4x2 synthetic topology.
+    Illustrative neighbourhood populations for the default 4x2 synthetic topology.
+
+    The module and provider id keep the name ``bbmp_static`` for compatibility,
+    but the values are assumptions made by this project. They are NOT census
+    records, were never published by BBMP, and have no source date.
     """
     @property
     def identity(self) -> ProviderIdentity:
         return ProviderIdentity(
             id="bbmp_static",
-            name="BBMP Ward Census (Static)",
-            organization="BBMP",
-            url="https://data.opencity.in/"
+            name="Illustrative neighbourhood populations (not census data)",
+            organization="WATERWEAVE project assumption",
+            url=""
         )
 
     def fetch(self) -> List[Observation]:
         retrieval_time = datetime.now(timezone.utc)
-        # Using a static representative 2011 timestamp
-        source_time = datetime(2011, 3, 1, tzinfo=timezone.utc)
-        
-        # These are illustrative values representing typical Bengaluru ward sizes.
-        # They do not correspond to specific, verified BBMP ward census records.
+        # No source exists, so there is no source timestamp. Giving these values
+        # a date would imply a publication that never happened.
+        source_time = None
+
+        # Illustrative values of a plausible size for a Bengaluru ward. They do
+        # not correspond to any verified BBMP or census record.
         ward_data = {
             "N1": 35000,
             "N2": 42000,

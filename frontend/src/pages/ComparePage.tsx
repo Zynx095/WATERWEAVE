@@ -115,7 +115,7 @@ function LiveComparison() {
                   )}
                 </td>
                 <td className="num">
-                  {r.key === 'exact'
+                  {r.key === 'exact' && r.status === 'ok'
                     ? 'Optimal'
                     : r.gap_to_exact === null
                       ? 'n/a'
@@ -214,7 +214,9 @@ function BenchmarkTable({ bench }: { bench: BenchmarkInstance }) {
         Recorded {formatDateTime(bench.timestamp_utc)} by <code>scripts/benchmark.py</code> into{' '}
         <code>{bench.file}</code>: seeds {bench.parameters.seeds.join(', ')}, layers {bench.parameters.p_values.join(', ')},{' '}
         {bench.parameters.shots} samples, {bench.parameters.maxiter} optimiser steps, engine commit{' '}
-        <code>{String(bench.provenance.engine_git_commit ?? 'unknown').slice(0, 7)}</code>. Greedy, exact and random
+        <code>{String(bench.provenance.engine_git_commit ?? 'unknown').slice(0, 7)}</code>
+        {bench.provenance.engine_git_branch ? <> on branch <code>{String(bench.provenance.engine_git_branch)}</code></> : null}
+        {bench.provenance.engine_tree_dirty === true ? ' (the working tree had uncommitted changes)' : ''}. Greedy, exact and random
         sampling were run alongside each QAOA run. For random sampling, the last column is exact: optimal plans divided
         by all plans. For QAOA it is the probability in the simulated quantum state.
       </p>
@@ -252,7 +254,12 @@ function HonestReading({ bench }: { bench: BenchmarkInstance }) {
   const pOpt = qaoaRows.map((r) => r.state_p_optimal_mean).filter((v): v is number => v !== null)
   const risesWithDepth = pOpt.length > 1 && pOpt.every((v, i) => i === 0 || v >= pOpt[i - 1])
   const depthsBeatingRandom = uniform === null ? [] : qaoaRows.filter((r) => (r.state_p_optimal_mean ?? 0) > uniform)
-  const controlAsGood = f.controlHits !== null && f.controlRuns !== null && f.controlHits / f.controlRuns >= f.qaoaHits / f.qaoaRuns
+  const hasRuns = f.qaoaRuns > 0 && (f.controlRuns ?? 0) > 0
+  const controlAsGood =
+    hasRuns && f.controlHits !== null && f.controlRuns !== null && f.controlHits / f.controlRuns >= f.qaoaHits / f.qaoaRuns
+  const rulesMoreOften =
+    validRange.length > 0 && control?.feasible_sample_ratio_mean != null && Math.min(...validRange) > control.feasible_sample_ratio_mean
+  const checksPassed = bench.audit_checks.length > 0 && bench.audit_checks.every((c) => c.status === 'pass')
   const exactFaster =
     f.exactMedianSeconds !== null && f.qaoaMedianSeconds !== null && f.exactMedianSeconds < f.qaoaMedianSeconds[0]
   return (
@@ -267,13 +274,16 @@ function HonestReading({ bench }: { bench: BenchmarkInstance }) {
           <li>
             QAOA reached the best plan in {f.qaoaHits} of {f.qaoaRuns} recorded runs.
           </li>
-          {validRange.length > 0 && control?.feasible_sample_ratio_mean != null && (
+          {rulesMoreOften && (
             <li>
               Its samples followed the rules more often than random ones: {formatPercent(Math.min(...validRange))} to{' '}
-              {formatPercent(Math.max(...validRange))} against {formatPercent(control.feasible_sample_ratio_mean)}.
+              {formatPercent(Math.max(...validRange))} against {formatPercent(control!.feasible_sample_ratio_mean!)}.
             </li>
           )}
-          <li>Every reported number traces back to an engine run, and the formulation passed independent checks.</li>
+          <li>
+            Every reported number traces back to an engine run
+            {checksPassed ? ', and the formulation passed independent checks.' : '.'}
+          </li>
         </ul>
       </div>
       <div>
@@ -288,8 +298,10 @@ function HonestReading({ bench }: { bench: BenchmarkInstance }) {
             </li>
           ) : (
             <li>
-              A quantum advantage. QAOA found the best plan more often than random sampling here, but one small
-              simulated instance cannot establish an advantage.
+              A quantum advantage.{' '}
+              {hasRuns
+                ? 'QAOA found the best plan more often than random sampling here, but one small simulated instance cannot establish an advantage.'
+                : 'One small simulated instance cannot establish an advantage.'}
             </li>
           )}
           {exactFaster && (
@@ -330,7 +342,7 @@ export function ComparePage() {
         <h1>Does the quantum solver help?</h1>
         <p className="lede">
           Not on the benchmark scenario. All three solvers get the same scenario and the same score. Exact search is
-          certain and fastest there; QAOA finds equally good plans, but so does random sampling with the same number
+          certain, and far quicker than simulating QAOA there; QAOA finds equally good plans, but so does random sampling with the same number
           of samples. What this project shows is a working, checked quantum pipeline, not a speed or quality
           advantage.
         </p>

@@ -82,7 +82,7 @@ function LiveComparison() {
           </>
         )}
       </p>
-      <ScrollRegion className="table-scroll" label="Solver results table">
+      <ScrollRegion className="table-scroll" label="Solver results table" hint>
         <table className="data-table">
           <caption className="sr-only">Solver results on the same scenario and objective</caption>
           <thead>
@@ -171,7 +171,7 @@ function BenchmarkTable({ bench }: { bench: BenchmarkInstance }) {
   const facts = bench.audit_facts ?? {}
   return (
     <>
-      <ScrollRegion className="table-scroll" label="Recorded benchmark table">
+      <ScrollRegion className="table-scroll" label="Recorded benchmark table" hint>
         <table className="data-table">
           <caption className="sr-only">Recorded benchmark: {bench.instance}</caption>
           <thead>

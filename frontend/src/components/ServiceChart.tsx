@@ -31,70 +31,72 @@ export function ServiceChart({ scenario, results, reference }: ServiceChartProps
   }
 
   return (
-    <ScrollRegion className="service" label="Share of requests met">
-      <table className="service__table">
-        <caption className="sr-only">Share of each neighborhood's requests that each solver met</caption>
-        <thead>
-          <tr>
-            <th scope="col">
-              <span className="sr-only">Neighborhood</span>
-            </th>
-            {series.map((s) => (
-              <th scope="col" key={s.outcome.key} className={`service__solver service__solver--${s.outcome.key}`}>
-                {SOLVERS[s.outcome.key].name}
+    <div className="service">
+      <ScrollRegion className="service__scroll" label="Share of requests met" hint>
+        <table className="service__table">
+          <caption className="sr-only">Share of each neighborhood's requests that each solver met</caption>
+          <thead>
+            <tr>
+              <th scope="col">
+                <span className="sr-only">Neighborhood</span>
               </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {series[0].rows.map((row, i) => (
-            <tr key={row.id}>
-              <th scope="row">
-                {row.name}
-                <span className="service__requested">{row.requested} requested</span>
-              </th>
-              {series.map((s) => {
-                const r = s.rows[i]
-                return (
-                  <td key={s.outcome.key}>
-                    {r.share === null ? (
-                      <span className="service__none">No request</span>
-                    ) : (
-                      <div className="service__bar" data-solver={s.outcome.key}>
-                        <span className="service__fill" style={{ width: `${r.share * 100}%` }} />
-                        <span className="service__value num">
-                          {formatPercent(r.share)} <span className="sr-only">({r.served} of {r.requested})</span>
-                        </span>
-                      </div>
-                    )}
-                  </td>
-                )
-              })}
+              {series.map((s) => (
+                <th scope="col" key={s.outcome.key} className={`service__solver service__solver--${s.outcome.key}`}>
+                  {SOLVERS[s.outcome.key].name}
+                </th>
+              ))}
             </tr>
-          ))}
-        </tbody>
-        <tfoot>
-          <tr>
-            <th scope="row">Fairness score</th>
-            {series.map((s) => (
-              <td key={s.outcome.key} className="num">
-                {formatNumber(s.outcome.metrics!.fairness_score)}
-              </td>
+          </thead>
+          <tbody>
+            {series[0].rows.map((row, i) => (
+              <tr key={row.id}>
+                <th scope="row">
+                  {row.name}
+                  <span className="service__requested">{row.requested} requested</span>
+                </th>
+                {series.map((s) => {
+                  const r = s.rows[i]
+                  return (
+                    <td key={s.outcome.key}>
+                      {r.share === null ? (
+                        <span className="service__none">No request</span>
+                      ) : (
+                        <div className="service__bar" data-solver={s.outcome.key}>
+                          <span className="service__fill" style={{ width: `${r.share * 100}%` }} />
+                          <span className="service__value num">
+                            {formatPercent(r.share)} <span className="sr-only">({r.served} of {r.requested})</span>
+                          </span>
+                        </div>
+                      )}
+                    </td>
+                  )
+                })}
+              </tr>
             ))}
-          </tr>
-          <tr>
-            <th scope="row">Requests met</th>
-            {series.map((s) => (
-              <td key={s.outcome.key} className="num">
-                {s.outcome.metrics!.total_demand_units - s.outcome.metrics!.unmet_demand_units} of{' '}
-                {s.outcome.metrics!.total_demand_units}
-              </td>
-            ))}
-          </tr>
-        </tfoot>
-      </table>
+          </tbody>
+          <tfoot>
+            <tr>
+              <th scope="row">Fairness score</th>
+              {series.map((s) => (
+                <td key={s.outcome.key} className="num">
+                  {formatNumber(s.outcome.metrics!.fairness_score)}
+                </td>
+              ))}
+            </tr>
+            <tr>
+              <th scope="row">Requests met</th>
+              {series.map((s) => (
+                <td key={s.outcome.key} className="num">
+                  {s.outcome.metrics!.total_demand_units - s.outcome.metrics!.unmet_demand_units} of{' '}
+                  {s.outcome.metrics!.total_demand_units}
+                </td>
+              ))}
+            </tr>
+          </tfoot>
+        </table>
+      </ScrollRegion>
       <ReferenceNote reference={reference} objectives={ok.map((r) => r.objective_value as number)} />
-    </ScrollRegion>
+    </div>
   )
 }
 

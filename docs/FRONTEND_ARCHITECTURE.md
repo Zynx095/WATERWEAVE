@@ -77,20 +77,26 @@ Audience: hackathon judges with mixed backgrounds, watching live or on video.
 Signature element, used sparingly: **the weave**. An allocation is drawn as
 woven threads: each neighborhood is a horizontal warp thread, each delivery
 slot a vertical weft thread. Where a unit is delivered, the slot thread
-crosses over and is dyed indigo; where demand is unmet, the crossing is left
-open; where nothing was requested, the threads pass plainly. The same matrix
-is always available as a table.
+crosses over and is dyed indigo; where a request went unmet, the crossing is
+marked with a madder ring; where nothing was requested, the threads pass
+plainly. Each crossing has a text label for screen readers, and the counts
+("1 of 2") are printed beside every row.
 
-| Token | Value | Use |
-|---|---|---|
-| Paper | `#EEF2F1` | Page background (cool limewash, not cream) |
-| Sheet | `#FFFFFF` | Panels that group results |
-| Ink | `#13213C` | Text |
-| Indigo | `#1F3FB4` | Delivered water, primary actions, exact solver |
-| Madder | `#B3261E` | Unmet demand, errors |
-| Ochre | `#9A6B00` text / `#F2CF6B` fill | QAOA, presentation spotlight |
-| Slate | `#5B6B82` | Greedy solver, secondary text |
-| Verdigris | `#0F7B6C` | Verified live data |
+| Token | Value | Use | Contrast on white |
+|---|---|---|---|
+| Paper | `#EEF2F1` | Page background (cool limewash, not cream) | |
+| Sheet | `#FFFFFF` | Panels that group results | |
+| Ink | `#13213C` | Text | 16.0:1 |
+| Indigo | `#1F3FB4` | Delivered water, primary actions, exact solver | 8.7:1 |
+| Madder | `#B3261E` | Unmet demand, errors | 6.5:1 |
+| Ochre | `#8A5F00` text / `#F2CF6B` fill | QAOA | 5.7:1 (text) |
+| Slate | `#526178` | Greedy solver | 6.2:1 |
+| Verdigris | `#0B6B5E` | Verified live data | 6.4:1 |
+| Spotlight | `#A87600` | Presentation outline around the current target | 3.5:1 on paper (non-text) |
+
+Values and contrast ratios are kept in `frontend/src/styles/tokens.css`.
+Each solver keeps its dye everywhere: panel thread, table row marker, score
+bar and fairness bar.
 
 Indigo, ochre and madder are natural dyes, which ties the palette to the
 weave. Colour never carries meaning alone: every state also has an icon or
@@ -102,6 +108,19 @@ on a projector). Body 18 px, scale ratio 1.25, tabular figures for numbers.
 
 Motion: one moment only. When a result arrives, its weave threads draw in
 (600 ms). Everything respects `prefers-reduced-motion`.
+
+Accessibility beyond the palette:
+
+* Keyboard: a skip link, visible focus on every control, and every page and
+  presentation control reachable without a mouse.
+* Windows high contrast (forced colours): focus rings, the selected option,
+  the current page and presentation progress have forced-colour styles in
+  `forced-colors.css`, since forced colours drop the box shadows and fills
+  those cues use otherwise.
+* Narrow screens: wide tables say that they scroll sideways and keep their
+  first column pinned; the circuit keeps its qubit names in view.
+* Every scrollable region is labelled and focusable, so it can be scrolled
+  from the keyboard.
 
 ## 5. Presentation mode
 
@@ -143,8 +162,34 @@ labelled "recorded".
 | Suite | Command | Result on this branch |
 |---|---|---|
 | Python | `pytest` | 142 passed, 1 skipped (optional live fetch). The original 104 still pass; `tests/test_api.py` covers every endpoint, validation, failure reporting and offline mode; `tests/test_recorded_snapshot.py` replays the recorded run against the engine. |
-| Frontend | `cd frontend && npm test` | 98 passed: state machine transitions, the controller with fake timers (auto-advance, pause, resume, keys, failures, timer cleanup), preflight, presenter channel, API client, weave, editor validation, pages, and the browser-side service shares checked against the engine's fairness numbers. |
-| Browser | `cd frontend && npm run e2e` | 21 passed in Microsoft Edge against the real API: all pages, real solver runs, failure and offline paths, three viewport sizes, keyboard use, the full nine-step presentation playing on its own, the presenter window, and an axe-core WCAG 2.1 AA audit with no serious or critical violations. |
+| Frontend | `cd frontend && npm test` | 106 passed: state machine transitions, the controller with fake timers (auto-advance, pause, resume, keys, failures, timer cleanup), preflight, presenter channel, API client, weave, editor validation, pages, and the browser-side service shares checked against the engine's fairness numbers. |
+| Browser | `cd frontend && npm run e2e` | 22 passed in Microsoft Edge against the real API (1.7 min): all pages, real solver runs, failure and offline paths, three viewport sizes, keyboard use, forced colours, the full nine-step presentation playing on its own, the presenter window, and an axe-core WCAG 2.1 AA audit with no serious or critical violations. |
+
+The brief's twenty browser checks and the tests that cover them
+(`frontend/e2e/`):
+
+| # | Check | Covered by |
+|---|---|---|
+| 1 | Launch from the documented command | Playwright's web server runs `python -m waterweave.api`, which serves the API and the built app |
+| 2 | Open the overview | `app.spec.ts`: overview explains the problem with numbers from the engine |
+| 3 | Navigate to the workspace | `app.spec.ts`: workspace edits the scenario and runs the real solvers |
+| 4 | Configure or load a scenario | same test: preset, a toggled request, reset; typed input is validated |
+| 5 | Run the solvers | same test, on the real engine |
+| 6 | Results appear | same test: exact score 6, QAOA circuit facts, fairness table |
+| 7 | Compare classical and quantum | `app.spec.ts`: comparison runs all three solvers and shows the recorded benchmark |
+| 8 | Inspect data provenance | `app.spec.ts`: data sources label each input |
+| 9 | Start presentation mode | `presentation.spec.ts`: every test starts through the preflight dialog |
+| 10 | Automatic progression | `presentation.spec.ts`: plays every step on its own with real results, then finishes |
+| 11 | Pause stops progression | `presentation.spec.ts`: pause, wait longer than a step, still on the same step |
+| 12 | Resume continues | same test |
+| 13 | Back and forward | same test: buttons and arrow keys |
+| 14 | Restart | same test |
+| 15 | Exit | `presentation.spec.ts`: exit restores normal use; the presenter window can exit too |
+| 16 | Offline or failed live data | `app.spec.ts`: failed weather fetch, API down with the recorded run; `presentation.spec.ts`: walkthrough on the recorded run without the API, failing solver step with Retry |
+| 17 | Console errors and failed requests | every test fails on an unexpected console error, page error or failed request (`e2e/fixtures.ts`) |
+| 18 | Responsive layouts | `app.spec.ts`: laptop 1366x768, tablet 820x1180 and phone 390x844, no sideways page scroll |
+| 19 | Important controls stay usable | the same viewport tests click the run button, the menu and the presentation controls; keyboard and forced-colours tests |
+| 20 | Valid state after the presentation | `presentation.spec.ts`: after exit the solvers run and navigation works |
 
 Playwright's own browser download was blocked on the development machine,
 so the browser tests ran with `PLAYWRIGHT_CHANNEL=msedge` (the installed

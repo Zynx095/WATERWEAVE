@@ -14,8 +14,8 @@ export function ScrollRegion({
   label: string
   className: string
   children: ReactNode
-  /** Say "scroll sideways" while the content overflows, for tables wider than a phone. */
-  hint?: boolean
+  /** Say that it scrolls sideways while the content overflows; a string replaces the default wording. */
+  hint?: boolean | string
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const [overflowing, setOverflowing] = useState(false)
@@ -36,7 +36,7 @@ export function ScrollRegion({
     <>
       {hint && overflowing && (
         <p className="scroll-hint" aria-hidden="true">
-          Scroll sideways to see every column.
+          {typeof hint === 'string' ? hint : 'Scroll sideways to see every column.'}
         </p>
       )}
       <div ref={ref} className={className} role="region" aria-label={label} tabIndex={0}>

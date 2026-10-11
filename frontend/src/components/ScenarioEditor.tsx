@@ -27,8 +27,11 @@ function updateNeighborhood(
 export function ScenarioEditor({ scenario, onChange, disabled = false }: ScenarioEditorProps) {
   const { slots, neighborhoods } = scenario
   return (
-    <ScrollRegion className="weave-wrap" label="Scenario editor">
-      <p className="editor__scroll-hint">Scroll the table sideways for weight and storage.</p>
+    <ScrollRegion
+      className="weave-wrap"
+      label="Scenario editor"
+      hint="Scroll the table sideways for weight and storage."
+    >
       <table className="weave weave--editor">
         <caption className="sr-only">
           Scenario editor: requests per neighborhood and slot, supply per slot, weight and storage per neighborhood

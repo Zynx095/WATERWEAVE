@@ -282,22 +282,11 @@
   cursor: not-allowed;
 }
 
-.editor__scroll-hint {
-  display: none;
-  margin-bottom: var(--space-2);
-  font-size: var(--step--1);
-  color: var(--ink-2);
-}
-
 @media (max-width: 560px) {
   /* Steppers need room; keep the crossing proportions (112:72) and let the table scroll. */
   .weave.weave--editor {
     --cell-w: 6.5rem;
     --cell-h: 4.18rem;
-  }
-
-  .editor__scroll-hint {
-    display: block;
   }
 }
 

@@ -53,3 +53,27 @@ A drought-time water rationing problem, solved three ways: a quick rule of thumb
   *A note on honesty: every number here is made up. Demand, supply and storage are synthetic, population figures are illustrative, and nothing comes from a real water utility. The project is about the method, not about any real network.*
 
 ---
+
+## 2. Quantum Architecture & Mechanics
+
+* **Core Quantum Principles Used:**
+  * **Superposition.** Hadamard gates put the circuit into an even mix of all 2^12 = 4,096 possible plans at once.
+  * **A cost Hamiltonian (the Ising model).** Each yes/no delivery choice becomes one qubit. The cost of a plan is written as energy: single-qubit rotations for "how much shortage does this choice cause", and two-qubit RZZ gates for "how much do these two choices interfere" (fairness, supply limits, storage limits).
+  * **A mixer.** RX rotations let neighbouring plans interfere so probability can move around instead of staying put.
+  * **A variational loop.** A classical optimiser (SciPy COBYLA, started from a 36-point grid so runs are repeatable) tunes two angles per layer, gamma and beta, to lower the expected energy.
+  * **Measurement.** We sample 1,024 shots, throw away plans that break a rule, and keep the best one that is left. That last step is ordinary classical code, and we say so.
+
+* **How the Quantum Circuit is Integrated:**
+  A delivery choice is one yes/no question: does neighbourhood *i* get a unit of water in slot *t*? On the default 4×2 scenario that is 7 real questions, so 7 decision qubits.
+
+  Supply limits ("at most 2 units in the morning") and storage limits ("this house can only hold 1 unit") are inequalities, and qubits cannot enforce those directly. We add 5 extra "slack" qubits that soak up the unused capacity, which turns each limit into a penalty the circuit can feel. The measured bit string is then decoded back into a delivery table.
+
+```mermaid
+flowchart LR
+    A["Scenario<br/>4 neighbourhoods x 2 slots<br/>7 requests, 4 units"] --> B["Decision bits<br/>7 qubits"]
+    B --> C["Slack bits<br/>+5 qubits"]
+    C --> D["Ising cost<br/>12 qubits"]
+    D --> E["QAOA<br/>COBYLA, 1,024 shots"]
+    E --> F["Keep the best<br/>rule-following sample"]
+    F --> G["Delivery table"]
+```

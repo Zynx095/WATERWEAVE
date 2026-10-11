@@ -1,7 +1,7 @@
 {
  "kind": "waterweave-recorded-run",
- "captured_at": "2026-10-10T20:04:57+00:00",
- "git_commit": "0e25b0d03940a66c5af74753d1a850415fc363e9",
+ "captured_at": "2026-10-11T04:12:59+00:00",
+ "git_commit": "bb6245f0e7397c072be1fa1c58a271b92b455ccd",
  "git_dirty": false,
  "command": "python scripts/export_demo_snapshot.py",
  "note": "Raw responses of the WATERWEAVE API for the synthetic default scenario. Shown by the frontend only when the API is unreachable, and labelled as recorded.",
@@ -15,16 +15,16 @@
  "responses": {
   "health": {
    "status": "ok",
-   "server_time": "2026-10-10T20:04:57.627363+00:00",
+   "server_time": "2026-10-11T04:12:59.256152+00:00",
    "engine": {
     "python": "3.12.0",
     "qiskit": "2.5.2",
-    "numpy": "2.5.3",
-    "scipy": "1.18.1",
+    "numpy": "2.4.6",
+    "scipy": "1.18.0",
     "max_qaoa_qubits": 15
    },
    "offline_mode": false,
-   "frontend_built": true
+   "frontend_built": false
   },
   "presets": [
    {
@@ -334,8 +334,8 @@
    }
   ],
   "solve_classical": {
-   "run_id": "3136ad8eb91c",
-   "executed_at": "2026-10-10T20:04:57.633954+00:00",
+   "run_id": "65e537776f54",
+   "executed_at": "2026-10-11T04:12:59.262788+00:00",
    "source": "live",
    "scenario": {
     "name": "synthetic-4x2",
@@ -517,7 +517,7 @@
       "supply_violation_units": 0.0,
       "storage_violation_units": 0.0
      },
-     "runtime_seconds": 0.0006885000038892031,
+     "runtime_seconds": 0.0007522999985667411,
      "gap_to_exact": 1.0,
      "metadata": {
       "solver_type": "classical_heuristic",
@@ -567,7 +567,7 @@
       "supply_violation_units": 0.0,
       "storage_violation_units": 0.0
      },
-     "runtime_seconds": 0.002574299927800894,
+     "runtime_seconds": 0.0028798000021197367,
      "gap_to_exact": 0.0,
      "metadata": {
       "solver_type": "classical_exact",
@@ -617,18 +617,18 @@
      }
     }
    },
-   "wall_seconds": 0.003297800081782043,
+   "wall_seconds": 0.0036699000011140015,
    "engine": {
     "python": "3.12.0",
     "qiskit": "2.5.2",
-    "numpy": "2.5.3",
-    "scipy": "1.18.1",
+    "numpy": "2.4.6",
+    "scipy": "1.18.0",
     "max_qaoa_qubits": 15
    }
   },
   "solve_quantum": {
-   "run_id": "b302d08f715d",
-   "executed_at": "2026-10-10T20:04:57.979859+00:00",
+   "run_id": "d635829f9d48",
+   "executed_at": "2026-10-11T04:12:59.674017+00:00",
    "source": "live",
    "scenario": {
     "name": "synthetic-4x2",
@@ -810,7 +810,7 @@
       "supply_violation_units": 0.0,
       "storage_violation_units": 0.0
      },
-     "runtime_seconds": 0.0006544999778270721,
+     "runtime_seconds": 0.0008186000013665762,
      "gap_to_exact": 1.0,
      "metadata": {
       "solver_type": "classical_heuristic",
@@ -860,7 +860,7 @@
       "supply_violation_units": 0.0,
       "storage_violation_units": 0.0
      },
-     "runtime_seconds": 0.00263109989464283,
+     "runtime_seconds": 0.002630499999213498,
      "gap_to_exact": 0.0,
      "metadata": {
       "solver_type": "classical_exact",
@@ -911,7 +911,7 @@
       "supply_violation_units": 0.0,
       "storage_violation_units": 0.0
      },
-     "runtime_seconds": 0.33738779998384416,
+     "runtime_seconds": 0.40443320000122185,
      "gap_to_exact": 0.0,
      "metadata": {
       "solver_type": "quantum_approximate",
@@ -1772,12 +1772,12 @@
      }
     }
    },
-   "wall_seconds": 0.34150900004897267,
+   "wall_seconds": 0.4083759999994072,
    "engine": {
     "python": "3.12.0",
     "qiskit": "2.5.2",
-    "numpy": "2.5.3",
-    "scipy": "1.18.1",
+    "numpy": "2.4.6",
+    "scipy": "1.18.0",
     "max_qaoa_qubits": 15
    }
   },
@@ -2319,14 +2319,14 @@
   "data_sources_offline": {
    "requested_live": false,
    "offline_mode": false,
-   "fetched_at": "2026-10-10T20:04:57.990943+00:00",
+   "fetched_at": "2026-10-11T04:12:59.683460+00:00",
    "observations": [
     {
      "provider": {
       "id": "bbmp_static",
-      "name": "BBMP Ward Census (Static)",
-      "organization": "BBMP",
-      "url": "https://data.opencity.in/"
+      "name": "Illustrative neighbourhood populations (not census data)",
+      "organization": "WATERWEAVE project assumption",
+      "url": ""
      },
      "dataset_id": "ward_population_illustrative",
      "geographic_level": "neighborhood",
@@ -2334,9 +2334,9 @@
      "variable": "population",
      "value": 35000.0,
      "unit": "count",
-     "source_timestamp": "2011-03-01T00:00:00+00:00",
-     "retrieval_timestamp": "2026-10-10T20:04:57.990943+00:00",
-     "source_age_seconds": 492725097.990943,
+     "source_timestamp": null,
+     "retrieval_timestamp": "2026-10-11T04:12:59.683460+00:00",
+     "source_age_seconds": null,
      "retrieval_age_seconds": 0.0,
      "served_from_cache": false,
      "quality": {
@@ -2348,9 +2348,9 @@
     {
      "provider": {
       "id": "bbmp_static",
-      "name": "BBMP Ward Census (Static)",
-      "organization": "BBMP",
-      "url": "https://data.opencity.in/"
+      "name": "Illustrative neighbourhood populations (not census data)",
+      "organization": "WATERWEAVE project assumption",
+      "url": ""
      },
      "dataset_id": "ward_population_illustrative",
      "geographic_level": "neighborhood",
@@ -2358,9 +2358,9 @@
      "variable": "population",
      "value": 42000.0,
      "unit": "count",
-     "source_timestamp": "2011-03-01T00:00:00+00:00",
-     "retrieval_timestamp": "2026-10-10T20:04:57.990943+00:00",
-     "source_age_seconds": 492725097.990943,
+     "source_timestamp": null,
+     "retrieval_timestamp": "2026-10-11T04:12:59.683460+00:00",
+     "source_age_seconds": null,
      "retrieval_age_seconds": 0.0,
      "served_from_cache": false,
      "quality": {
@@ -2372,9 +2372,9 @@
     {
      "provider": {
       "id": "bbmp_static",
-      "name": "BBMP Ward Census (Static)",
-      "organization": "BBMP",
-      "url": "https://data.opencity.in/"
+      "name": "Illustrative neighbourhood populations (not census data)",
+      "organization": "WATERWEAVE project assumption",
+      "url": ""
      },
      "dataset_id": "ward_population_illustrative",
      "geographic_level": "neighborhood",
@@ -2382,9 +2382,9 @@
      "variable": "population",
      "value": 28000.0,
      "unit": "count",
-     "source_timestamp": "2011-03-01T00:00:00+00:00",
-     "retrieval_timestamp": "2026-10-10T20:04:57.990943+00:00",
-     "source_age_seconds": 492725097.990943,
+     "source_timestamp": null,
+     "retrieval_timestamp": "2026-10-11T04:12:59.683460+00:00",
+     "source_age_seconds": null,
      "retrieval_age_seconds": 0.0,
      "served_from_cache": false,
      "quality": {
@@ -2396,9 +2396,9 @@
     {
      "provider": {
       "id": "bbmp_static",
-      "name": "BBMP Ward Census (Static)",
-      "organization": "BBMP",
-      "url": "https://data.opencity.in/"
+      "name": "Illustrative neighbourhood populations (not census data)",
+      "organization": "WATERWEAVE project assumption",
+      "url": ""
      },
      "dataset_id": "ward_population_illustrative",
      "geographic_level": "neighborhood",
@@ -2406,9 +2406,9 @@
      "variable": "population",
      "value": 51000.0,
      "unit": "count",
-     "source_timestamp": "2011-03-01T00:00:00+00:00",
-     "retrieval_timestamp": "2026-10-10T20:04:57.990943+00:00",
-     "source_age_seconds": 492725097.990943,
+     "source_timestamp": null,
+     "retrieval_timestamp": "2026-10-11T04:12:59.683460+00:00",
+     "source_age_seconds": null,
      "retrieval_age_seconds": 0.0,
      "served_from_cache": false,
      "quality": {

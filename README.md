@@ -321,3 +321,18 @@ Scenario: synthetic-4x2 (4 neighborhoods, 2 delivery slots)
   * **Exact search.** Checks all 2^7 = 128 plans and returns the true best: a score of 6.0 in about 3.5 ms. This is the yardstick for everything else.
   * **QAOA.** The 12-qubit circuit above, simulated on a laptop.
   * **A random-guess control.** The same number of samples (1,024) drawn uniformly at random from the same 12-qubit space, with the same filtering. It exists to answer one question honestly: does QAOA beat just guessing?
+
+* **Comparative Analysis:**
+
+  | Measure | Result |
+  | :--- | :--- |
+  | **Approximation ratio** (QAOA / optimal) | 1.00 for the best run, about 1.011 on average (6.067 / 6.0). QAOA reached the optimum in 14 of 15 recorded runs across seeds and depths. |
+  | **Feasibility yield** | 74.6% of QAOA samples followed the rules at p = 1, 63.0% at p = 2, 65.5% at p = 3, against 50.8% for random sampling. |
+  | **Against random guessing** | 3 of the 128 plans are optimal, so a random sampler finds one in 15 of 15 runs (the chance of missing is about 3 in 100 billion). At this size, best-of-1,024 sampling cannot tell QAOA apart from guessing. |
+  | **Run time** | Exact search: about 3.5 ms. QAOA simulation: about 330 to 730 ms. Classical search is roughly 100 times faster here. |
+
+  **In one line:** QAOA finds the optimum, and so does throwing darts, at a thousandth of the cost. We report that on purpose.
+
+  Two things we noticed and did not hide. First, "fairness score" and "disparity" are different numbers that can rank plans in opposite orders, so both are shown. Second, the most frequent bit string QAOA measured was often one that broke a rule; the answer we report comes from picking the best rule-following sample afterwards.
+
+---

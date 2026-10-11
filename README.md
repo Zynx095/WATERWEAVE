@@ -369,7 +369,11 @@ Scenario: synthetic-4x2 (4 neighborhoods, 2 delivery slots)
 * **Weather data:** [Open-Meteo](https://open-meteo.com/) (CC BY 4.0).
 * **Software:** [Qiskit](https://github.com/Qiskit/qiskit), [NumPy](https://numpy.org/), [SciPy](https://scipy.org/), [Pandas](https://pandas.pydata.org/), [Streamlit](https://streamlit.io/), [Plotly](https://plotly.com/), [FastAPI](https://fastapi.tiangolo.com/), [Uvicorn](https://www.uvicorn.org/), [React](https://react.dev/), [React Router](https://reactrouter.com/), [Vite](https://vite.dev/), [TypeScript](https://www.typescriptlang.org/), [Lucide](https://lucide.dev/), [Vitest](https://vitest.dev/), [Testing Library](https://testing-library.com/) and [Playwright](https://playwright.dev/).
 * **Fonts:** Barlow Condensed and Atkinson Hyperlegible Next (both SIL OFL), bundled through [Fontsource](https://fontsource.org/).
-* **Acknowledgments:** the formulation was independently audited in the validation workstream, and the web app, API and presentation mode were built and reviewed with the help of Claude Code. My grandmother, whose tap started all of this.
+* **Acknowledgments:** this was built with a small crew of AI coding assistants, each on its own branch:
+  * **Antigravity** built the original Streamlit dashboard and researched and wired in the live-data pipeline (the Open-Meteo provider, caching and data-quality labels).
+  * **Codex** wrote the optimisation engine: the QUBO and Ising formulation and the exact, greedy and QAOA solvers.
+  * **Claude Code** built the validation and benchmark tooling, the React web app, the API layer and the guided presentation, and reviewed the rest.
+  * My grandmother, whose tap started all of this.
 
 <div align="center">
 

@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import math
 import re
+from typing import Annotated
 
 from pydantic import (
     BaseModel,
@@ -141,7 +142,10 @@ class EvaluateRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     scenario: ScenarioIn
-    allocation: dict[str, dict[str, int]]
+    # Cells are 0 or 1 in every solver result; a little headroom lets a caller
+    # score an over-allocation, which is reported as infeasible. Negative cells
+    # would offset other neighborhoods' use and bools are not units.
+    allocation: dict[str, dict[str, Annotated[int, Field(strict=True, ge=0, le=100)]]]
     fairness_weight: float = Field(2.0, ge=0.0, le=20.0)
     penalty_weight: float | None = Field(None, gt=0.0, le=1000.0)
 

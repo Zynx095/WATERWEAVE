@@ -16,8 +16,6 @@
 | :--- | :--- | :--- |
 | *Yukith M Joseph* | *yukithj@gmail.com* | *@Zynx095* |
 
-*(Note: Team members above are placeholders for the team registration form. Individual workstream branches `codex/optimization`, `antigravity/dashboard`, `antigravity/live-data-research`, `claude/validation` and `claude/frontend-demo-mode` developed the respective subsystems).*
-
 ---
 
 ## 1. Project Overview & Motivation

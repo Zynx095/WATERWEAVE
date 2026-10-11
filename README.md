@@ -29,7 +29,7 @@ A drought-time water rationing problem, solved three ways: a quick rule of thumb
   *(Access must be "Anyone with the link can view" on Google Drive, or "Unlisted / Public" on YouTube. Locked links cannot be scored.)*
 * **Live Demo Timestamp in Video:** *[Pending: e.g. 02:15, once the video is recorded]*
 
-### Team Members (Max 4 members)
+### Team Members
 | Name | Email | GitHub Username |
 | :--- | :--- | :--- |
 | Yukith M Joseph | yukithj@gmail.com | [@Zynx095](https://github.com/Zynx095) |

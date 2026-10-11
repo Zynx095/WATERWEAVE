@@ -269,6 +269,16 @@ export function PresentationProvider({ children }: { children: ReactNode }) {
       }
       const handler = keys[event.key]
       if (!handler) return
+      // Space on a page control (a crossing, a stepper button) presses that
+      // control; only the presentation bar and plain content take it as pause.
+      const target = event.target as HTMLElement | null
+      if (
+        event.key === ' ' &&
+        target?.closest?.('button, a[href], summary, [role="button"], [role="switch"], [role="checkbox"]') &&
+        !target.closest('.present-bar')
+      ) {
+        return
+      }
       // Space on a button would also click it; the shortcut takes over.
       event.preventDefault()
       handler()
@@ -305,6 +315,9 @@ export function PresentationProvider({ children }: { children: ReactNode }) {
     }
   }, [state, step, context, store.mode])
   const channel = useRef<BroadcastChannel | null>(null)
+  const isActive = useRef(false)
+  const sentActive = useRef(false)
+  isActive.current = active
   const latestSnapshot = useRef(snapshot)
   latestSnapshot.current = snapshot
 
@@ -313,10 +326,15 @@ export function PresentationProvider({ children }: { children: ReactNode }) {
     const ch = new BroadcastChannel(CHANNEL_NAME)
     channel.current = ch
     const publish = () => ch.postMessage({ kind: 'snapshot', snapshot: latestSnapshot.current } satisfies AudienceMessage)
+    // Any open tab of the app shares this channel. A tab that is not
+    // presenting answers only while it is the one in front, and only to
+    // a hello, so a background tab neither talks over nor obeys the presenter.
+    const inFront = () => document.visibilityState !== 'hidden'
     let presenterSeenAt = 0
     ch.onmessage = (event: MessageEvent) => {
       const message = parsePresenterMessage(event.data)
       if (!message) return
+      if (!isActive.current && !inFront()) return
       presenterSeenAt = Date.now()
       setPresenterLinked(true)
       if (message.kind === 'hello') publish()
@@ -324,7 +342,7 @@ export function PresentationProvider({ children }: { children: ReactNode }) {
     }
     // Heartbeats in both directions tell each window whether the other is still there.
     const heartbeat = window.setInterval(() => {
-      publish()
+      if (isActive.current) publish()
       if (presenterSeenAt && Date.now() - presenterSeenAt > 5000) setPresenterLinked(false)
     }, 1000)
     return () => {
@@ -335,8 +353,25 @@ export function PresentationProvider({ children }: { children: ReactNode }) {
   }, [])
 
   useEffect(() => {
-    channel.current?.postMessage({ kind: 'snapshot', snapshot } satisfies AudienceMessage)
+    // Active tabs publish every change; a tab that has just stopped presenting
+    // publishes once more so the presenter view sees that the show ended.
+    if (isActive.current || sentActive.current) {
+      channel.current?.postMessage({ kind: 'snapshot', snapshot } satisfies AudienceMessage)
+    }
+    sentActive.current = isActive.current
   }, [snapshot])
+
+  // Keyboard focus follows the show: onto the bar when it starts, back to
+  // the opener when it ends, instead of falling to the page body.
+  const wasActive = useRef(false)
+  useEffect(() => {
+    if (active && !wasActive.current) {
+      window.setTimeout(() => document.querySelector<HTMLElement>('.present-btn--main')?.focus(), 0)
+    } else if (!active && wasActive.current) {
+      window.setTimeout(() => document.querySelector<HTMLElement>('[data-present-opener]')?.focus(), 0)
+    }
+    wasActive.current = active
+  }, [active])
 
   const openPreflight = useCallback(() => setPreflightOpen(true), [])
   const closePreflight = useCallback(() => setPreflightOpen(false), [])

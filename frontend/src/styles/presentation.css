@@ -1,0 +1,617 @@
+/* ---- guided presentation ---------------------------------------------- */
+
+body[data-presenting='true'] .shell-footer {
+  display: none;
+}
+
+/* The element the current step is about. Outline, not colour alone: it is
+   also announced in the caption. */
+[data-spotlight='true'] {
+  outline: 4px solid var(--spotlight);
+  outline-offset: 12px;
+  border-radius: 12px;
+  scroll-margin-top: calc(var(--header-h) + var(--space-6));
+  animation: spotlight-in 500ms var(--ease-out);
+}
+
+@keyframes spotlight-in {
+  from {
+    outline-color: transparent;
+    outline-offset: 24px;
+  }
+}
+
+.present-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
+  color: var(--sheet);
+  background: var(--ink);
+  box-shadow: 0 -12px 32px -18px rgb(19 33 60 / 0.6);
+}
+
+.present-bar__inner {
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: var(--space-3) var(--gutter) var(--space-3);
+  display: grid;
+  gap: var(--space-2);
+}
+
+.present-bar__caption {
+  max-width: none;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--step-2);
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+.present-bar__action {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: none;
+  color: #d6def5;
+  font-size: var(--step--1);
+}
+
+.present-bar__action--failed {
+  color: #ffd4cf;
+  font-weight: 650;
+}
+
+.present-bar__retry {
+  margin-left: var(--space-2);
+  padding: 0.2rem 0.75rem;
+  border: 1px solid currentColor;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.present-bar__row {
+  display: grid;
+  grid-template-columns: minmax(10rem, 16rem) auto 1fr auto;
+  align-items: center;
+  gap: var(--space-2) var(--space-5);
+}
+
+.present-progress {
+  display: flex;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.present-progress li {
+  flex: 1;
+}
+
+.present-progress__segment {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 10px;
+  padding: 0;
+  border: 0;
+  border-radius: 3px;
+  background: rgb(255 255 255 / 0.22);
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.present-progress__segment:focus-visible {
+  box-shadow: 0 0 0 3px var(--ochre-fill);
+}
+
+.present-progress li[data-state='done'] .present-progress__segment {
+  background: #a9b8ff;
+}
+
+.present-progress__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  background: var(--ochre-fill);
+}
+
+.present-bar__where {
+  max-width: none;
+  white-space: nowrap;
+}
+
+.present-bar__count {
+  color: #c9d3ea;
+  margin-right: var(--space-2);
+}
+
+.present-bar__title {
+  font-weight: 700;
+}
+
+.present-bar__status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  max-width: none;
+  color: #c9d3ea;
+  font-size: var(--step--1);
+}
+
+.present-bar__state {
+  font-weight: 700;
+  color: var(--sheet);
+}
+
+.present-bar__time {
+  white-space: nowrap;
+}
+
+.present-bar__controls {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.present-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-width: 2.75rem;
+  height: 2.75rem;
+  padding: 0 var(--space-3);
+  border: 1px solid rgb(255 255 255 / 0.35);
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--sheet);
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.present-btn:hover:not(:disabled) {
+  background: rgb(255 255 255 / 0.12);
+}
+
+.present-btn:focus-visible {
+  box-shadow: 0 0 0 3px var(--ochre-fill);
+}
+
+.present-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.present-btn--main {
+  min-width: 8rem;
+  background: var(--sheet);
+  color: var(--ink);
+  border-color: var(--sheet);
+}
+
+.present-btn--main:hover:not(:disabled) {
+  background: #dfe5fb;
+}
+
+.present-btn[aria-expanded='true'] {
+  background: rgb(255 255 255 / 0.18);
+}
+
+.present-notes {
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: var(--space-4) var(--gutter) var(--space-2);
+  border-bottom: 1px solid rgb(255 255 255 / 0.18);
+}
+
+.present-notes__title {
+  font-size: var(--step-0);
+  color: #c9d3ea;
+  margin-bottom: var(--space-2);
+}
+
+.present-notes ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: var(--space-1);
+}
+
+.present-notes__next {
+  margin-top: var(--space-2);
+  color: #c9d3ea;
+  font-size: var(--step--1);
+}
+
+@media (max-width: 1100px) {
+  .present-bar__row {
+    grid-template-columns: 1fr auto;
+  }
+
+  .present-progress {
+    grid-column: 1 / -1;
+  }
+
+  .present-bar__status {
+    grid-column: 1 / -1;
+    order: 3;
+  }
+}
+
+@media (max-width: 640px) {
+  .present-bar__caption {
+    font-size: var(--step-1);
+  }
+
+  .present-bar__controls {
+    grid-column: 1 / -1;
+    flex-wrap: wrap;
+  }
+
+  .present-btn--main {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .present-btn--exit {
+    flex: 1;
+  }
+}
+
+/* ---- preflight dialog ---------------------------------------------------- */
+
+.preflight {
+  width: min(44rem, calc(100vw - 2rem));
+  max-height: calc(100vh - 2rem);
+  padding: var(--space-6);
+  border: 0;
+  border-radius: var(--radius-panel);
+  background: var(--sheet);
+  color: var(--ink);
+  box-shadow: 0 24px 64px -24px rgb(19 33 60 / 0.55);
+}
+
+.preflight::backdrop {
+  background: rgb(19 33 60 / 0.55);
+}
+
+.preflight h2 {
+  font-size: var(--step-3);
+  margin-bottom: var(--space-2);
+}
+
+.preflight__lede {
+  color: var(--ink-2);
+  margin-bottom: var(--space-5);
+}
+
+.preflight__checks {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-5);
+  padding: 0;
+  list-style: none;
+}
+
+.preflight__checks li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-3);
+  align-items: start;
+}
+
+.preflight__checks li > svg {
+  margin-top: 0.15rem;
+  color: var(--ink-3);
+}
+
+.preflight__checks li[data-status='pass'] > svg {
+  color: var(--verdigris);
+}
+
+.preflight__checks li[data-status='fail'] > svg {
+  color: var(--madder);
+}
+
+.preflight__check {
+  max-width: none;
+}
+
+.preflight__need {
+  margin-left: var(--space-2);
+  padding: 0 0.4rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: 4px;
+  font-size: 0.8rem;
+  color: var(--ink-2);
+}
+
+.preflight__result {
+  margin-left: var(--space-2);
+  font-size: var(--step--1);
+  font-weight: 650;
+  color: var(--ink-2);
+}
+
+li[data-status='pass'] .preflight__result {
+  color: var(--verdigris);
+}
+
+li[data-status='fail'] .preflight__result {
+  color: var(--madder);
+}
+
+.preflight__detail {
+  font-size: var(--step--1);
+  color: var(--ink-2);
+}
+
+.preflight__options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--space-4) var(--space-5);
+  padding: var(--space-4) 0;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: var(--space-5);
+}
+
+.preflight__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.preflight {
+  overflow-y: auto;
+}
+
+.preflight__checks p + p {
+  margin-top: 0.15rem;
+}
+
+/* ---- presenter view ------------------------------------------------------ */
+
+.presenter {
+  min-height: 100vh;
+  padding: var(--space-5) var(--gutter) var(--space-7);
+  max-width: 72rem;
+  margin: 0 auto;
+}
+
+.presenter__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.presenter__head h1 {
+  font-size: var(--step-2);
+}
+
+.presenter__head .pill {
+  margin-left: auto;
+}
+
+.presenter__waiting {
+  display: grid;
+  gap: var(--space-5);
+  justify-items: start;
+}
+
+.presenter__main {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: var(--space-6) var(--space-7);
+}
+
+.presenter__now,
+.presenter__controls {
+  grid-column: 1 / -1;
+}
+
+.presenter__count {
+  color: var(--ink-2);
+  font-weight: 650;
+}
+
+.presenter__now h2 {
+  font-size: var(--step-5);
+}
+
+.presenter__state {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  margin-top: var(--space-2);
+  max-width: none;
+  font-size: var(--step-1);
+}
+
+.presenter__action {
+  margin-top: var(--space-2);
+  color: var(--ink-2);
+}
+
+.presenter__action--failed {
+  color: var(--madder);
+  font-weight: 650;
+}
+
+.presenter__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.presenter__toggle {
+  min-width: 10rem;
+}
+
+.presenter__notes h3,
+.presenter__next h3 {
+  font-size: var(--step-1);
+  margin: var(--space-4) 0 var(--space-2);
+  color: var(--ink-2);
+}
+
+.presenter__notes ul {
+  margin: 0;
+  padding-left: 1.2rem;
+  display: grid;
+  gap: var(--space-3);
+  font-size: var(--step-1);
+  line-height: 1.4;
+}
+
+.presenter__caption {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--step-1);
+}
+
+.presenter__next-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--step-2);
+}
+
+.presenter__steps {
+  grid-column: 1 / -1;
+}
+
+.presenter__steps ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.presenter__steps button {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-control);
+  background: var(--sheet);
+  cursor: pointer;
+}
+
+.presenter__steps button[aria-current='step'] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--sheet);
+}
+
+@media (max-width: 760px) {
+  .presenter__main {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---- clean audience view ------------------------------------------------- */
+
+body[data-clean-view='true'] .primary-nav,
+body[data-clean-view='true'] .menu-toggle,
+body[data-clean-view='true'] .shell-header__status .button {
+  display: none;
+}
+
+.present-bar[data-clean] .present-bar__status {
+  display: none;
+}
+
+.present-bar[data-clean] .present-bar__row {
+  grid-template-columns: minmax(10rem, 16rem) 1fr auto;
+}
+
+.present-btn--quiet {
+  border-color: transparent;
+  opacity: 0.6;
+}
+
+.present-btn--quiet:hover,
+.present-btn--quiet:focus-visible {
+  opacity: 1;
+}
+
+/* ---- framing content above the caption bar (design review) ---------------- */
+
+body[data-presenting='true'] {
+  padding-bottom: calc(var(--present-bar-h, 10.5rem) + var(--space-6));
+}
+
+/* The bar names the step, so the header can scroll away and give content room. */
+body[data-presenting='true'] .shell-header {
+  position: static;
+}
+
+/* Reading aids that matter in the app but not on stage. */
+body[data-presenting='true'] .solver__details,
+body[data-presenting='true'] .solver__link {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  .present-btn__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+
+  .present-btn--main {
+    min-width: 2.75rem;
+  }
+
+  .present-bar__controls {
+    flex-wrap: nowrap;
+    justify-content: space-between;
+  }
+}
+
+body[data-presenting='true'] .solver__score dd {
+  font-size: var(--step-3);
+}
+
+/* Short laptop screens: a slimmer bar leaves more room for the content. */
+@media (max-height: 820px) {
+  .present-bar__caption {
+    font-size: var(--step-1);
+  }
+
+  .present-btn {
+    height: 2.5rem;
+  }
+
+  .present-bar__inner {
+    padding-top: var(--space-2);
+    padding-bottom: var(--space-2);
+  }
+}
+
+@media (max-height: 820px) {
+  /* Same crossing proportions (112:72), smaller, so whole solver panels fit. */
+  body[data-presenting='true'] .weave--compact {
+    --cell-w: 4.375rem;
+    --cell-h: 2.8125rem;
+  }
+
+  body[data-presenting='true'] .solver {
+    gap: var(--space-3);
+    padding-top: var(--space-4);
+  }
+
+  body[data-presenting='true'] .solver__metrics {
+    gap: var(--space-2) var(--space-4);
+  }
+}

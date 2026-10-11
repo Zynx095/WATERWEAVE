@@ -1,5 +1,7 @@
-﻿from dataclasses import dataclass, field
-from typing import Any
+from dataclasses import dataclass, field
+from typing import Any, TypeAlias
+
+Allocation: TypeAlias = dict[str, dict[str, int]]
 
 @dataclass(frozen=True)
 class Neighborhood:

@@ -1,0 +1,102 @@
+from typing import List, Dict
+from datetime import datetime, timezone
+from ..models import Scenario, Neighborhood
+from .models import Observation
+
+class ScenarioBuilder:
+    def __init__(self, seed: int = 42, apply_hypothetical_rainfall_heuristic: bool = False):
+        self.seed = seed
+        self.apply_hypothetical_rainfall_heuristic = apply_hypothetical_rainfall_heuristic
+        # Base synthetic schema to fall back on or modify
+        self.base_demand = {
+            "N1": {"morning": 1, "evening": 1},
+            "N2": {"morning": 1, "evening": 1},
+            "N3": {"morning": 1, "evening": 0},
+            "N4": {"morning": 1, "evening": 1},
+        }
+        self.base_storage = {"N1": 2, "N2": 1, "N3": 2, "N4": 2}
+        self.names = {
+            "N1": "Hillview (Data-Driven)",
+            "N2": "Riverside (Data-Driven)",
+            "N3": "Market (Data-Driven)",
+            "N4": "Lakeside (Data-Driven)"
+        }
+
+    def build(self, observations: List[Observation]) -> Scenario:
+        """
+        Transforms live/static observations into a valid Scenario.
+        """
+        # 1. Parse Observations
+        rainfall_mm = 0.0
+        rainfall_observed = False
+        population_by_ward: Dict[str, float] = {}
+        
+        has_live_data = False
+        data_sources = set()
+        
+        for obs in observations:
+            if obs.quality.missing:
+                continue
+                
+            data_sources.add(obs.provider_id)
+            if obs.quality.status == "VERIFIED_LIVE":
+                has_live_data = True
+                
+            if obs.variable == "rainfall_mm" and obs.geographic_id == "bengaluru":
+                if obs.value is not None:
+                    rainfall_mm = obs.value
+                    rainfall_observed = True
+            elif obs.variable == "population" and obs.geographic_id.startswith("N"):
+                if obs.value is not None:
+                    population_by_ward[obs.geographic_id] = obs.value
+        
+        # 2. Adjust Supply based on Rainfall
+        # This is a hypothetical assumption, disabled by default.
+        # Rainfall does not directly/instantly translate to BWSSB municipal pipe supply.
+        supply_morning = 2
+        supply_evening = 2
+        
+        if self.apply_hypothetical_rainfall_heuristic and rainfall_mm >= 5.0:
+            supply_evening += int(rainfall_mm // 5.0)
+            
+        # Cap supply to not exceed total demand (7) otherwise it's not a scarcity problem
+        if supply_morning + supply_evening > 6:
+            supply_evening = 6 - supply_morning
+            
+        # 3. Adjust Priority based on Population
+        neighborhoods = []
+        for n_id, demand in self.base_demand.items():
+            # Default priority if population is missing
+            priority = 1.0
+            if n_id in population_by_ward:
+                # 25000 population = 1.0 weight
+                priority = round(population_by_ward[n_id] / 25000.0, 2)
+                
+            neighborhoods.append(
+                Neighborhood(
+                    id=n_id,
+                    name=self.names[n_id],
+                    demand_by_slot=demand,
+                    priority_weight=priority,
+                    storage_capacity_units=self.base_storage[n_id]
+                )
+            )
+            
+        # 4. Construct description
+        mode = "LIVE/DATA-DRIVEN" if has_live_data else "STATIC DATA-DRIVEN"
+        sources = ", ".join(sorted(list(data_sources))) if data_sources else "None (Fallback)"
+        rainfall_text = f"{rainfall_mm}mm (context only)" if rainfall_observed else "not observed"
+        desc = (
+            f"[{mode}] SYNTHETIC demand and supply, adjusted by the listed data. "
+            f"Sources: {sources}. Rainfall: {rainfall_text}. "
+            f"Note: Priorities are estimated heuristics based on illustrative population counts."
+        )
+
+        return Scenario(
+            name=f"data-driven-4x2",
+            slots=("morning", "evening"),
+            neighborhoods=tuple(neighborhoods),
+            supply_by_slot={"morning": supply_morning, "evening": supply_evening},
+            description=desc,
+            seed=self.seed
+        )

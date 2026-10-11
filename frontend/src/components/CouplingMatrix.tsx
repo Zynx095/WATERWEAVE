@@ -15,7 +15,7 @@ export function CouplingMatrix({ model, labels, longLabels }: { model: ModelDeta
   )
   for (const [k, l, v] of model.qubo.quadratic) grid[k][l] = v
   const max = Math.max(...grid.flat().map((v) => Math.abs(v ?? 0)), 1e-9)
-  const cell = 34
+  const cell = 42
 
   const color = (v: number) => {
     if (Math.abs(v) < 1e-12) return 'var(--sheet)'
@@ -29,18 +29,18 @@ export function CouplingMatrix({ model, labels, longLabels }: { model: ModelDeta
     <figure className="matrix">
       <ScrollRegion className="matrix__scroll" label="QUBO coefficient grid">
         <svg
-          viewBox={`0 0 ${48 + n * cell} ${48 + n * cell}`}
-          width={48 + n * cell}
-          height={48 + n * cell}
+          viewBox={`0 0 ${56 + n * cell} ${56 + n * cell}`}
+          width={56 + n * cell}
+          height={56 + n * cell}
           role="img"
           aria-label={`QUBO coefficients for ${n} binary variables: ${model.qubo.quadratic.length} non-zero pairwise couplings. The table below lists every value.`}
         >
           {labels.map((label, i) => (
             <g key={i}>
-              <text className="matrix__label" x={48 + i * cell + cell / 2} y={36} textAnchor="middle">
+              <text className="matrix__label" x={56 + i * cell + cell / 2} y={42} textAnchor="middle">
                 {label}
               </text>
-              <text className="matrix__label" x={40} y={48 + i * cell + cell / 2 + 4} textAnchor="end">
+              <text className="matrix__label" x={48} y={56 + i * cell + cell / 2 + 5} textAnchor="end">
                 {label}
               </text>
             </g>
@@ -50,8 +50,8 @@ export function CouplingMatrix({ model, labels, longLabels }: { model: ModelDeta
               v === null ? null : (
                 <rect
                   key={`${k}-${l}`}
-                  x={48 + l * cell + 1}
-                  y={48 + k * cell + 1}
+                  x={56 + l * cell + 1}
+                  y={56 + k * cell + 1}
                   width={cell - 2}
                   height={cell - 2}
                   rx={3}
@@ -69,6 +69,13 @@ export function CouplingMatrix({ model, labels, longLabels }: { model: ModelDeta
           )}
         </svg>
       </ScrollRegion>
+      <ul className="matrix__key" aria-label="Short names used in the grid">
+        {labels.map((label, i) => (
+          <li key={label}>
+            <strong>{label}</strong> {longLabels[i]}
+          </li>
+        ))}
+      </ul>
       <figcaption className="matrix__legend">
         <span className="matrix__swatch matrix__swatch--neg" aria-hidden="true" /> negative: switching both on lowers
         the energy

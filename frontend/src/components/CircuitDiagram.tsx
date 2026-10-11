@@ -83,79 +83,84 @@ export function layoutCircuit(circuit: CircuitInfo): { gates: PlacedGate[]; phas
   return { gates, phases, columns: offset }
 }
 
-const COL = 30
-const ROW = 30
-const LABEL = 168
-const TOP = 52
+const COL = 34
+const ROW = 34
+const LABEL = 196
+const TOP = 58
 
 export function CircuitDiagram({ circuit, labels }: { circuit: CircuitInfo; labels: string[] }) {
   const { gates, phases, columns } = layoutCircuit(circuit)
-  const width = LABEL + columns * COL + 24
+  const width = columns * COL + 16
   const height = TOP + circuit.num_qubits * ROW + 8
   const y = (q: number) => TOP + q * ROW + ROW / 2
-  const x = (c: number) => LABEL + c * COL + COL / 2
+  const x = (c: number) => c * COL + COL / 2
   const counts = Object.entries(circuit.gate_counts)
     .map(([name, n]) => `${n} ${name.toUpperCase()}`)
     .join(', ')
 
   return (
-    <ScrollRegion className="circuit-wrap" label="QAOA circuit diagram">
-      <svg
-        className="circuit"
-        viewBox={`0 0 ${width} ${height}`}
-        width={width}
-        height={height}
-        role="img"
-        aria-label={`QAOA circuit on ${circuit.num_qubits} qubits, depth ${circuit.depth}, ${circuit.layers} layer(s): ${counts} gates.`}
-      >
-        {phases.map((p, i) => (
-          <g key={p.label}>
-            <rect
-              className={`circuit__phase circuit__phase--${p.label === 'Prepare' ? 'prep' : p.label.startsWith('Cost') ? 'cost' : 'mix'}`}
-              x={LABEL + p.start * COL + 2}
-              y={TOP - 46}
-              width={(p.end - p.start) * COL - 4}
-              height={height - TOP + 42}
-              rx={6}
-            />
-            <text className="circuit__phase-label" x={LABEL + p.start * COL + 8} y={TOP - 30}>
-              {p.label}
-            </text>
-            <text className="circuit__phase-detail" x={LABEL + p.start * COL + 8} y={TOP - 14}>
-              {i === 0 ? '' : p.detail}
-            </text>
-          </g>
-        ))}
+    <div className="circuit-figure">
+      {/* Qubit names stay in view while the gates scroll sideways. */}
+      <svg className="circuit-labels" viewBox={`0 0 ${LABEL} ${height}`} width={LABEL} height={height} aria-hidden="true">
         {labels.slice(0, circuit.num_qubits).map((label, q) => (
-          <g key={q}>
-            <text className="circuit__qubit" x={LABEL - 10} y={y(q) + 4} textAnchor="end">
-              {label}
-            </text>
-            <line className="circuit__wire" x1={LABEL} y1={y(q)} x2={width - 12} y2={y(q)} />
-          </g>
+          <text key={q} className="circuit__qubit" x={LABEL - 12} y={y(q) + 5} textAnchor="end">
+            {label}
+          </text>
         ))}
-        {gates.map((g, i) => {
-          if (g.qubits.length === 2) {
-            const [a, b] = g.qubits
-            return (
-              <g key={i} className="circuit__rzz">
-                <line x1={x(g.column)} y1={y(a)} x2={x(g.column)} y2={y(b)} />
-                <circle cx={x(g.column)} cy={y(a)} r={5} />
-                <circle cx={x(g.column)} cy={y(b)} r={5} />
-              </g>
-            )
-          }
-          const q = g.qubits[0]
-          return (
-            <g key={i} className={`circuit__gate circuit__gate--${g.name}`}>
-              <rect x={x(g.column) - 12} y={y(q) - 11} width={24} height={22} rx={4} />
-              <text x={x(g.column)} y={y(q) + 4} textAnchor="middle">
-                {g.name.toUpperCase()}
+      </svg>
+      <ScrollRegion className="circuit-wrap" label="QAOA circuit diagram">
+        <svg
+          className="circuit"
+          viewBox={`0 0 ${width} ${height}`}
+          width={width}
+          height={height}
+          role="img"
+          aria-label={`QAOA circuit on ${circuit.num_qubits} qubits, depth ${circuit.depth}, ${circuit.layers} layer(s): ${counts} gates.`}
+        >
+          {phases.map((p, i) => (
+            <g key={p.label}>
+              <rect
+                className={`circuit__phase circuit__phase--${p.label === 'Prepare' ? 'prep' : p.label.startsWith('Cost') ? 'cost' : 'mix'}`}
+                x={p.start * COL + 2}
+                y={TOP - 50}
+                width={(p.end - p.start) * COL - 4}
+                height={height - TOP + 46}
+                rx={6}
+              />
+              <text className="circuit__phase-label" x={p.start * COL + 9} y={TOP - 31}>
+                {p.label}
+              </text>
+              <text className="circuit__phase-detail" x={p.start * COL + 9} y={TOP - 13}>
+                {i === 0 ? '' : p.detail}
               </text>
             </g>
-          )
-        })}
-      </svg>
-    </ScrollRegion>
+          ))}
+          {labels.slice(0, circuit.num_qubits).map((_, q) => (
+            <line key={q} className="circuit__wire" x1={0} y1={y(q)} x2={width - 8} y2={y(q)} />
+          ))}
+          {gates.map((g, i) => {
+            if (g.qubits.length === 2) {
+              const [a, b] = g.qubits
+              return (
+                <g key={i} className="circuit__rzz">
+                  <line x1={x(g.column)} y1={y(a)} x2={x(g.column)} y2={y(b)} />
+                  <circle cx={x(g.column)} cy={y(a)} r={5.5} />
+                  <circle cx={x(g.column)} cy={y(b)} r={5.5} />
+                </g>
+              )
+            }
+            const q = g.qubits[0]
+            return (
+              <g key={i} className={`circuit__gate circuit__gate--${g.name}`}>
+                <rect x={x(g.column) - 14} y={y(q) - 12} width={28} height={24} rx={4} />
+                <text x={x(g.column)} y={y(q) + 4.5} textAnchor="middle">
+                  {g.name.toUpperCase()}
+                </text>
+              </g>
+            )
+          })}
+        </svg>
+      </ScrollRegion>
+    </div>
   )
 }

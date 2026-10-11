@@ -28,6 +28,21 @@ _NOT_BUILT_PAGE = """<!doctype html>
 </body></html>"""
 
 
+# The built frontend loads only its own scripts, styles and fonts and talks
+# only to this server, so the policy can be strict. Inline styles are allowed
+# because React sets element styles at run time.
+SECURITY_HEADERS = {
+    "Content-Security-Policy": (
+        "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; "
+        "connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; "
+        "frame-ancestors 'none'"
+    ),
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Referrer-Policy": "no-referrer",
+}
+
+
 def _frontend_dist() -> Path:
     return service.repo_root() / "frontend" / "dist"
 
@@ -38,6 +53,13 @@ def create_app() -> FastAPI:
         version="0.1.0",
         description="Thin HTTP layer over the WATERWEAVE optimisation engine and data pipeline.",
     )
+
+    @app.middleware("http")
+    async def _security_headers(request: Request, call_next):
+        response = await call_next(request)
+        for name, value in SECURITY_HEADERS.items():
+            response.headers.setdefault(name, value)
+        return response
 
     @app.exception_handler(RequestValidationError)
     async def _validation_error(_: Request, exc: RequestValidationError) -> JSONResponse:

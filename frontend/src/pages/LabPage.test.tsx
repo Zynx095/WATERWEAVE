@@ -80,6 +80,34 @@ describe('LabPage', () => {
   })
 })
 
+describe('LabPage with an old run', () => {
+  it('does not draw a circuit that was run for another scenario', async () => {
+    mockApi()
+    const user = userEvent.setup()
+    const { useStore } = await import('../state/store')
+    function Edit() {
+      const { actions } = useStore()
+      return (
+        <button type="button" onClick={() => actions.selectPreset('drought')}>
+          choose drought
+        </button>
+      )
+    }
+    renderWithStore(
+      <>
+        <Edit />
+        <LabPage />
+      </>,
+    )
+    await user.click(await screen.findByRole('button', { name: 'Run QAOA on this scenario' }))
+    expect(await screen.findByRole('img', { name: /QAOA circuit on 12 qubits/ })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'choose drought' }))
+    expect(await screen.findByText(/different scenario or different settings/)).toBeInTheDocument()
+    expect(screen.queryByRole('img', { name: /QAOA circuit on/ })).toBeNull()
+    expect(screen.queryByRole('heading', { name: 'Chosen sample' })).toBeNull()
+  })
+})
+
 describe('LabPage without the API', () => {
   it('shows the recorded model and circuit, labelled as recorded', async () => {
     const { offlineApi } = await import('../test/utils')

@@ -60,6 +60,7 @@ async function requestJson<T>(
   options.signal?.addEventListener('abort', onOuterAbort, { once: true })
 
   let response: Response
+  let text: string
   try {
     response = await fetch(path, {
       method: init.method ?? 'GET',
@@ -70,6 +71,9 @@ async function requestJson<T>(
       body: init.body === undefined ? undefined : JSON.stringify(init.body),
       signal: controller.signal,
     })
+    // The body is read inside the same guard, so cancelling or timing out
+    // still works while it streams.
+    text = await response.text()
   } catch (error) {
     if (timedOut) {
       throw new ApiError(
@@ -87,7 +91,6 @@ async function requestJson<T>(
   }
 
   let payload: unknown = null
-  const text = await response.text()
   if (text) {
     try {
       payload = JSON.parse(text)

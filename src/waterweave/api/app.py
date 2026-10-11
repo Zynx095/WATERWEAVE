@@ -58,6 +58,10 @@ def create_app() -> FastAPI:
     async def _security_headers(request: Request, call_next):
         response = await call_next(request)
         for name, value in SECURITY_HEADERS.items():
+            # FastAPI's /docs page loads Swagger UI from a CDN with an inline
+            # script, which this policy would block; it is a developer aid.
+            if name == "Content-Security-Policy" and request.url.path in {"/docs", "/redoc"}:
+                continue
             response.headers.setdefault(name, value)
         return response
 

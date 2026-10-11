@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright'
 import type { Page } from '@playwright/test'
-import { bar, expect, startLivePresentation, test } from './fixtures'
+import { bar, expect, expectClean, startLivePresentation, test } from './fixtures'
 
 /** Runs axe (WCAG 2.1 A and AA rules) and returns serious or critical violations. */
 async function seriousViolations(page: Page) {
@@ -61,5 +61,37 @@ test.describe('accessibility (axe, WCAG 2.1 AA)', () => {
     await presenter.goto('/presenter')
     await expect(presenter.getByRole('status')).toContainText('Linked to the main window')
     expect(await seriousViolations(presenter)).toEqual([])
+  })
+})
+
+test.describe('Windows high contrast (forced colours)', () => {
+  test.use({ forcedColors: 'active' })
+
+  test('keyboard focus, the current page and the selected depth stay visible', async ({ page, problems }) => {
+    await page.goto('/workspace')
+    expect(await page.evaluate(() => matchMedia('(forced-colors: active)').matches)).toBe(true)
+
+    // Focus rings are box shadows normally; forced colours drop those, so an outline must appear.
+    await page.keyboard.press('Tab')
+    await page.keyboard.press('Tab')
+    const focusRing = await page.evaluate(() => {
+      const style = getComputedStyle(document.activeElement as Element)
+      return { style: style.outlineStyle, width: parseFloat(style.outlineWidth) }
+    })
+    expect(focusRing.style).toBe('solid')
+    expect(focusRing.width).toBeGreaterThanOrEqual(2)
+
+    const current = page.getByRole('link', { name: 'Workspace', exact: true })
+    expect(await current.evaluate((el) => getComputedStyle(el).textDecorationLine)).toContain('underline')
+
+    // The selected QAOA depth must look different from the others without relying on colour choices.
+    await expect(page.getByRole('radio', { name: '1' })).toBeChecked()
+    const fills = await page
+      .getByRole('group', { name: /Layers/ })
+      .locator('.segmented__option span')
+      .evaluateAll((spans) => spans.map((s) => getComputedStyle(s).backgroundColor))
+    expect(fills[0]).not.toBe(fills[1])
+    expect(fills[1]).toBe(fills[2])
+    expectClean(problems)
   })
 })

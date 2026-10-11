@@ -454,7 +454,6 @@ def solve_qaoa(
                 return float(sv.expectation_value(hamiltonian_op).real)
 
         # Warm-start search for initial variational parameters to avoid poor local minima
-        np.random.seed(seed)
         best_init = np.concatenate([np.full(p, 0.3), np.full(p, 0.3)])
         best_init_cost = float("inf")
 

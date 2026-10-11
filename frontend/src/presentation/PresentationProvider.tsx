@@ -25,6 +25,7 @@ import {
   createReducer,
   initialPresentation,
   remaining,
+  stepDuration,
   type PresentationEvent,
   type PresentationState,
 } from './machine'
@@ -33,6 +34,8 @@ import { STEP_DURATIONS, STEPS, type StepAction, type StepContext } from './step
 export const MACHINE_CONFIG = { durations: STEP_DURATIONS }
 const reducer = createReducer(MACHINE_CONFIG)
 const TICK_MS = 200
+/** Fraction of a step after which a target too tall for the screen is scrolled to its end. */
+const REVEAL_AT = 0.5
 
 export interface PresentationValue {
   state: PresentationState
@@ -103,6 +106,18 @@ function frameAboveBar(element: HTMLElement, reduceMotion: boolean) {
     top: Math.max(0, window.scrollY + rect.top - gap - centring),
     behavior: reduceMotion ? 'auto' : 'smooth',
   })
+}
+
+/**
+ * For an element taller than the space above the bar: scrolls on until its
+ * end sits just above the bar, so nothing stays hidden behind the caption.
+ */
+function revealEnd(element: HTMLElement, reduceMotion: boolean) {
+  const gap = 24
+  const barTop = document.querySelector('.present-bar')?.getBoundingClientRect().top ?? window.innerHeight
+  const hidden = element.getBoundingClientRect().bottom - (barTop - gap)
+  if (hidden <= 1) return
+  window.scrollTo({ top: window.scrollY + hidden, behavior: reduceMotion ? 'auto' : 'smooth' })
 }
 
 function isTypingTarget(target: EventTarget | null) {
@@ -196,6 +211,21 @@ export function PresentationProvider({ children }: { children: ReactNode }) {
       element?.removeAttribute('data-spotlight')
     }
   }, [active, state.token, state.action.status, location.pathname, step.route, step.target])
+
+  // Halfway through a step that plays on its own, show the rest of a target too tall for the screen.
+  // Paused or manual presenters scroll themselves, so nothing moves under them.
+  const revealDue =
+    state.status === 'running' &&
+    state.auto &&
+    state.action.status !== 'pending' &&
+    state.elapsedMs >= stepDuration(MACHINE_CONFIG, state) * REVEAL_AT
+  const revealedToken = useRef(0)
+  useEffect(() => {
+    if (!revealDue || revealedToken.current === state.token) return
+    revealedToken.current = state.token
+    const element = document.querySelector<HTMLElement>('[data-spotlight]')
+    if (element) revealEnd(element, window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+  }, [revealDue, state.token])
 
   // Room for the presentation bar while presenting.
   useEffect(() => {

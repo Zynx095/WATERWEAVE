@@ -119,11 +119,11 @@ export function PresenterPage() {
                   ? 'Finished'
                   : s.action.status === 'pending'
                     ? 'Waiting for the engine'
-                    : playing
-                      ? s.auto
+                    : !s.auto
+                      ? 'Manual'
+                      : playing
                         ? 'Playing'
-                        : 'Manual'
-                      : 'Paused'}
+                        : 'Paused'}
               </strong>
               {s.auto && s.status !== 'finished' && (
                 <span className="num">

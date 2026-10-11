@@ -213,7 +213,7 @@ A pure state machine (`frontend/src/presentation/machine.ts`) drives nine steps 
 
 1. The problem, 2. The scenario (loads the synthetic default), 3. The rules, 4. Classical solvers (runs greedy and exact on the engine), 5. Quantum optimisation (runs QAOA on the engine), 6. Results and fairness, 7. Data integrity (fetches the data sources; offline view if the network is down), 8. Honest comparison (recorded benchmark with the random control), 9. Conclusion.
 
-Each step navigates to its page, scrolls to and outlines the element it is about, and runs its real action. Captions for the audience and notes for the presenter are generated from the actual results, so no number is read out that the engine has not produced.
+Each step navigates to its page, scrolls to and outlines the element it is about, and runs its real action. If that element is taller than the space above the caption bar (a 1280x720 projector, for example), the view scrolls on to its end halfway through the step; this happens only while the walkthrough plays on its own, never while paused. Captions for the audience and notes for the presenter are generated from the actual results, so no number is read out that the engine has not produced.
 
 | Control | Button | Key |
 | :--- | :--- | :--- |
@@ -329,7 +329,7 @@ Scenario: synthetic-4x2 (4 neighborhoods, 2 delivery slots)
 
   * **Fairness Score vs. Disparity Metric Separation:** Range-based `fairness_score` ($1 - (\max s - \min s) = 0.50$) and quadratic `disparity` ($\sum (s_i - s_j)^2 = 0.75$) are distinct mathematical quantities that can invert rankings. Both are reported explicitly to prevent conflation.
   * **Modal Bitstring vs. Post-Selection:** In multiple runs, the modal (most frequent) measured bitstring was infeasible. The reported solution is obtained via classical post-selection of the best feasible bitstring.
-  * **Test suite (measured on this branch):** 142 Python tests pass and 1 optional live-fetch test is skipped; 106 Vitest tests and 22 Playwright browser tests pass. The browser tests play the full presentation on the real engine and include an axe-core WCAG 2.1 AA audit with no serious or critical violations and a Windows high-contrast (forced colours) check.
+  * **Test suite (measured on this branch):** 142 Python tests pass and 1 optional live-fetch test is skipped; 107 Vitest tests and 22 Playwright browser tests pass. The browser tests play the full presentation on the real engine and include an axe-core WCAG 2.1 AA audit with no serious or critical violations and a Windows high-contrast (forced colours) check.
 
 * **Critical Reflection on Limitations:**  
   * **No Quantum Advantage Claimed:** On this synthetic benchmark, classical enumeration is two orders of magnitude faster than QAOA statevector simulation. Quantum advantage cannot be claimed or inferred.

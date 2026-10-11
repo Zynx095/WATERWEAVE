@@ -138,6 +138,12 @@ transition is unit-tested without timers.
   succeeds or fails. A failure pauses the walkthrough and shows the reason
   with a Retry button; Next still works.
 * Exit returns to normal navigation on the current page.
+* Framing: each step's element is centred in the space above the caption
+  bar, or shown from its top if it is taller. Halfway through a step that is
+  playing on its own, a taller element is scrolled on until its end sits
+  above the bar, once per step entry; paused or manual presenters are never
+  scrolled under. Measured at 1280x720: nothing of a step's element stays
+  behind the bar by 80% of the step.
 
 Steps (about four minutes at the default pace): problem, scenario,
 constraints, classical solvers (live run), QAOA (live run), results and
@@ -162,7 +168,7 @@ labelled "recorded".
 | Suite | Command | Result on this branch |
 |---|---|---|
 | Python | `pytest` | 142 passed, 1 skipped (optional live fetch). The original 104 still pass; `tests/test_api.py` covers every endpoint, validation, failure reporting and offline mode; `tests/test_recorded_snapshot.py` replays the recorded run against the engine. |
-| Frontend | `cd frontend && npm test` | 106 passed: state machine transitions, the controller with fake timers (auto-advance, pause, resume, keys, failures, timer cleanup), preflight, presenter channel, API client, weave, editor validation, pages, and the browser-side service shares checked against the engine's fairness numbers. |
+| Frontend | `cd frontend && npm test` | 107 passed: state machine transitions, the controller with fake timers (auto-advance, pause, resume, keys, failures, timer cleanup), preflight, presenter channel, API client, weave, editor validation, pages, and the browser-side service shares checked against the engine's fairness numbers. |
 | Browser | `cd frontend && npm run e2e` | 22 passed in Microsoft Edge against the real API (1.7 min): all pages, real solver runs, failure and offline paths, three viewport sizes, keyboard use, forced colours, the full nine-step presentation playing on its own, the presenter window, and an axe-core WCAG 2.1 AA audit with no serious or critical violations. |
 
 The brief's twenty browser checks and the tests that cover them

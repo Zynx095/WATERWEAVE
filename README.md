@@ -305,7 +305,7 @@ Scenario: synthetic-4x2 (4 neighborhoods, 2 delivery slots)
   * **Uniform Random Sampling Control:** Shot-matched ($1,024$ shots) uniform random sampler over the same 12-qubit register, applying identical post-selection. Added to rigorously test whether QAOA provides an advantage over random search.
 
 * **Comparative Analysis:**  
-  * **Approximation Ratio ($C_{\text{quantum}} / C_{\text{optimal}}$):** $\mathbf{1.00}$ (QAOA reaches the optimal objective $6.0$ in 14 of 15 recorded runs across seeds and depths).
+  * **Approximation Ratio ($C_{\text{quantum}} / C_{\text{optimal}}$):** $\mathbf{1.00}$ for the best recorded run and $pprox 1.011$ on average ($6.067 / 6.0$; QAOA reaches the optimal objective $6.0$ in 14 of 15 recorded runs across seeds and depths, and $6.2$ on average at $p=1$).
   * **Feasibility Yield:** QAOA concentrates probability mass on feasible states ($74.6\%$ feasible samples at $p=1$, $63.0\%$ at $p=2$, $65.5\%$ at $p=3$) compared to $50.8\%$ for uniform random sampling.
   * **Random Control Reality:** Because 3 of 128 states are optimal on this small synthetic instance, a shot-matched uniform random sampler draws an optimal state in **15 of 15 runs** (failure probability is $(1 - 3/128)^{1024} \approx 3.2 \times 10^{-11}$). Consequently, best-of-1024 post-selection cannot separate QAOA from random search on this problem size.
   * **Runtime:** Exact classical enumeration takes $\approx 3.5\text{ ms}$. QAOA statevector simulation takes $\approx 330\text{ ms} - 730\text{ ms}$. Classical enumeration is vastly faster on small instances.

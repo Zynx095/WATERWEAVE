@@ -394,3 +394,18 @@ def test_built_frontend_is_served_with_client_side_routes(monkeypatch, tmp_path)
     assert local.get("/../pyproject.toml").text.startswith("<!doctype html>")
     assert local.get("/api/nope").status_code == 404
     assert local.get("/api/health").json()["frontend_built"] is True
+
+
+def test_responses_carry_security_headers(client):
+    for path in ("/api/health", "/api/nonexistent", "/"):
+        headers = client.get(path).headers
+        assert headers["x-content-type-options"] == "nosniff"
+        assert headers["x-frame-options"] == "DENY"
+        assert "default-src 'self'" in headers["content-security-policy"]
+        assert "frame-ancestors 'none'" in headers["content-security-policy"]
+
+
+def test_static_file_requests_cannot_leave_the_build_folder(client):
+    for path in ("/..%2f..%2fpyproject.toml", "/%2e%2e/%2e%2e/pyproject.toml", "/C:/Windows/win.ini"):
+        body = client.get(path).text
+        assert "[build-system]" not in body and "for 16-bit app support" not in body

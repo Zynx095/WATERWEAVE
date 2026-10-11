@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatAge, formatRelative, formatSeconds, shortName } from './format'
+import { formatAge, formatGap, formatRelative, formatSeconds, shortName } from './format'
 
 describe('formatting', () => {
   const now = Date.parse('2026-10-11T01:00:00Z')
@@ -24,5 +24,15 @@ describe('formatting', () => {
   it('drops the provenance suffix from neighborhood names', () => {
     expect(shortName('Hillview (synthetic)')).toBe('Hillview')
     expect(shortName('Lakeside')).toBe('Lakeside')
+  })
+})
+
+
+describe('formatGap', () => {
+  it('does not show a real but tiny gap as zero', () => {
+    expect(formatGap(0.001)).toBe('<0.01')
+    expect(formatGap(0.004999)).toBe('<0.01')
+    expect(formatGap(0.5)).toBe('0.5')
+    expect(formatGap(3)).toBe('3')
   })
 })

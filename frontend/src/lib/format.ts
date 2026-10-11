@@ -61,6 +61,12 @@ export function formatNumber(value: number | null | undefined, digits = 2): stri
   return rounded.toLocaleString('en-GB', { maximumFractionDigits: digits })
 }
 
+/** A score gap; a real gap smaller than the display precision must not read as "0". */
+export function formatGap(value: number, digits = 2): string {
+  const floor = 0.5 * 10 ** -digits
+  return Math.abs(value) < floor ? `<${(2 * floor).toFixed(digits)}` : formatNumber(value, digits)
+}
+
 export function formatPercent(fraction: number | null | undefined, digits = 0): string {
   if (fraction === null || fraction === undefined || !Number.isFinite(fraction)) return 'n/a'
   return `${(fraction * 100).toFixed(digits)}%`

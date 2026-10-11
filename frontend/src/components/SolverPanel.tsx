@@ -1,7 +1,7 @@
 import { CircleAlert, CircleCheck, CircleSlash, TriangleAlert } from 'lucide-react'
 import { Link } from 'react-router'
 import type { QaoaMetadata, RunSource, ScenarioSpec, SolverOutcome } from '../api/types'
-import { formatNumber, formatPercent, formatSeconds } from '../lib/format'
+import { formatGap, formatNumber, formatPercent, formatSeconds } from '../lib/format'
 import { SOLVERS } from '../lib/solvers'
 import { ProvenanceTag } from './ProvenanceTag'
 import { Weave } from './Weave'
@@ -38,7 +38,7 @@ function GapLine({ outcome }: { outcome: SolverOutcome }) {
   }
   return (
     <p className="gap gap--worse">
-      <span className="num">{formatNumber(outcome.gap_to_exact)}</span> worse than exact search.
+      <span className="num">{formatGap(outcome.gap_to_exact)}</span> worse than exact search.
     </p>
   )
 }

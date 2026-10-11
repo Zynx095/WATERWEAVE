@@ -99,7 +99,10 @@ export function PresentationBar() {
                 <button
                   type="button"
                   className="present-bar__retry"
-                  onClick={() => dispatch({ type: 'GOTO', index: state.index })}
+                  onClick={() => {
+                    dispatch({ type: 'GOTO', index: state.index })
+                    dispatch({ type: 'RESUME' })
+                  }}
                 >
                   Retry
                 </button>

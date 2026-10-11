@@ -3,6 +3,13 @@ from datetime import datetime, timezone, timedelta
 
 _cache: Dict[str, Tuple[datetime, Any]] = {}
 
+def _all_missing(result: Any) -> bool:
+    """True for a non-empty list of observations that all failed to produce a value."""
+    if not isinstance(result, list) or not result:
+        return False
+    return all(getattr(getattr(o, "quality", None), "missing", False) for o in result)
+
+
 def ttl_cache(ttl_seconds: int = 300):
     """
     Simple in-memory TTL cache decorator for provider fetch methods.
@@ -21,7 +28,10 @@ def ttl_cache(ttl_seconds: int = 300):
             
             # Cache miss or expired
             result = func(*args, **kwargs)
-            _cache[key] = (now, result)
+            # A fetch that produced only missing values (a network error) is
+            # not kept: caching it would hide live data for the whole TTL.
+            if not _all_missing(result):
+                _cache[key] = (now, result)
             return result
         return wrapper
     return decorator

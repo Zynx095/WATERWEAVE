@@ -391,7 +391,11 @@ def test_built_frontend_is_served_with_client_side_routes(monkeypatch, tmp_path)
     assert local.get("/workspace").text.startswith("<!doctype html>")  # SPA route
     assert local.get("/assets/app.js").text == "console.log(1)"
     assert local.get("/favicon.svg").text == "<svg/>"
-    assert local.get("/../pyproject.toml").text.startswith("<!doctype html>")
+    (tmp_path / "secret.txt").write_text("outside the build folder", encoding="utf-8")
+    for path in ("/../secret.txt", "/..%2fsecret.txt", "/%2e%2e/secret.txt", "/..%5csecret.txt", "/../distx.txt"):
+        body = local.get(path).text
+        assert "outside the build folder" not in body, path
+        assert body.startswith("<!doctype html>"), path
     assert local.get("/api/nope").status_code == 404
     assert local.get("/api/health").json()["frontend_built"] is True
 
@@ -436,3 +440,32 @@ def test_provider_that_raises_is_marked_failed_not_just_skipped(client, monkeypa
     entry = next(s for s in body["skipped"] if s["provider"]["id"] == "open_meteo")
     assert entry["failed"] is True
     assert "provider crashed" in entry["reason"]
+
+
+@pytest.mark.parametrize(
+    "cell", [10**200, -1, True, "1", 101],
+)
+def test_evaluate_rejects_cells_that_are_not_small_non_negative_integers(client, default_payload, cell):
+    """Regression: 10**200 caused a 500 and a negative cell scored below the exact optimum."""
+    resp = client.post(
+        "/api/evaluate", json={"scenario": default_payload, "allocation": {"N1": {"morning": cell}}}
+    )
+    assert resp.status_code == 422
+
+
+def test_failed_weather_fetch_is_not_kept_for_the_cache_window(client, monkeypatch, fresh_cache):
+    import urllib.error
+
+    calls = {"n": 0}
+
+    def flaky(*args, **kwargs):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            raise urllib.error.URLError("offline for a moment")
+        return _FakeResponse({"current": {"time": "2026-10-11T04:00", "precipitation": 0.4}})
+
+    monkeypatch.setattr("urllib.request.urlopen", flaky)
+    first = _rain(client.get("/api/data-sources").json())
+    assert first["quality"]["missing"] is True
+    second = _rain(client.get("/api/data-sources").json())  # no refresh=true needed
+    assert second["quality"]["missing"] is False and second["value"] == 0.4

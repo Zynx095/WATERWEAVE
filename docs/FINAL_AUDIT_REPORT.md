@@ -227,7 +227,7 @@ Not fixed, by decision:
 * The PR contains the optimisation, validation, live-data and frontend
   workstreams, because none of them is on `main` yet. Open PRs #1
   (`claude/validation`) and #2 (`codex/optimization`) overlap with it.
-* PR URL: see the section appended below once created.
+* PR URL: <https://github.com/Zynx095/WATERWEAVE/pull/4> (open, not merged, no approvals).
 * **The PR has not been merged and must not be merged until a reviewer has
   gone through the checklist in its description.**
 

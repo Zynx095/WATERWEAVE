@@ -468,12 +468,15 @@ def solve_qaoa(
                     best_init_cost = c_val
                     best_init = cand
 
-        # Classical parameter optimization starting from warm-start basin
+        # Classical parameter optimization starting from warm-start basin.
+        # COBYLA needs at least (number of parameters + 2) evaluations; below
+        # that SciPy silently raises the limit, so use and report the real one.
+        maxiter_used = max(maxiter, 2 * p + 2)
         opt_res = scipy.optimize.minimize(
             expectation_cost,
             best_init,
             method="COBYLA",
-            options={"maxiter": maxiter},
+            options={"maxiter": maxiter_used},
         )
 
         opt_gammas = [float(g) for g in opt_res.x[:p]]
@@ -551,7 +554,7 @@ def solve_qaoa(
             scenario, modal_alloc, fairness_weight=fairness_weight, penalty_weight=penalty_weight
         )
         modal_feasible = bool(modal_m["feasible"] == 1.0)
-        opt_converged = bool(opt_res.nfev < maxiter)
+        opt_converged = bool(opt_res.nfev < maxiter_used)
         opt_status = "converged" if opt_converged else "maxiter_reached"
 
         return SolverResult(
@@ -570,6 +573,8 @@ def solve_qaoa(
                 "circuit_depth": circuit.depth(),
                 "optimizer": "COBYLA",
                 "optimizer_iterations": int(opt_res.nfev),
+                "optimizer_maxiter_requested": int(maxiter),
+                "optimizer_maxiter_used": int(maxiter_used),
                 "optimizer_converged": opt_converged,
                 "optimizer_status": opt_status,
                 "grid_evaluations": 36,

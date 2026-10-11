@@ -167,3 +167,39 @@ WATERWEAVE
    | `--offline` | never contact network data providers (same as `WATERWEAVE_OFFLINE=1`) |
 
 5. **Start the guided presentation:** press **Present** in the header. The preflight runs the real engine once, checks live weather, then offers *Start with the live engine* (or *Start with the recorded run* if the API is down). For a second screen, open <http://127.0.0.1:8000/presenter> in another window of the same browser.
+
+6. **Run the tests:**
+   ```bash
+   pytest                               # Python: engine, metrics, API, recorded-run check
+
+   cd frontend
+   npm test                             # Vitest: components, pages, presentation logic
+   npx playwright install chromium      # once, downloads the test browser
+   npm run e2e                          # Playwright: real API, real browser
+   ```
+   `npm run e2e` starts the API itself. Set `WATERWEAVE_PYTHON` to the interpreter that has the project installed. If the browser download is blocked, set `PLAYWRIGHT_CHANNEL=msedge` (or `chrome`) to use a browser you already have.
+
+7. **Other ways in:**
+   ```bash
+   python -m waterweave.optimization                  # command line: greedy vs exact vs QAOA
+   streamlit run app.py                               # the original Streamlit dashboard
+   python scripts/benchmark.py                        # the benchmark (seeds 0..4, p = 1..3)
+   jupyter notebook notebooks/solution.ipynb          # executed walkthrough notebook
+   cd frontend && npm run dev                         # live-reload web app on :5173
+   ```
+
+<details>
+<summary><b>Troubleshooting</b></summary>
+
+| What you see | What to do |
+| :--- | :--- |
+| "The WATERWEAVE API is not reachable" | Start `python -m waterweave.api` and press **Retry**. To present anyway, choose **Show recorded run**; everything is then labelled as recorded. |
+| The page says "WATERWEAVE API is running" instead of the app | The frontend has not been built. Run `cd frontend && npm ci && npm run build`, then restart. |
+| A page says it "could not be displayed" | The API and the built frontend are different versions. Rebuild the frontend and restart the API. |
+| QAOA says "Not run: this scenario needs N qubits" | Live simulation is capped at 15 qubits so answers come back in seconds. Greedy and exact still run. |
+| Live weather is unavailable | Nothing depends on it. Use `--offline` to skip the network completely. |
+| Port 8000 is busy | Start with `--port 8001` and open that port. |
+
+</details>
+
+---

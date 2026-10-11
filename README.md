@@ -329,7 +329,7 @@ Scenario: synthetic-4x2 (4 neighborhoods, 2 delivery slots)
 
   * **Fairness Score vs. Disparity Metric Separation:** Range-based `fairness_score` ($1 - (\max s - \min s) = 0.50$) and quadratic `disparity` ($\sum (s_i - s_j)^2 = 0.75$) are distinct mathematical quantities that can invert rankings. Both are reported explicitly to prevent conflation.
   * **Modal Bitstring vs. Post-Selection:** In multiple runs, the modal (most frequent) measured bitstring was infeasible. The reported solution is obtained via classical post-selection of the best feasible bitstring.
-  * **Test suite (measured on this branch):** 156 Python tests pass and 1 optional live-fetch test is skipped; 113 Vitest tests and 22 Playwright browser tests pass. The browser tests play the full presentation on the real engine and include an axe-core WCAG 2.1 AA audit with no serious or critical violations and a Windows high-contrast (forced colours) check.
+  * **Test suite (measured on this branch):** 162 Python tests pass and 1 optional live-fetch test is skipped; 115 Vitest tests and 22 Playwright browser tests pass. The browser tests play the full presentation on the real engine and include an axe-core WCAG 2.1 AA audit with no serious or critical violations and a Windows high-contrast (forced colours) check.
 
 * **Critical Reflection on Limitations:**  
   * **No Quantum Advantage Claimed:** On this synthetic benchmark, classical enumeration is two orders of magnitude faster than QAOA statevector simulation. Quantum advantage cannot be claimed or inferred.

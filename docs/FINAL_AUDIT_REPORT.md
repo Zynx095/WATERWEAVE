@@ -177,8 +177,8 @@ packages beyond what `pip-audit` resolves.
 
 | Test/check | Command or method | Result | Evidence | Notes |
 |---|---|---|---|---|
-| Python | `python -m pytest -q` | 156 passed, 1 skipped | run after the last code change | skipped test is the optional live fetch |
-| Frontend unit | `npx vitest run` in `frontend/` | 113 passed (18 files) | after the last code change | |
+| Python | `python -m pytest -q` | 162 passed, 1 skipped | run after the last code change | skipped test is the optional live fetch |
+| Frontend unit | `npx vitest run` in `frontend/` | 115 passed (18 files) | after the last code change | |
 | Frontend build | `npm run build` (tsc + vite) | passes | run inside `npm run e2e` | |
 | Browser | `PLAYWRIGHT_CHANNEL=msedge npm run e2e` | 22 passed, 1.7 min | against the real API on the final build | Edge only |
 | Viewport sweep | scripted, 7 routes x 4 sizes | 0 overflow, 0 console issues | | with the security policy active |
@@ -260,3 +260,31 @@ Not fixed, by decision:
    dated source if one is ever ingested, and keep the label until then.
 5. Optional hardening: Firefox and Safari checks, a screen-reader pass, and
    moving `isStale` out of `WorkspacePage.tsx` into `lib/`.
+
+## N. Second review round (independent reviewers, after the PR was opened)
+
+Two read-only reviewers who had not written the code examined the Python
+side and the presentation and accessibility side, and the results were
+re-verified before fixing. Fixed in follow-up commits on the same branch:
+
+| Sev | Issue | Fix |
+|---|---|---|
+| Medium | `/api/evaluate` returned 500 for a 10^200 cell and scored a negative cell below the exact optimum | cells must be ints 0 to 100, strict; 422 otherwise |
+| Medium | A failed weather fetch was cached for 5 minutes | all-missing results are not cached |
+| Medium | Every open app tab answered and obeyed the presenter; Home from the presenter started shows in all idle tabs | idle background tabs ignore the channel; RESTART is a no-op before START |
+| Medium | Forced colours with a dark scheme: coupling-grid labels dark on dark, legend keys gone | CanvasText fill, bordered swatches; measured in Edge |
+| Low | Pause/Resume did nothing in manual mode and the windows disagreed | toggle hidden, both windows say Manual |
+| Low | Space on a focused crossing or stepper button toggled the show | page controls take Space |
+| Low | Focus fell to `body` when the show started or ended | focus moves to the bar and back to Present |
+| Low | `np.random.seed` reseeded NumPy globally with no effect | removed (results unchanged) |
+| Low | Traversal test passed trivially without a build | builds its own dist |
+
+Left as is, by decision: COBYLA raises `maxiter` of 1 to 3 to 4 and reports
+convergence heuristically (Low); the heaviest accepted solve can hold the
+solver lock for about 20 s (Low); a gap between 1e-9 and 0.005 can read
+"0 worse than exact search" (Info); the resize observer in the bar is
+rebuilt on every tick without visible effect (Info); after a successful
+Retry the show stays paused (Info). The presenter-session design (a tab
+claiming a session id and commands carrying it) was not built; the
+visibility rule above is a heuristic, so two visible app windows can still
+both react.

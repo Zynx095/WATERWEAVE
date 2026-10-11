@@ -19,3 +19,19 @@ A drought-time water rationing problem, solved three ways: a quick rule of thumb
 </div>
 
 ---
+
+## Project Metadata
+
+* **Project Title:** WATERWEAVE: Fair Water Allocation with Quantum Optimization
+* **Team Name:** WATERWEAVE Project Team
+* **Chosen Track:** Track 2: Open-Domain Optimization & Real-World Solvers
+* **Video Presentation Link:** *[Pending: submission video URL, to be added before the deadline]*
+  *(Access must be "Anyone with the link can view" on Google Drive, or "Unlisted / Public" on YouTube. Locked links cannot be scored.)*
+* **Live Demo Timestamp in Video:** *[Pending: e.g. 02:15, once the video is recorded]*
+
+### Team Members (Max 4 members)
+| Name | Email | GitHub Username |
+| :--- | :--- | :--- |
+| Yukith M Joseph | yukithj@gmail.com | [@Zynx095](https://github.com/Zynx095) |
+
+---

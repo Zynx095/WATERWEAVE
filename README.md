@@ -130,3 +130,40 @@ WATERWEAVE
 ├── benchmark_results/         reproducible benchmark data
 └── tests/                     pytest suite
 ```
+
+### Installation & Execution Instructions
+
+> **Environment recommendation:** Python 3.11 or 3.12 in a fresh virtual environment, and Node.js 22.12 or newer for the web app. Windows user? There is a step-by-step PowerShell guide with troubleshooting in [`docs/WINDOWS_SETUP.md`](docs/WINDOWS_SETUP.md).
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/Zynx095/WATERWEAVE.git
+   cd WATERWEAVE
+   ```
+2. **Create an environment and install the Python dependencies:**
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate       # Windows: .venv\Scripts\activate
+   pip install -r requirements.txt
+   pip install -e .
+   ```
+3. **Build the web app once:**
+   ```bash
+   cd frontend
+   npm ci
+   npm run build
+   cd ..
+   ```
+4. **Start WATERWEAVE.** One process serves both the API and the web app:
+   ```bash
+   python -m waterweave.api
+   ```
+   Open <http://127.0.0.1:8000>. No API keys or environment variables are needed.
+
+   | Flag | What it does |
+   | :--- | :--- |
+   | `--port 8080` | use another port |
+   | `--host 0.0.0.0` | listen on every network interface (the API has no login, so only do this on a network you trust) |
+   | `--offline` | never contact network data providers (same as `WATERWEAVE_OFFLINE=1`) |
+
+5. **Start the guided presentation:** press **Present** in the header. The preflight runs the real engine once, checks live weather, then offers *Start with the live engine* (or *Start with the recorded run* if the API is down). For a second screen, open <http://127.0.0.1:8000/presenter> in another window of the same browser.

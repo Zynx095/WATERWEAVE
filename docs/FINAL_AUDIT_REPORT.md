@@ -34,7 +34,7 @@ commands run on this checkout; things not checked are listed as such.
 | Branch | `integration/final-validation` |
 | Start of audit | `3576ff5` (merge of `claude/frontend-demo-mode` at `120e775` into `b4bda95`); 54 commits ahead of `origin/integration/final-validation`, not yet pushed; working tree clean |
 | Frontend integration merge | `3576ff5`; its second parent `120e775` is the frontend branch tip |
-| Audit commits | 16 (`git log 3576ff5..HEAD`, including this report), each a separate verified fix, test or doc change |
+| Audit commits | `git log 3576ff5..HEAD` is authoritative (17 when the PR was opened); each is a separate verified fix, test or doc change |
 | `origin/main` | `b8cc20d`, unchanged. Not merged into, not modified |
 | Other worktrees | listed with `git worktree list`; none were touched |
 | History | no rebase, reset, amend or force-push |

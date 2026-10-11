@@ -336,3 +336,19 @@ Scenario: synthetic-4x2 (4 neighborhoods, 2 delivery slots)
   Two things we noticed and did not hide. First, "fairness score" and "disparity" are different numbers that can rank plans in opposite orders, so both are shown. Second, the most frequent bit string QAOA measured was often one that broke a rule; the answer we report comes from picking the best rule-following sample afterwards.
 
 ---
+
+## 6. Performance, Results & Limitations
+
+* **Key Results & Observations:**
+  Default 4×2 scenario, seeds 0 to 4, p = 1 to 3. Reproduce with `python scripts/benchmark.py`.
+
+  | Solver | Depth p | Feasible | Hit optimum | Objective (mean ± SD) | Median time | Feasible samples |
+  | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+  | Greedy | n/a | 100% | 0% | 7.000 ± 0.000 | 0.0009 s | n/a |
+  | Exact (optimal) | n/a | 100% | 100% | 6.000 ± 0.000 | 0.0035 s | n/a |
+  | QAOA | 1 | 100% | 80% | 6.200 ± 0.447 | 0.3279 s | 74.6% |
+  | QAOA | 2 | 100% | 100% | 6.000 ± 0.000 | 0.5501 s | 63.0% |
+  | QAOA | 3 | 100% | 100% | 6.000 ± 0.000 | 0.7304 s | 65.5% |
+  | Random control | n/a | 100% | 100% | 6.000 ± 0.000 | 0.0003 s | 50.8% |
+
+  **Tests, measured on this branch:** 163 Python tests pass (1 optional live-fetch test is skipped), 118 frontend unit tests pass, and 23 browser tests pass. The browser tests play the whole presentation against the real engine and include an automated accessibility audit and a Windows high-contrast check.

@@ -28,6 +28,7 @@ class ScenarioBuilder:
         """
         # 1. Parse Observations
         rainfall_mm = 0.0
+        rainfall_observed = False
         population_by_ward: Dict[str, float] = {}
         
         has_live_data = False
@@ -42,7 +43,9 @@ class ScenarioBuilder:
                 has_live_data = True
                 
             if obs.variable == "rainfall_mm" and obs.geographic_id == "bengaluru":
-                rainfall_mm = obs.value if obs.value is not None else 0.0
+                if obs.value is not None:
+                    rainfall_mm = obs.value
+                    rainfall_observed = True
             elif obs.variable == "population" and obs.geographic_id.startswith("N"):
                 if obs.value is not None:
                     population_by_ward[obs.geographic_id] = obs.value
@@ -82,12 +85,13 @@ class ScenarioBuilder:
         # 4. Construct description
         mode = "LIVE/DATA-DRIVEN" if has_live_data else "STATIC DATA-DRIVEN"
         sources = ", ".join(sorted(list(data_sources))) if data_sources else "None (Fallback)"
+        rainfall_text = f"{rainfall_mm}mm (context only)" if rainfall_observed else "not observed"
         desc = (
-            f"[{mode}] Scenario integrating real-world observations. "
-            f"Sources: {sources}. Rainfall: {rainfall_mm}mm. "
+            f"[{mode}] SYNTHETIC demand and supply, adjusted by the listed data. "
+            f"Sources: {sources}. Rainfall: {rainfall_text}. "
             f"Note: Priorities are estimated heuristics based on illustrative population counts."
         )
-        
+
         return Scenario(
             name=f"data-driven-4x2",
             slots=("morning", "evening"),

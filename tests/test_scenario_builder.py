@@ -54,3 +54,12 @@ def test_scenario_builder_with_data():
     
     assert "LIVE/DATA-DRIVEN" in scenario.description
     assert "open_meteo" in scenario.description
+
+
+def test_description_does_not_claim_real_observations_or_zero_rain():
+    from waterweave.data import ScenarioBuilder, registry
+
+    scenario = ScenarioBuilder().build(registry.get_provider("bbmp_static").fetch())
+    assert "real-world" not in scenario.description
+    assert "SYNTHETIC" in scenario.description
+    assert "Rainfall: not observed" in scenario.description

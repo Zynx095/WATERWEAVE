@@ -10,6 +10,7 @@ export function PresentButton({ large = false }: { large?: boolean }) {
       type="button"
       className={large ? 'button button--large' : 'button button--quiet'}
       disabled={presenting}
+      data-present-opener
       onClick={openPreflight}
     >
       <Presentation aria-hidden size={18} />

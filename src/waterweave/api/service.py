@@ -492,6 +492,7 @@ def data_sources(live: bool) -> dict[str, Any]:
                 {
                     "provider": {"id": pid, "name": provider.identity.name, "url": provider.identity.url},
                     "reason": f"Provider raised {type(exc).__name__}: {exc}",
+                    "failed": True,
                 }
             )
     now = utc_now()

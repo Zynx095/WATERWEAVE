@@ -423,3 +423,16 @@ def test_interactive_schema_page_is_not_blocked_by_the_policy(client):
     assert resp.status_code == 200
     assert "content-security-policy" not in resp.headers
     assert resp.headers["x-content-type-options"] == "nosniff"
+
+
+def test_provider_that_raises_is_marked_failed_not_just_skipped(client, monkeypatch, fresh_cache):
+    from waterweave.data.providers.open_meteo import OpenMeteoProvider
+
+    def boom(self):
+        raise RuntimeError("provider crashed")
+
+    monkeypatch.setattr(OpenMeteoProvider, "fetch", boom)
+    body = client.get("/api/data-sources", params={"live": "true"}).json()
+    entry = next(s for s in body["skipped"] if s["provider"]["id"] == "open_meteo")
+    assert entry["failed"] is True
+    assert "provider crashed" in entry["reason"]

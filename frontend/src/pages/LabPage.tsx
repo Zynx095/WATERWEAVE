@@ -30,6 +30,27 @@ function Levels({ plain, here, children }: { plain: ReactNode; here?: ReactNode;
   )
 }
 
+function Sample({ title, bitstring, decision, slack, labels }: {
+  title: string
+  bitstring: string
+  decision: number[]
+  slack: number[]
+  labels: string[]
+}) {
+  return (
+    <div>
+      <h3>{title}</h3>
+      <p className="bitstring-note">
+        Qiskit reports <code className="bitstring">{bitstring}</code>, with qubit 0 on the right. In qubit order:
+      </p>
+      <p className="bits__group">Decisions</p>
+      <Bits bits={decision} labels={labels} />
+      <p className="bits__group">Slack</p>
+      <Bits bits={slack} labels={labels} offset={decision.length} />
+    </div>
+  )
+}
+
 function Bits({ bits, labels, offset = 0 }: { bits: number[]; labels: string[]; offset?: number }) {
   return (
     <ul className="bits">
@@ -300,19 +321,21 @@ export function LabPage() {
             </Levels>
             {qaoa?.samples?.best && (
               <div className="samples">
-                <div>
-                  <h3>Chosen sample</h3>
-                  <p className="bitstring num">{qaoa.samples.best.bitstring}</p>
-                  <Bits bits={qaoa.samples.best.decision_bits} labels={labels} />
-                  <Bits bits={qaoa.samples.best.slack_bits} labels={labels} offset={model.n_decision} />
-                </div>
+                <Sample
+                  title="Chosen sample"
+                  bitstring={qaoa.samples.best.bitstring}
+                  decision={qaoa.samples.best.decision_bits}
+                  slack={qaoa.samples.best.slack_bits}
+                  labels={labels}
+                />
                 {qaoa.samples.modal && (
-                  <div>
-                    <h3>Most frequent sample</h3>
-                    <p className="bitstring num">{qaoa.samples.modal.bitstring}</p>
-                    <Bits bits={qaoa.samples.modal.decision_bits} labels={labels} />
-                    <Bits bits={qaoa.samples.modal.slack_bits} labels={labels} offset={model.n_decision} />
-                  </div>
+                  <Sample
+                    title="Most frequent sample"
+                    bitstring={qaoa.samples.modal.bitstring}
+                    decision={qaoa.samples.modal.decision_bits}
+                    slack={qaoa.samples.modal.slack_bits}
+                    labels={labels}
+                  />
                 )}
               </div>
             )}

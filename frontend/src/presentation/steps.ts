@@ -22,6 +22,10 @@ export interface StepContext {
   run: SolveResponse | null
   bench: BenchmarkFacts | null
   data: DataSourcesResponse | null
+  /** Facts of the default scenario, which the first step's page shows whatever is selected. */
+  introFacts?: ScenarioFacts | null
+  /** 'recorded' when results come from the recorded run rather than a live engine. */
+  mode?: 'live' | 'recorded'
 }
 
 export interface StepDef {
@@ -51,15 +55,17 @@ export const STEPS: StepDef[] = [
     route: '/',
     target: 'problem',
     durationMs: 22_000,
-    caption: ({ facts }) =>
-      facts
-        ? `${numberWord(facts.requests, true)} deliveries are requested, but there is water for ${numberWord(facts.supply)}. Who gets it?`
-        : 'More water is requested than there is. Who gets it?',
-    notes: ({ facts }) => [
+    caption: ({ facts, introFacts }) => {
+      const shown = introFacts ?? facts
+      return shown
+        ? `${numberWord(shown.requests, true)} deliveries are requested, but there is water for ${numberWord(shown.supply)}. Who gets it?`
+        : 'More water is requested than there is. Who gets it?'
+    },
+    notes: ({ facts, introFacts }) => [
       'When demand exceeds supply, a utility has to decide which neighborhoods get water in which delivery slot.',
       'Each crossing in the weave is one request: a neighborhood (row) wants one unit of water in a slot (column).',
-      facts
-        ? `Today: ${facts.requests} requests and ${facts.supply} units of water, so ${facts.requests - facts.supply} requests cannot be met.`
+      (introFacts ?? facts)
+        ? `Today: ${(introFacts ?? facts)!.requests} requests and ${(introFacts ?? facts)!.supply} units of water, so at least ${Math.max(0, (introFacts ?? facts)!.requests - (introFacts ?? facts)!.supply)} requests cannot be met.`
         : 'The scenario has not loaded yet; describe the problem in general terms.',
     ],
   },
@@ -112,11 +118,13 @@ export const STEPS: StepDef[] = [
       if (!exact || !greedy) return 'Two classical solvers: a quick rule of thumb and a search of every plan.'
       return `Exact search checked all ${facts?.plans ?? 'possible'} plans in ${formatSeconds(exact.runtime_seconds)}: best score ${formatNumber(exact.objective_value)}. Greedy scored ${formatNumber(greedy.objective_value)}.`
     },
-    notes: ({ run }) => {
+    notes: ({ run, mode }) => {
       const exact = result(run, 'exact')
       const greedy = result(run, 'greedy')
       return [
-        'These results are being computed live by the Python engine.',
+        mode === 'recorded' || run?.source === 'recorded'
+          ? 'These results come from a recorded run of the Python engine, not a live run. Say so.'
+          : 'These results are being computed live by the Python engine.',
         'Greedy builds a plan one delivery at a time. It is fast but can miss the best plan.',
         'Exact search scores every plan, so it is certain to find the best one for this scoring; its work doubles with each extra request.',
         exact && greedy
@@ -189,18 +197,27 @@ export const STEPS: StepDef[] = [
     durationMs: 26_000,
     action: 'fetch-data',
     actionLabel: 'Asking the data providers for their latest values.',
-    caption: ({ data }) => {
+    caption: ({ data, mode }) => {
       const rain = data?.observations.find((o) => o.variable === 'rainfall_mm')
+      if (mode === 'recorded') {
+        return 'Recorded run: these are the labels the providers returned when it was recorded. Demand is synthetic, population illustrative.'
+      }
       if (rain && !rain.quality.missing && rain.value !== null) {
         return `Live rainfall from Open-Meteo: ${formatNumber(rain.value, 1)} mm, shown for context only. Population figures are illustrative; demand is synthetic.`
+      }
+      if (data && data.requested_live === false && !rain) {
+        return 'Live weather was not requested, so no network source was contacted. Demand is synthetic, population illustrative.'
       }
       if (rain?.quality.missing || data?.skipped.length) {
         return 'Live weather is unavailable right now, and nothing depends on it: demand is synthetic, population illustrative.'
       }
       return 'Every input is labelled: live, cached, illustrative, synthetic or unavailable.'
     },
-    notes: ({ data }) => [
-      'Rainfall is fetched live but deliberately not used: rain today does not tell us how much water the pipes carry today.',
+    notes: ({ data, mode }) => [
+      ...(mode === 'recorded'
+        ? ['This is a recorded run: nothing was fetched just now. Say that the weather row shows what was captured earlier.']
+        : []),
+      'Rainfall is deliberately not used in any scenario: rain today does not tell us how much water the pipes carry today.',
       'The population figures are illustrative, not census records; they only feed one optional preset.',
       'There is no public live feed of Bengaluru reservoir or pipe data, so none is claimed.',
       data?.skipped.length || data?.observations.some((o) => o.quality.missing)

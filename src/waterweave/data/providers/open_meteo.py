@@ -36,23 +36,24 @@ class OpenMeteoProvider(DataProvider):
             with urllib.request.urlopen(req, timeout=10) as response:
                 data = json.loads(response.read().decode('utf-8'))
                 
-                current = data.get('current', {})
+                current = data.get('current') or {}
                 time_str = current.get('time')
-                source_time = None
-                if time_str:
-                    source_time = datetime.fromisoformat(time_str).replace(tzinfo=timezone.utc)
-                else:
-                    source_time = retrieval_time
-                
-                rainfall_mm = current.get('precipitation', 0.0)
-                
+                rainfall_mm = current.get('precipitation')
+                # A response without a reading or without its observation time is
+                # reported as missing. Substituting 0 mm or the retrieval time
+                # would present an invented value as an observation.
+                if rainfall_mm is None or not time_str:
+                    return [self._error_observation(
+                        retrieval_time, "Response lacked a precipitation value or observation time")]
+                source_time = datetime.fromisoformat(time_str).replace(tzinfo=timezone.utc)
+
                 obs = Observation(
                     provider_id=self.identity.id,
                     dataset_id="current_weather",
                     geographic_level="city",
                     geographic_id="bengaluru",
                     variable="rainfall_mm",
-                    value=float(rainfall_mm) if rainfall_mm is not None else 0.0,
+                    value=float(rainfall_mm),
                     unit="mm",
                     source_timestamp=source_time,
                     retrieval_timestamp=retrieval_time,

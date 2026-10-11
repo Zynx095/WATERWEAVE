@@ -218,3 +218,20 @@ WATERWEAVE
   | **Quantum lab** | What is the circuit really doing? Eight steps from yes/no decisions to measurement, with plain words first and the maths behind a click. It draws the exact circuit QAOA ran. |
 
   **Reading the weave.** A blue thread crossing is a delivered unit. An open red ring is a request that was not met. Every crossing also has a text state for screen readers. If a solver fails, it is shown as failed with the reason; no other solver's answer is put in its place.
+
+  **The app presents itself.** Press **Present** and nine steps play through the real app in about four minutes: the problem, the scenario, the rules, the classical solvers, the quantum run, the results and fairness, data integrity, the honest comparison, and a conclusion. Each step goes to its page, highlights the part it is talking about and runs its real action. Everything said on the captions comes from the numbers the engine just produced, so nothing is read out that was not computed.
+
+  | Do this | Press |
+  | :--- | :--- |
+  | Pause or resume | `Space` |
+  | Next or previous step | `→` `←` (or `Page Down` / `Page Up` from a clicker) |
+  | Restart | `Home` |
+  | Presenter notes | `N` |
+  | Clean audience view | `H` |
+  | Exit | `Esc` |
+
+  A few things it does so that a live talk does not fall apart:
+  * **Auto or manual.** It advances itself by default; switch that off in the preflight to move by hand. Pace goes from a one-minute quick check to a slow, relaxed pass.
+  * **An honest clock.** Pausing stops it at once. While the engine is still working, the clock waits. If a step fails, the show pauses with the reason and a **Retry** button.
+  * **A presenter view** at `/presenter` for a second screen: current step, time left, notes, what the audience is reading and big controls. It talks to the main window directly in the browser (no server) and only sends commands to the window it is paired with.
+  * **Offline.** The solvers run on your machine and need no internet. If the API itself is down, *Start with the recorded run* replays real, earlier API output, and every result is labelled "Recorded run".

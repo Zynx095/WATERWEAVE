@@ -235,3 +235,79 @@ WATERWEAVE
   * **An honest clock.** Pausing stops it at once. While the engine is still working, the clock waits. If a step fails, the show pauses with the reason and a **Retry** button.
   * **A presenter view** at `/presenter` for a second screen: current step, time left, notes, what the audience is reading and big controls. It talks to the main window directly in the browser (no server) and only sends commands to the window it is paired with.
   * **Offline.** The solvers run on your machine and need no internet. If the API itself is down, *Start with the recorded run* replays real, earlier API output, and every result is labelled "Recorded run".
+
+  **What is real and what is not.** We would rather show a gap than invent a number.
+
+  | Label | Source | Used for |
+  | :--- | :--- | :--- |
+  | Live | Open-Meteo: current rainfall for Bengaluru, 10 s timeout, cached 5 minutes | Context only. The rainfall-to-supply rule is switched off, because rain today does not tell you how much water a utility can pipe today. |
+  | Illustrative | Hard-coded neighbourhood populations (not census records) | Priority weights in one optional preset. |
+  | Synthetic | All demand, supply and storage figures | Every scenario and the whole benchmark. |
+  | Unavailable | Reservoir levels, pipe flow, ward-level demand: there is no public real-time feed | Nothing, and none is claimed. |
+
+  A failed fetch is reported as missing, with its error, and never replaced by an invented value. No scenario depends on live data.
+
+* **Key Screenshots / Terminal Output:**
+
+<details>
+<summary><b>Real output of <code>python -m waterweave.optimization</code> (click to expand)</b></summary>
+
+```text
+======================================================================
+WATERWEAVE Optimization Comparison
+Scenario: synthetic-4x2 (4 neighborhoods, 2 delivery slots)
+======================================================================
+
+--- Greedy (Priority-First) ---
+  Feasible:             True
+  Objective Value:      7.0000
+  Weighted Shortage:    5.50
+  Fairness Score:       0.5000
+  Disparity (QUBO):     0.7500
+  Service Level:        42.86%
+  Allocated / Demand:   3/7 units
+  Runtime:              0.0009 s
+  Allocation:
+    N1: {'morning': 1, 'evening': 0}
+    N2: {'morning': 0, 'evening': 1}
+    N3: {'morning': 0, 'evening': 0}
+    N4: {'morning': 1, 'evening': 0}
+
+--- Exact Classical (Optimal) ---
+  Feasible:             True
+  Objective Value:      6.0000
+  Weighted Shortage:    4.50
+  Fairness Score:       0.5000
+  Disparity (QUBO):     0.7500
+  Service Level:        57.14%
+  Allocated / Demand:   4/7 units
+  Runtime:              0.0034 s
+  Allocation:
+    N1: {'morning': 0, 'evening': 1}
+    N2: {'morning': 0, 'evening': 1}
+    N3: {'morning': 1, 'evening': 0}
+    N4: {'morning': 1, 'evening': 0}
+
+--- QAOA (Quantum Heuristic) ---
+  Feasible:             True
+  Objective Value:      6.0000
+  Weighted Shortage:    4.50
+  Fairness Score:       0.5000
+  Disparity (QUBO):     0.7500
+  Service Level:        57.14%
+  Allocated / Demand:   4/7 units
+  Runtime:              0.3544 s
+  Allocation:
+    N1: {'morning': 0, 'evening': 1}
+    N2: {'morning': 1, 'evening': 0}
+    N3: {'morning': 1, 'evening': 0}
+    N4: {'morning': 0, 'evening': 1}
+  QAOA Circuit:         depth=17, qubits=12, shots=1024
+  Feasible Samples:     74.41%
+
+======================================================================
+```
+
+</details>
+
+---

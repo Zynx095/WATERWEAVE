@@ -237,3 +237,18 @@ def test_qaoa_notes_state_simulation_and_make_no_performance_claim():
     assert "simulator" in notes and "no quantum advantage" in notes
     assert "favorabl" not in notes
     assert meta["quantum_advantage_claimed"] is False
+
+
+def test_qaoa_reports_the_iteration_limit_it_really_used():
+    """Regression: maxiter=1 was silently raised by SciPy to 4 and reported as requested."""
+    import warnings
+
+    from waterweave.scenarios import default_scenario
+    from waterweave.solvers import solve_qaoa
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")  # SciPy must not need to warn
+        meta = solve_qaoa(default_scenario(), p=1, shots=32, maxiter=1).metadata
+    assert meta["optimizer_maxiter_requested"] == 1
+    assert meta["optimizer_maxiter_used"] == 4
+    assert meta["optimizer_iterations"] <= meta["optimizer_maxiter_used"]

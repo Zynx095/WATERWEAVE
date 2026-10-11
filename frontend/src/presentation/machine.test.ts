@@ -149,3 +149,15 @@ describe('presentation machine', () => {
     expect(totalDuration(config, 0.2)).toBe(1200)
   })
 })
+
+describe('commands that must not start or toggle a show', () => {
+  it('ignores RESTART before the presentation has started', () => {
+    const s = run([{ type: 'RESTART' }], initialPresentation)
+    expect(s.status).toBe('idle')
+  })
+
+  it('ignores TOGGLE in manual mode, where no clock runs', () => {
+    const s = run([{ type: 'SET_AUTO', auto: false }, { type: 'TOGGLE' }], started())
+    expect(s.status).toBe('running')
+  })
+})

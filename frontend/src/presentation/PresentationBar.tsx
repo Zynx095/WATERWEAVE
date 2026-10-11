@@ -174,7 +174,7 @@ export function PresentationBar() {
                 <button type="button" className="present-btn present-btn--main" onClick={() => dispatch({ type: 'RESTART' })}>
                   <RotateCcw aria-hidden size={20} /> <span className="present-btn__label">Restart</span>
                 </button>
-              ) : (
+              ) : !state.auto ? null : (
                 <button
                   type="button"
                   className="present-btn present-btn--main"

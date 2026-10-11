@@ -91,6 +91,8 @@ export function createReducer(config: MachineConfig) {
         return state.status === 'paused' ? { ...state, status: 'running' } : state
 
       case 'TOGGLE':
+        // In manual mode no clock runs, so pausing would change nothing.
+        if (!state.auto) return state
         if (state.status === 'running') return { ...state, status: 'paused' }
         if (state.status === 'paused') return { ...state, status: 'running' }
         return state
@@ -110,6 +112,9 @@ export function createReducer(config: MachineConfig) {
         return enter(state, event.index, state.status === 'finished' ? 'paused' : state.status)
 
       case 'RESTART':
+        // Starting is START's job (after the preflight); a stray Home key or
+        // a presenter window must not begin a show that was never started.
+        if (state.status === 'idle') return state
         return enter(state, 0, 'running')
 
       case 'EXIT':

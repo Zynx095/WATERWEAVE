@@ -49,4 +49,25 @@
     forced-color-adjust: none;
     background: Highlight;
   }
+
+  /* SVG text keeps its fill under forced colours, so a dark palette left the
+     coupling-grid labels dark on a dark canvas; the legend keys were
+     background-only and vanished. */
+  .matrix__label,
+  .circuit text {
+    fill: CanvasText;
+  }
+
+  .matrix__swatch {
+    forced-color-adjust: none;
+    border: 2px solid CanvasText;
+  }
+
+  .matrix__swatch--neg {
+    background: Highlight;
+  }
+
+  .matrix__swatch--pos {
+    background: LinkText;
+  }
 }

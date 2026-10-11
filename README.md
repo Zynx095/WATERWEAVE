@@ -361,3 +361,18 @@ Scenario: synthetic-4x2 (4 neighborhoods, 2 delivery slots)
   * **App limits.** The recorded fallback only covers the default scenario with default settings. Each delivery is one unit, so per-slot demand is 0 or 1. The presenter view needs both windows in the same browser. It has not been tried on a real projector, in Firefox or Safari, or with a screen reader.
 
 ---
+
+## 7. References & Acknowledgments
+
+* **Hackathon reference:** the pipeline shape (binary decisions, quadratic penalties, Ising mapping, QAOA simulation, exact baselines, feasibility yield) follows the Track 2 guide in the [Qiskit Fall Fest 2026 IIIT Kottayam template](https://github.com/Shanwis/Qiskit-Fall-Fest-2026-IIITKottayam-Hackathon-Template/tree/main/references/track-2-optimization) (MIT).
+* **The algorithm:** E. Farhi, J. Goldstone, S. Gutmann, *A Quantum Approximate Optimization Algorithm*, 2014, [arXiv:1411.4028](https://arxiv.org/abs/1411.4028).
+* **Weather data:** [Open-Meteo](https://open-meteo.com/) (CC BY 4.0).
+* **Software:** [Qiskit](https://github.com/Qiskit/qiskit), [NumPy](https://numpy.org/), [SciPy](https://scipy.org/), [Pandas](https://pandas.pydata.org/), [Streamlit](https://streamlit.io/), [Plotly](https://plotly.com/), [FastAPI](https://fastapi.tiangolo.com/), [Uvicorn](https://www.uvicorn.org/), [React](https://react.dev/), [React Router](https://reactrouter.com/), [Vite](https://vite.dev/), [TypeScript](https://www.typescriptlang.org/), [Lucide](https://lucide.dev/), [Vitest](https://vitest.dev/), [Testing Library](https://testing-library.com/) and [Playwright](https://playwright.dev/).
+* **Fonts:** Barlow Condensed and Atkinson Hyperlegible Next (both SIL OFL), bundled through [Fontsource](https://fontsource.org/).
+* **Acknowledgments:** the formulation was independently audited in the validation workstream, and the web app, API and presentation mode were built and reviewed with the help of Claude Code. My grandmother, whose tap started all of this.
+
+<div align="center">
+
+*Every number in this README is produced by the engine or cited from its docs. None is a real-world measurement.*
+
+</div>

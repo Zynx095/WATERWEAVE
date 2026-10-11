@@ -160,7 +160,7 @@ describe('guided presentation', () => {
     await startPresentation()
     fireEvent.click(within(bar()).getByRole('button', { name: 'Presenter notes' }))
     expect(screen.getByRole('heading', { name: 'Presenter notes' })).toBeInTheDocument()
-    expect(bar()).toHaveTextContent('Today: 7 requests and 4 units of water, so 3 requests cannot be met.')
+    expect(bar()).toHaveTextContent('Today: 7 requests and 4 units of water, so at least 3 requests cannot be met.')
     expect(bar()).toHaveTextContent('Next: The scenario')
     fireEvent.keyDown(window, { key: 'n' })
     expect(screen.queryByRole('heading', { name: 'Presenter notes' })).not.toBeInTheDocument()

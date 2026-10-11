@@ -277,14 +277,17 @@ export function PresentationProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('keydown', onKey)
   }, [active])
 
+  const defaultScenario = store.presets.data?.find((p) => p.id === 'default')?.scenario ?? null
   const context = useMemo<StepContext>(
     () => ({
       facts: store.scenario ? scenarioFacts(store.scenario) : null,
       run: store.run.status === 'ready' ? store.run.data : null,
       bench: store.benchmark.data?.default ? benchmarkFacts(store.benchmark.data.default) : null,
       data: store.dataSources.status === 'ready' ? store.dataSources.data : null,
+      introFacts: defaultScenario ? scenarioFacts(defaultScenario) : null,
+      mode: store.mode,
     }),
-    [store.scenario, store.run, store.benchmark.data, store.dataSources],
+    [store.scenario, store.run, store.benchmark.data, store.dataSources, store.mode, defaultScenario],
   )
 
   // Presenter view in another window: publish a snapshot, accept commands.

@@ -280,6 +280,17 @@ def test_offline_data_sources_skip_network_and_label_illustrative(client, monkey
     assert {c["id"] for c in effect["priority_weight_changes"]} == {"N1", "N2", "N3", "N4"}
 
 
+def test_raw_api_does_not_call_illustrative_populations_census_data(client, monkeypatch, fresh_cache):
+    monkeypatch.setattr("urllib.request.urlopen", _no_network)
+    body = client.get("/api/data-sources", params={"live": "false"}).json()
+    for obs in body["observations"]:
+        assert obs["source_timestamp"] is None and obs["source_age_seconds"] is None
+        provider = obs["provider"]
+        assert "census" not in provider["name"].lower().replace("not census", "")
+        assert provider["organization"] != "BBMP" and "opencity" not in provider["url"]
+    assert "2011" not in str(body)
+
+
 def test_offline_mode_env_overrides_live_request(client, monkeypatch, fresh_cache):
     monkeypatch.setenv("WATERWEAVE_OFFLINE", "1")
     monkeypatch.setattr("urllib.request.urlopen", _no_network)

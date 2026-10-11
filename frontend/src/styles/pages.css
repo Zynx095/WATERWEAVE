@@ -666,8 +666,8 @@
 
 /* ---- wide tables on phones ------------------------------------------------- */
 
+/* Shown by ScrollRegion only while its content is wider than the screen. */
 .scroll-hint {
-  display: none;
   margin: 0 0 var(--space-2);
   font-size: var(--step--1);
   color: var(--ink-2);
@@ -676,10 +676,6 @@
 /* On phones the first column stays put while the rest scrolls, so every row keeps its name.
    The data ledger is left out: its first column is too wide to pin on a phone. */
 @media (max-width: 760px) {
-  .scroll-hint {
-    display: block;
-  }
-
   /* Separate borders move with the pinned cells; collapsed ones stay with the table. */
   .data-table:not(.ledger) {
     border-collapse: separate;

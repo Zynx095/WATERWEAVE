@@ -223,7 +223,7 @@ export function WorkspacePage() {
             {running ? 'Running' : settings.include_qaoa ? 'Run greedy, exact and QAOA' : 'Run greedy and exact'}
           </button>
           {running && (
-            <button type="button" className="button button--quiet" onClick={() => controller.current?.abort()}>
+            <button type="button" className="button button--quiet" onClick={() => actions.cancelRun()}>
               <Square aria-hidden size={16} /> Cancel
             </button>
           )}

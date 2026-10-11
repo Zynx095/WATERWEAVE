@@ -10,6 +10,7 @@ import { formatDateTime, formatNumber, formatPercent, shortName } from '../lib/f
 import { scenarioFacts } from '../lib/scenario'
 import { variableLabels, variableShortLabels } from '../lib/variables'
 import { useStore } from '../state/store'
+import { isStale } from './WorkspacePage'
 
 function Levels({ plain, here, children }: { plain: ReactNode; here?: ReactNode; children: ReactNode }) {
   return (
@@ -69,7 +70,11 @@ export function LabPage() {
   const { state, actions } = useStore()
   const model = state.model.data
   const scenario = state.scenario
-  const run = state.run.status === 'ready' ? state.run.data : null
+  const latestRun = state.run.status === 'ready' ? state.run.data : null
+  // A run made for another scenario or other settings would be drawn with this
+  // scenario's variable names, so it is not shown here until it is run again.
+  const runIsOld = latestRun && scenario ? isStale(latestRun, scenario, state.settings) : false
+  const run = runIsOld ? null : latestRun
   const qaoa: SolverOutcome | null = run?.results.find((r) => r.key === 'qaoa' && r.status === 'ok') ?? null
   const md = (qaoa?.metadata ?? null) as QaoaMetadata | null
   const labels = model ? variableLabels(model, scenario) : []
@@ -105,6 +110,13 @@ export function LabPage() {
           {scenario ? ` (${scenario.name})` : ''}.
         </p>
       </header>
+
+      {runIsOld && (
+        <p className="notice notice--info">
+          The last run was for a different scenario or different settings, so its circuit and samples are not shown
+          here. Run the solvers again in the <Link to="/workspace">workspace</Link>.
+        </p>
+      )}
 
       {model && model.n_decision === 0 ? (
         <p className="notice notice--info">

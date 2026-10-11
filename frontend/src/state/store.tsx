@@ -123,7 +123,17 @@ export function reducer(state: StoreState, action: Action): StoreState {
         [action.key]: { ...state[action.key], status: 'ready', data: action.data, error: null, source: action.source },
       }
     case 'slice/error':
-      return { ...state, [action.key]: { ...state[action.key], status: 'error', error: action.error } }
+      // A model that could not be built for the current scenario must not leave
+      // the previous scenario's model on screen.
+      return {
+        ...state,
+        [action.key]: {
+          ...state[action.key],
+          ...(action.key === 'model' ? { data: null } : {}),
+          status: 'error',
+          error: action.error,
+        },
+      }
     case 'slice/clear':
       return { ...state, [action.key]: action.key === 'run' ? { ...emptySlice(), label: null } : emptySlice() }
     case 'scenario/preset':
@@ -171,6 +181,8 @@ export interface StoreActions {
     signal?: AbortSignal
   }) => Promise<Outcome<DataSourcesResponse>>
   loadBenchmark: (options?: { signal?: AbortSignal }) => Promise<Outcome<BenchmarkResponse>>
+  /** Cancel the live solver run in flight, whichever page or presentation step started it. */
+  cancelRun: () => void
 }
 
 interface StoreValue {
@@ -190,6 +202,7 @@ export function StoreProvider({ children, autoConnect = true }: { children: Reac
   stateRef.current = state
   const runCounter = useRef(0)
   const dataCounter = useRef(0)
+  const activeRun = useRef<AbortController | null>(null)
 
   const applyPresets = useCallback((presets: Preset[], source: RunSource) => {
     dispatch({ type: 'slice/ready', key: 'presets', data: presets, source })
@@ -222,6 +235,9 @@ export function StoreProvider({ children, autoConnect = true }: { children: Reac
 
   const switchToRecording = useCallback(async () => {
     const recording = await loadRecording()
+    // A live request still in flight must not land in the recorded view.
+    runCounter.current++
+    dataCounter.current++
     dispatch({ type: 'mode', mode: 'recorded', recording })
     applyPresets(recording.presets, 'recorded')
     const fallback = recording.presets.find((p) => p.id === 'default')
@@ -231,6 +247,8 @@ export function StoreProvider({ children, autoConnect = true }: { children: Reac
   }, [applyPresets])
 
   const switchToLive = useCallback(async () => {
+    runCounter.current++
+    dataCounter.current++
     dispatch({ type: 'mode', mode: 'live' })
     dispatch({ type: 'slice/clear', key: 'run' })
     dispatch({ type: 'slice/clear', key: 'dataSources' })
@@ -289,7 +307,18 @@ export function StoreProvider({ children, autoConnect = true }: { children: Reac
     }
 
     try {
-      const response = await api.solve(scenario, settings, { signal: options.signal })
+      const controller = new AbortController()
+      activeRun.current = controller
+      const forward = () => controller.abort()
+      if (options.signal?.aborted) controller.abort()
+      options.signal?.addEventListener('abort', forward, { once: true })
+      let response: SolveResponse
+      try {
+        response = await api.solve(scenario, settings, { signal: controller.signal })
+      } finally {
+        options.signal?.removeEventListener('abort', forward)
+        if (activeRun.current === controller) activeRun.current = null
+      }
       if (id !== runCounter.current) return cancelled() // a newer run superseded this one
       dispatch({ type: 'slice/ready', key: 'run', data: response, source: 'live' })
       return ok(response)
@@ -393,8 +422,11 @@ export function StoreProvider({ children, autoConnect = true }: { children: Reac
     if (autoConnect) void checkConnection()
   }, [autoConnect, checkConnection])
 
+  const cancelRun = useCallback(() => activeRun.current?.abort(), [])
+
   const actions = useMemo<StoreActions>(
     () => ({
+      cancelRun,
       checkConnection,
       switchToRecording,
       switchToLive,
@@ -405,7 +437,7 @@ export function StoreProvider({ children, autoConnect = true }: { children: Reac
       fetchDataSources,
       loadBenchmark,
     }),
-    [checkConnection, switchToRecording, switchToLive, selectPreset, editScenario, updateSettings, runSolvers, fetchDataSources, loadBenchmark],
+    [cancelRun, checkConnection, switchToRecording, switchToLive, selectPreset, editScenario, updateSettings, runSolvers, fetchDataSources, loadBenchmark],
   )
 
   const value = useMemo(() => ({ state, actions }), [state, actions])

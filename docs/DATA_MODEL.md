@@ -6,7 +6,7 @@ This document defines the normalized schema used to convert heterogeneous munici
 
 ### ProviderIdentity
 Identifies the source of the data.
-- `id`: str (e.g., "open_meteo", "bbmp_census")
+- `id`: str (e.g., "open_meteo", "bbmp_static")
 - `name`: str
 - `organization`: str
 - `url`: str

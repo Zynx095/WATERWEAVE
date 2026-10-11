@@ -38,16 +38,14 @@ This document tracks the research, verification status, and integration feasibil
 
 ## 2. Population and Water Demand
 
-### BBMP Ward Population Data
-* **Source name**: Bengaluru Ward-wise Census Data - 2011 / BBMP Ward Population
-* **Responsible organization**: BBMP (Bruhat Bengaluru Mahanagara Palike)
-* **Official source URL**: https://data.opencity.in/
-* **Geographic coverage**: Bengaluru (Ward level)
-* **Variables provided**: Population count, household count.
-* **Data format**: CSV
-* **Authentication**: Free
-* **Implementation status**: **ILLUSTRATIVE** (Currently simulated in code using typical values for representative neighborhoods, not direct dynamic ingestion of census records)
-* **Relevance**: Fundamental for calculating estimated demand per neighborhood using standard per-capita norms (e.g., 135 LPCD for urban areas).
+### Neighbourhood populations (illustrative assumptions)
+* **Source name**: None. The values are assumptions made by this project, served by the `bbmp_static` provider (the id is kept for compatibility).
+* **Responsible organization**: None. They were not published by BBMP or any other body, and they carry no source date.
+* **Geographic coverage**: The four synthetic neighbourhoods N1 to N4 only.
+* **Variables provided**: Population count (35,000; 42,000; 28,000; 51,000).
+* **Authentication**: Not applicable
+* **Implementation status**: **ILLUSTRATIVE**. Hard-coded in `src/waterweave/data/providers/bbmp_static.py`; no census record is read.
+* **Relevance**: Sets priority weights (population / 25,000) in the optional illustrative-population preset only. Real ward census or household data would need a separate, verified ingestion and a ward-to-neighbourhood mapping.
 
 ## 3. Weather, Rainfall, Drought, and Environmental Conditions
 

@@ -70,7 +70,13 @@ describe('LabPage', () => {
     const chosen = screen.getByRole('heading', { name: 'Chosen sample' }).parentElement!
     const md = quantum.results.find((r) => r.key === 'qaoa')!.metadata
     expect(chosen).toHaveTextContent(String(md.best_bitstring))
-    expect(within(chosen).getAllByRole('listitem')).toHaveLength(12)
+    expect(chosen).toHaveTextContent('with qubit 0 on the right')
+    const items = within(chosen).getAllByRole('listitem')
+    expect(items).toHaveLength(12)
+    // Shown in qubit order: Qiskit's string read from right to left.
+    const shown = items.map((li) => li.querySelector('.bits__value')!.textContent).join('')
+    expect(shown).toBe([...String(md.best_bitstring)].reverse().join(''))
+    expect(items[0]).toHaveTextContent('Hillview morning')
   })
 })
 

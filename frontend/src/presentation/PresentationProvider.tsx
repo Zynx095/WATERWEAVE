@@ -120,6 +120,11 @@ function revealEnd(element: HTMLElement, reduceMotion: boolean) {
   window.scrollTo({ top: window.scrollY + hidden, behavior: reduceMotion ? 'auto' : 'smooth' })
 }
 
+function newTabId() {
+  const c = globalThis.crypto
+  return c?.randomUUID ? c.randomUUID() : `tab-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`
+}
+
 function isTypingTarget(target: EventTarget | null) {
   const el = target as HTMLElement | null
   if (!el || !el.tagName) return false
@@ -134,6 +139,8 @@ export function PresentationProvider({ children }: { children: ReactNode }) {
   const [notesOpen, setNotesOpen] = useState(false)
   const [cleanView, setCleanView] = useState(false)
   const [presenterLinked, setPresenterLinked] = useState(false)
+  // Names this window on the presenter channel (a new id per page load).
+  const tabId = useRef(newTabId())
   const navigate = useNavigate()
   const location = useLocation()
   const active = state.status !== 'idle'
@@ -304,6 +311,7 @@ export function PresentationProvider({ children }: { children: ReactNode }) {
   const snapshot = useMemo<PresenterSnapshot>(() => {
     const next = STEPS[state.index + 1]
     return {
+      tabId: tabId.current,
       state,
       steps: STEPS.map((s) => ({ id: s.id, title: s.title })),
       caption: step.caption(context),
@@ -334,11 +342,21 @@ export function PresentationProvider({ children }: { children: ReactNode }) {
     ch.onmessage = (event: MessageEvent) => {
       const message = parsePresenterMessage(event.data)
       if (!message) return
-      if (!isActive.current && !inFront()) return
+      if (message.kind === 'hello') {
+        // Only a window that is presenting, or the one in front, answers; the
+        // presenter view pins to one answer by id.
+        if (!isActive.current && !inFront()) return
+        presenterSeenAt = Date.now()
+        setPresenterLinked(true)
+        publish()
+        return
+      }
+      // A command is for one window. Every other window ignores it, however
+      // many are open, so the show can only run in the window that was chosen.
+      if (message.target !== tabId.current) return
       presenterSeenAt = Date.now()
       setPresenterLinked(true)
-      if (message.kind === 'hello') publish()
-      else dispatch(message.event)
+      dispatch(message.event)
     }
     // Heartbeats in both directions tell each window whether the other is still there.
     const heartbeat = window.setInterval(() => {

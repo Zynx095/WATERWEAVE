@@ -77,3 +77,23 @@ flowchart LR
     E --> F["Keep the best<br/>rule-following sample"]
     F --> G["Delivery table"]
 ```
+
+* **Circuit Details:**
+  * **Number of Qubits:** 12 (7 decision + 5 slack)
+  * **Key Gates Used (p = 1):** 12 H, 39 RZZ (one per non-zero coupling), 12 RZ, 12 RX, then measurement. Depth is 17 at p = 1, 29 at p = 2 and 41 at p = 3. These counts come straight from the engine (`POST /api/model`) and are drawn gate by gate in the app's Quantum lab.
+  * **Primitives Used:** Qiskit `StatevectorSampler`. This is a noiseless simulator on a classical computer, not quantum hardware.
+  * **Other Technologies Used:** React, TypeScript and Vite for the web app; FastAPI and Uvicorn for a thin API over the engine; Streamlit and Plotly for the original dashboard; NumPy, SciPy and Pandas. Qiskit powers the quantum core.
+
+```python
+# Build the exact QAOA circuit the engine runs
+from qiskit import QuantumCircuit
+from waterweave.formulation import build_model
+from waterweave.solvers import _build_qaoa_circuit
+
+model = build_model(scenario, fairness_weight=2.0)
+qc = _build_qaoa_circuit(model, gammas=[0.404], betas=[0.392])
+print(f"Circuit width: {qc.num_qubits} qubits, Depth: {qc.depth()}, "
+      f"Gate counts: {dict(qc.count_ops())}")
+```
+
+---

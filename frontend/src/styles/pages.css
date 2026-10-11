@@ -1,0 +1,714 @@
+/* ---- overview --------------------------------------------------------- */
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-7);
+  align-items: center;
+}
+
+.hero__title {
+  font-size: var(--step-6);
+  font-weight: 700;
+  line-height: 0.98;
+  letter-spacing: -0.005em;
+  margin-bottom: var(--space-5);
+}
+
+.hero__actions {
+  margin-top: var(--space-6);
+}
+
+.hero__figure {
+  margin: 0;
+  padding: var(--space-5) var(--space-5) var(--space-4);
+  background: var(--sheet);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-panel);
+}
+
+.hero__figcaption {
+  margin-top: var(--space-4);
+  font-size: var(--step--1);
+  color: var(--ink-2);
+  max-width: 46ch;
+}
+
+.hero__figcaption .tag {
+  margin-right: var(--space-2);
+}
+
+.qa {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-6) var(--space-7);
+  margin: 0;
+}
+
+.qa dt {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--step-1);
+  line-height: 1.15;
+  margin-bottom: var(--space-2);
+}
+
+.qa dd {
+  margin: 0;
+  color: var(--ink-2);
+  max-width: 56ch;
+}
+
+@media (max-width: 1100px) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hero__title {
+    font-size: var(--step-5);
+  }
+}
+
+@media (max-width: 760px) {
+  .qa {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hero__title {
+    font-size: var(--step-4);
+  }
+
+  .hero__figure {
+    padding: var(--space-4) var(--space-3);
+  }
+}
+
+/* ---- tables and comparison -------------------------------------------- */
+
+.table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  background: var(--sheet);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-panel);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 44rem;
+}
+
+.data-table th,
+.data-table td {
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--rule);
+}
+
+.data-table thead th {
+  font-size: var(--step--1);
+  font-weight: 650;
+  color: var(--ink-2);
+  background: var(--sheet-sunk);
+}
+
+.data-table tbody th {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--step-1);
+  white-space: nowrap;
+}
+
+.data-table tbody tr:last-child th,
+.data-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.data-table tr[data-solver='greedy'] th {
+  box-shadow: inset 4px 0 0 var(--slate);
+}
+
+.data-table tr[data-solver='exact'] th {
+  box-shadow: inset 4px 0 0 var(--indigo);
+}
+
+.data-table tr[data-solver='qaoa'] th {
+  box-shadow: inset 4px 0 0 var(--ochre-fill);
+}
+
+.data-table tr[data-control] th,
+.data-table__reference th,
+.data-table__reference td {
+  color: var(--ink-2);
+}
+
+.data-table tr[data-control] {
+  background: var(--sheet-sunk);
+}
+
+.score-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 9rem;
+  height: 1.9rem;
+}
+
+.score-bar__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--indigo-soft);
+  border-right: 3px solid var(--indigo);
+  border-radius: 3px 0 0 3px;
+}
+
+.score-bar__fill--reference {
+  background: var(--sheet-sunk);
+  border-right-color: var(--rule-strong);
+}
+
+.score-bar .num {
+  position: relative;
+  padding-left: var(--space-2);
+  font-weight: 700;
+}
+
+.callout {
+  margin-top: var(--space-5);
+  padding: var(--space-4) var(--space-5);
+  border-left: 4px solid var(--ochre-fill);
+  background: var(--sheet);
+  max-width: 76ch;
+}
+
+.check-list {
+  margin: var(--space-3) 0 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: var(--space-2);
+  font-size: var(--step--1);
+  color: var(--ink-2);
+}
+
+.honest,
+.conclusion {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-5) var(--space-7);
+}
+
+.conclusion {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.honest h3,
+.conclusion h3 {
+  font-size: var(--step-2);
+  margin-bottom: var(--space-3);
+}
+
+.honest ul {
+  margin: 0;
+  padding-left: 1.2rem;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.honest > div:first-child li::marker {
+  color: var(--indigo);
+}
+
+.honest > div:last-child li::marker {
+  color: var(--madder);
+}
+
+@media (max-width: 960px) {
+  .honest,
+  .conclusion {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---- data sources ------------------------------------------------------ */
+
+.ledger th[scope='row'] {
+  font-size: var(--step-0) !important;
+  white-space: normal !important;
+  min-width: 12rem;
+}
+
+.ledger__provider,
+.ledger__sub {
+  display: block;
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: var(--step--1);
+  color: var(--ink-2);
+}
+
+.ledger td {
+  font-size: var(--step--1);
+}
+
+.ledger td.num {
+  font-size: var(--step-0);
+  font-weight: 650;
+}
+
+.effect {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-5) var(--space-7);
+}
+
+.effect h3 {
+  font-size: var(--step-2);
+  margin-bottom: var(--space-3);
+}
+
+.weights {
+  margin: var(--space-3) 0 var(--space-4);
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, max-content);
+  gap: var(--space-1) var(--space-6);
+}
+
+@media (max-width: 960px) {
+  .effect {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---- quantum lab ------------------------------------------------------- */
+
+.lab {
+  counter-reset: lab;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-8);
+}
+
+.lab__step {
+  counter-increment: lab;
+  position: relative;
+  min-width: 0;
+  padding-left: 4.5rem;
+  scroll-margin-top: calc(var(--header-h) + var(--space-5));
+}
+
+/* The steps are a real sequence: decisions, score, penalties, energy, spins, circuit, measurement, checks. */
+.lab__step::before {
+  content: counter(lab);
+  position: absolute;
+  left: 0;
+  top: -0.15rem;
+  width: 3rem;
+  height: 3rem;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--step-2);
+}
+
+.lab__step:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 1.5rem;
+  top: 3.25rem;
+  bottom: calc(-1 * var(--space-8) + 0.5rem);
+  width: 4px;
+  margin-left: -2px;
+  border-radius: 2px;
+  background: var(--weft);
+}
+
+.lab__step h2 {
+  margin-bottom: var(--space-4);
+}
+
+.lab__step > p {
+  max-width: 70ch;
+  margin-bottom: var(--space-3);
+}
+
+.math {
+  font-size: var(--step-1);
+  line-height: 1.7;
+  padding: var(--space-3) var(--space-4);
+  background: var(--sheet);
+  border-left: 3px solid var(--indigo);
+  overflow-x: auto;
+  max-width: 100% !important;
+}
+
+.math var {
+  font-family: "Cambria Math", "STIX Two Math", Georgia, serif;
+}
+
+.circuit-wrap,
+.matrix__scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  margin-top: var(--space-5);
+  padding: var(--space-4);
+  background: var(--sheet);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-panel);
+}
+
+.circuit {
+  max-width: none;
+  font-family: var(--font-body);
+}
+
+.circuit__wire {
+  stroke: var(--warp);
+  stroke-width: 2;
+}
+
+.circuit__phase {
+  fill: var(--sheet-sunk);
+  stroke: var(--rule);
+}
+
+.circuit__phase--cost {
+  fill: var(--ochre-soft);
+}
+
+.circuit__phase--mix {
+  fill: var(--indigo-soft);
+}
+
+.circuit__phase-label {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 16px;
+  fill: var(--ink);
+}
+
+.circuit__phase-detail {
+  font-size: 13px;
+  fill: var(--ink-2);
+}
+
+.circuit__gate rect {
+  fill: var(--sheet);
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+
+.circuit__gate--rz rect {
+  fill: var(--ochre-fill);
+  stroke: var(--ochre);
+}
+
+.circuit__gate--rx rect {
+  fill: var(--indigo);
+  stroke: var(--indigo-strong);
+}
+
+.circuit__gate text {
+  font-size: 11.5px;
+  font-weight: 700;
+  fill: var(--ink);
+}
+
+.circuit__gate--rx text {
+  fill: var(--sheet);
+}
+
+.circuit__rzz line {
+  stroke: var(--ochre);
+  stroke-width: 2.5;
+}
+
+.circuit__rzz circle {
+  fill: var(--ochre);
+}
+
+.matrix {
+  margin: 0;
+}
+
+.matrix svg {
+  max-width: none;
+}
+
+.matrix__label {
+  font-size: 14px;
+  fill: var(--ink-2);
+  font-weight: 650;
+}
+
+.matrix__diag {
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+
+.matrix__cell {
+  stroke: var(--rule);
+}
+
+.matrix__legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin-top: var(--space-3);
+  font-size: var(--step--1);
+  color: var(--ink-2);
+}
+
+.matrix__swatch {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 3px;
+}
+
+.matrix__swatch--neg {
+  background: var(--indigo);
+}
+
+.matrix__swatch--pos {
+  background: #b07a00;
+  margin-left: var(--space-3);
+}
+
+.data-table--compact {
+  min-width: 28rem;
+}
+
+.data-table--compact th,
+.data-table--compact td {
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--step--1) !important;
+}
+
+.samples {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-6);
+  margin-top: var(--space-5);
+}
+
+.samples h3 {
+  font-size: var(--step-1);
+}
+
+.bitstring {
+  margin: var(--space-2) 0 var(--space-3);
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: var(--step-1);
+  letter-spacing: 0.12em;
+}
+
+.bits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin: 0 0 var(--space-2);
+  padding: 0;
+  list-style: none;
+}
+
+.bits li {
+  display: grid;
+  justify-items: center;
+  width: 4.6rem;
+  padding: var(--space-1);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: var(--sheet);
+}
+
+.bits li[data-on] {
+  background: var(--indigo-soft);
+  border-color: var(--indigo);
+}
+
+.bits__value {
+  font-weight: 700;
+}
+
+.bits__label {
+  font-size: 0.72rem;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--ink-2);
+}
+
+@media (max-width: 760px) {
+  .lab__step {
+    padding-left: 0;
+  }
+
+  .lab__step::before {
+    position: static;
+    margin-bottom: var(--space-3);
+  }
+
+  .lab__step::after {
+    display: none;
+  }
+
+  .samples {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---- lab readability (design review) ------------------------------------- */
+
+.circuit-figure {
+  display: flex;
+  align-items: flex-start;
+  margin-top: var(--space-5);
+  background: var(--sheet);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-panel);
+  padding: var(--space-4) 0 var(--space-4) var(--space-3);
+}
+
+.circuit-figure .circuit-wrap {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 0 var(--space-3) 0 0;
+  border: 0;
+  border-radius: 0;
+}
+
+.circuit-labels {
+  flex: none;
+  margin: 0;
+  padding: 0 var(--space-3) 0 0;
+  list-style: none;
+  font-size: 14px;
+  line-height: 1.15;
+  color: var(--ink-2);
+}
+
+.circuit-labels li {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.matrix__key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--step--1);
+  color: var(--ink-2);
+}
+
+.matrix__key strong {
+  color: var(--ink);
+  margin-right: 0.25rem;
+}
+
+.bitstring-note {
+  margin: var(--space-2) 0 var(--space-3);
+  color: var(--ink-2);
+}
+
+.bitstring-note .bitstring {
+  margin: 0;
+  font-size: var(--step-0);
+  color: var(--ink);
+}
+
+.bits__group {
+  margin: var(--space-2) 0 var(--space-1);
+  font-size: var(--step--1);
+  font-weight: 650;
+  color: var(--ink-2);
+}
+
+@media (max-width: 560px) {
+  .circuit-labels {
+    width: 7.5rem;
+    font-size: 12px;
+  }
+
+  .circuit-labels li {
+    white-space: normal;
+  }
+}
+
+/* ---- per-solver score bars ------------------------------------------------ */
+
+/* Each solver's bar in its own colour, matching its row marker and its panel. */
+.data-table tr[data-solver='greedy'] .score-bar__fill {
+  background: var(--slate-soft);
+  border-right-color: var(--slate);
+}
+
+.data-table tr[data-solver='qaoa'] .score-bar__fill {
+  background: var(--ochre-soft);
+  border-right-color: var(--ochre);
+}
+
+/* ---- wide tables on phones ------------------------------------------------- */
+
+/* Shown by ScrollRegion only while its content is wider than the screen. */
+.scroll-hint {
+  margin: 0 0 var(--space-2);
+  font-size: var(--step--1);
+  color: var(--ink-2);
+}
+
+/* On phones the first column stays put while the rest scrolls, so every row keeps its name.
+   The data ledger is left out: its first column is too wide to pin on a phone. */
+@media (max-width: 760px) {
+  /* Separate borders move with the pinned cells; collapsed ones stay with the table. */
+  .data-table:not(.ledger) {
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .data-table:not(.ledger) th:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    width: 9rem;
+    min-width: 9rem;
+    padding-inline: var(--space-3);
+    white-space: normal;
+    background: var(--sheet);
+  }
+
+  .data-table:not(.ledger) tbody th {
+    font-size: var(--step-0);
+  }
+
+  .data-table:not(.ledger) thead th:first-child,
+  .data-table tr[data-control] th:first-child {
+    background: var(--sheet-sunk);
+  }
+
+  .data-table:not(.ledger) th:first-child::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--rule);
+  }
+}

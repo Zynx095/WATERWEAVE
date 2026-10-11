@@ -1,0 +1,2886 @@
+{
+ "kind": "waterweave-recorded-run",
+ "captured_at": "2026-10-10T20:04:57+00:00",
+ "git_commit": "0e25b0d03940a66c5af74753d1a850415fc363e9",
+ "git_dirty": false,
+ "command": "python scripts/export_demo_snapshot.py",
+ "note": "Raw responses of the WATERWEAVE API for the synthetic default scenario. Shown by the frontend only when the API is unreachable, and labelled as recorded.",
+ "quantum_settings": {
+  "include_qaoa": true,
+  "p": 1,
+  "shots": 1024,
+  "maxiter": 25,
+  "seed": 42
+ },
+ "responses": {
+  "health": {
+   "status": "ok",
+   "server_time": "2026-10-10T20:04:57.627363+00:00",
+   "engine": {
+    "python": "3.12.0",
+    "qiskit": "2.5.2",
+    "numpy": "2.5.3",
+    "scipy": "1.18.1",
+    "max_qaoa_qubits": 15
+   },
+   "offline_mode": false,
+   "frontend_built": true
+  },
+  "presets": [
+   {
+    "id": "default",
+    "label": "Default scarcity",
+    "summary": "Seven deliveries requested, four possible. Riverside can store only one unit.",
+    "provenance": "synthetic",
+    "scenario": {
+     "name": "synthetic-4x2",
+     "description": "SYNTHETIC demonstration data. Not live or measured municipal data and not based on any real water network.",
+     "slots": [
+      "morning",
+      "evening"
+     ],
+     "supply_by_slot": {
+      "morning": 2,
+      "evening": 2
+     },
+     "neighborhoods": [
+      {
+       "id": "N1",
+       "name": "Hillview (synthetic)",
+       "demand_by_slot": {
+        "morning": 1,
+        "evening": 1
+       },
+       "priority_weight": 1.5,
+       "storage_capacity_units": 2
+      },
+      {
+       "id": "N2",
+       "name": "Riverside (synthetic)",
+       "demand_by_slot": {
+        "morning": 1,
+        "evening": 1
+       },
+       "priority_weight": 1.0,
+       "storage_capacity_units": 1
+      },
+      {
+       "id": "N3",
+       "name": "Market (synthetic)",
+       "demand_by_slot": {
+        "morning": 1,
+        "evening": 0
+       },
+       "priority_weight": 1.0,
+       "storage_capacity_units": 2
+      },
+      {
+       "id": "N4",
+       "name": "Lakeside (synthetic)",
+       "demand_by_slot": {
+        "morning": 1,
+        "evening": 1
+       },
+       "priority_weight": 2.0,
+       "storage_capacity_units": 2
+      }
+     ],
+     "seed": 42
+    }
+   },
+   {
+    "id": "drought",
+    "label": "Severe drought",
+    "summary": "Same neighborhoods, one unit per slot: two deliveries for seven requests.",
+    "provenance": "synthetic",
+    "scenario": {
+     "name": "synthetic-4x2-drought",
+     "description": "SYNTHETIC demonstration data. Not live or measured municipal data and not based on any real water network.",
+     "slots": [
+      "morning",
+      "evening"
+     ],
+     "supply_by_slot": {
+      "morning": 1,
+      "evening": 1
+     },
+     "neighborhoods": [
+      {
+       "id": "N1",
+       "name": "Hillview (synthetic)",
+       "demand_by_slot": {
+        "morning": 1,
+        "evening": 1
+       },
+       "priority_weight": 1.5,
+       "storage_capacity_units": 2
+      },
+      {
+       "id": "N2",
+       "name": "Riverside (synthetic)",
+       "demand_by_slot": {
+        "morning": 1,
+        "evening": 1
+       },
+       "priority_weight": 1.0,
+       "storage_capacity_units": 1
+      },
+      {
+       "id": "N3",
+       "name": "Market (synthetic)",
+       "demand_by_slot": {
+        "morning": 1,
+        "evening": 0
+       },
+       "priority_weight": 1.0,
+       "storage_capacity_units": 2
+      },
+      {
+       "id": "N4",
+       "name": "Lakeside (synthetic)",
+       "demand_by_slot": {
+        "morning": 1,
+        "evening": 1
+       },
+       "priority_weight": 2.0,
+       "storage_capacity_units": 2
+      }
+     ],
+     "seed": 42
+    }
+   },
+   {
+    "id": "ample",
+    "label": "Ample supply",
+    "summary": "Enough water for every request; Riverside's storage limit still binds.",
+    "provenance": "synthetic",
+    "scenario": {
+     "name": "synthetic-4x2-ample",
+     "description": "SYNTHETIC demonstration data. Not live or measured municipal data and not based on any real water network.",
+     "slots": [
+      "morning",
+      "evening"
+     ],
+     "supply_by_slot": {
+      "morning": 4,
+      "evening": 3
+     },
+     "neighborhoods": [
+      {
+       "id": "N1",
+       "name": "Hillview (synthetic)",
+       "demand_by_slot": {
+        "morning": 1,
+        "evening": 1
+       },
+       "priority_weight": 1.5,
+       "storage_capacity_units": 2
+      },
+      {
+       "id": "N2",
+       "name": "Riverside (synthetic)",
+       "demand_by_slot": {
+        "morning": 1,
+        "evening": 1
+       },
+       "priority_weight": 1.0,
+       "storage_capacity_units": 1
+      },
+      {
+       "id": "N3",
+       "name": "Market (synthetic)",
+       "demand_by_slot": {
+        "morning": 1,
+        "evening": 0
+       },
+       "priority_weight": 1.0,
+       "storage_capacity_units": 2
+      },
+      {
+       "id": "N4",
+       "name": "Lakeside (synthetic)",
+       "demand_by_slot": {
+        "morning": 1,
+        "evening": 1
+       },
+       "priority_weight": 2.0,
+       "storage_capacity_units": 2
+      }
+     ],
+     "seed": 42
+    }
+   },
+   {
+    "id": "lakeside-priority",
+    "label": "Lakeside priority 3x",
+    "summary": "Default scarcity, but Lakeside's shortage counts three times as much.",
+    "provenance": "synthetic",
+    "scenario": {
+     "name": "synthetic-4x2-lakeside-priority",
+     "description": "SYNTHETIC demonstration data. Not live or measured municipal data and not based on any real water network.",
+     "slots": [
+      "morning",
+      "evening"
+     ],
+     "supply_by_slot": {
+      "morning": 2,
+      "evening": 2
+     },
+     "neighborhoods": [
+      {
+       "id": "N1",
+       "name": "Hillview (synthetic)",
+       "demand_by_slot": {
+        "morning": 1,
+        "evening": 1
+       },
+       "priority_weight": 1.5,
+       "storage_capacity_units": 2
+      },
+      {
+       "id": "N2",
+       "name": "Riverside (synthetic)",
+       "demand_by_slot": {
+        "morning": 1,
+        "evening": 1
+       },
+       "priority_weight": 1.0,
+       "storage_capacity_units": 1
+      },
+      {
+       "id": "N3",
+       "name": "Market (synthetic)",
+       "demand_by_slot": {
+        "morning": 1,
+        "evening": 0
+       },
+       "priority_weight": 1.0,
+       "storage_capacity_units": 2
+      },
+      {
+       "id": "N4",
+       "name": "Lakeside (synthetic)",
+       "demand_by_slot": {
+        "morning": 1,
+        "evening": 1
+       },
+       "priority_weight": 3.0,
+       "storage_capacity_units": 2
+      }
+     ],
+     "seed": 42
+    }
+   },
+   {
+    "id": "illustrative-population",
+    "label": "Illustrative population weights",
+    "summary": "Default demand and supply; priority weights from illustrative population figures.",
+    "provenance": "illustrative",
+    "scenario": {
+     "name": "illustrative-population-4x2",
+     "description": "SYNTHETIC demand and supply. Priority weights = illustrative population / 25,000 from the bbmp_static provider, whose figures are illustrative, not census records.",
+     "slots": [
+      "morning",
+      "evening"
+     ],
+     "supply_by_slot": {
+      "morning": 2,
+      "evening": 2
+     },
+     "neighborhoods": [
+      {
+       "id": "N1",
+       "name": "Hillview (synthetic)",
+       "demand_by_slot": {
+        "morning": 1,
+        "evening": 1
+       },
+       "priority_weight": 1.4,
+       "storage_capacity_units": 2
+      },
+      {
+       "id": "N2",
+       "name": "Riverside (synthetic)",
+       "demand_by_slot": {
+        "morning": 1,
+        "evening": 1
+       },
+       "priority_weight": 1.68,
+       "storage_capacity_units": 1
+      },
+      {
+       "id": "N3",
+       "name": "Market (synthetic)",
+       "demand_by_slot": {
+        "morning": 1,
+        "evening": 0
+       },
+       "priority_weight": 1.12,
+       "storage_capacity_units": 2
+      },
+      {
+       "id": "N4",
+       "name": "Lakeside (synthetic)",
+       "demand_by_slot": {
+        "morning": 1,
+        "evening": 1
+       },
+       "priority_weight": 2.04,
+       "storage_capacity_units": 2
+      }
+     ],
+     "seed": 42
+    }
+   }
+  ],
+  "solve_classical": {
+   "run_id": "3136ad8eb91c",
+   "executed_at": "2026-10-10T20:04:57.633954+00:00",
+   "source": "live",
+   "scenario": {
+    "name": "synthetic-4x2",
+    "description": "SYNTHETIC demonstration data. Not live or measured municipal data and not based on any real water network.",
+    "slots": [
+     "morning",
+     "evening"
+    ],
+    "supply_by_slot": {
+     "morning": 2,
+     "evening": 2
+    },
+    "neighborhoods": [
+     {
+      "id": "N1",
+      "name": "Hillview (synthetic)",
+      "demand_by_slot": {
+       "morning": 1,
+       "evening": 1
+      },
+      "priority_weight": 1.5,
+      "storage_capacity_units": 2
+     },
+     {
+      "id": "N2",
+      "name": "Riverside (synthetic)",
+      "demand_by_slot": {
+       "morning": 1,
+       "evening": 1
+      },
+      "priority_weight": 1.0,
+      "storage_capacity_units": 1
+     },
+     {
+      "id": "N3",
+      "name": "Market (synthetic)",
+      "demand_by_slot": {
+       "morning": 1,
+       "evening": 0
+      },
+      "priority_weight": 1.0,
+      "storage_capacity_units": 2
+     },
+     {
+      "id": "N4",
+      "name": "Lakeside (synthetic)",
+      "demand_by_slot": {
+       "morning": 1,
+       "evening": 1
+      },
+      "priority_weight": 2.0,
+      "storage_capacity_units": 2
+     }
+    ],
+    "seed": 42
+   },
+   "settings": {
+    "include_qaoa": false,
+    "fairness_weight": 2.0,
+    "penalty_weight": 15.0,
+    "penalty_weight_was_default": true,
+    "p": 1,
+    "shots": 1024,
+    "maxiter": 25,
+    "seed": 42
+   },
+   "model": {
+    "n_decision": 7,
+    "n_slack": 5,
+    "n_vars": 12,
+    "fairness_weight": 2.0,
+    "penalty_weight": 15.0,
+    "decision_vars": [
+     {
+      "index": 0,
+      "neighborhood_id": "N1",
+      "slot": "morning",
+      "name": "x_N1_morning"
+     },
+     {
+      "index": 1,
+      "neighborhood_id": "N1",
+      "slot": "evening",
+      "name": "x_N1_evening"
+     },
+     {
+      "index": 2,
+      "neighborhood_id": "N2",
+      "slot": "morning",
+      "name": "x_N2_morning"
+     },
+     {
+      "index": 3,
+      "neighborhood_id": "N2",
+      "slot": "evening",
+      "name": "x_N2_evening"
+     },
+     {
+      "index": 4,
+      "neighborhood_id": "N3",
+      "slot": "morning",
+      "name": "x_N3_morning"
+     },
+     {
+      "index": 5,
+      "neighborhood_id": "N4",
+      "slot": "morning",
+      "name": "x_N4_morning"
+     },
+     {
+      "index": 6,
+      "neighborhood_id": "N4",
+      "slot": "evening",
+      "name": "x_N4_evening"
+     }
+    ],
+    "slack_vars": [
+     {
+      "index": 7,
+      "name": "slack_supply_morning_0"
+     },
+     {
+      "index": 8,
+      "name": "slack_supply_morning_1"
+     },
+     {
+      "index": 9,
+      "name": "slack_supply_evening_0"
+     },
+     {
+      "index": 10,
+      "name": "slack_supply_evening_1"
+     },
+     {
+      "index": 11,
+      "name": "slack_storage_N2_0"
+     }
+    ],
+    "qaoa_within_budget": true,
+    "max_qaoa_qubits": 15
+   },
+   "results": [
+    {
+     "key": "greedy",
+     "solver_name": "Greedy (Priority-First)",
+     "status": "ok",
+     "error": null,
+     "allocation": {
+      "N1": {
+       "morning": 1,
+       "evening": 0
+      },
+      "N2": {
+       "morning": 0,
+       "evening": 1
+      },
+      "N3": {
+       "morning": 0,
+       "evening": 0
+      },
+      "N4": {
+       "morning": 1,
+       "evening": 0
+      }
+     },
+     "objective_value": 7.0,
+     "feasible": true,
+     "metrics": {
+      "total_demand_units": 7.0,
+      "total_allocated_units": 3.0,
+      "unmet_demand_units": 4.0,
+      "weighted_shortage": 5.5,
+      "service_level": 0.42857142857142855,
+      "fairness_score": 0.5,
+      "disparity": 0.75,
+      "feasible": 1.0,
+      "invalid_entries": 0.0,
+      "demand_violation_units": 0.0,
+      "supply_violation_units": 0.0,
+      "storage_violation_units": 0.0
+     },
+     "runtime_seconds": 0.0006885000038892031,
+     "gap_to_exact": 1.0,
+     "metadata": {
+      "solver_type": "classical_heuristic",
+      "heuristic": "objective_aware_greedy_with_local_search",
+      "is_demo": false,
+      "description": "Objective-aware greedy heuristic with deterministic 1-opt local search. Evaluates allocations against the shared objective (shortage, disparity, penalties) and guards against returning solutions dominated by the zero-allocation baseline."
+     },
+     "circuit": null,
+     "samples": null
+    },
+    {
+     "key": "exact",
+     "solver_name": "Exact Classical (Optimal)",
+     "status": "ok",
+     "error": null,
+     "allocation": {
+      "N1": {
+       "morning": 0,
+       "evening": 1
+      },
+      "N2": {
+       "morning": 0,
+       "evening": 1
+      },
+      "N3": {
+       "morning": 1,
+       "evening": 0
+      },
+      "N4": {
+       "morning": 1,
+       "evening": 0
+      }
+     },
+     "objective_value": 6.0,
+     "feasible": true,
+     "metrics": {
+      "total_demand_units": 7.0,
+      "total_allocated_units": 4.0,
+      "unmet_demand_units": 3.0,
+      "weighted_shortage": 4.5,
+      "service_level": 0.5714285714285714,
+      "fairness_score": 0.5,
+      "disparity": 0.75,
+      "feasible": 1.0,
+      "invalid_entries": 0.0,
+      "demand_violation_units": 0.0,
+      "supply_violation_units": 0.0,
+      "storage_violation_units": 0.0
+     },
+     "runtime_seconds": 0.002574299927800894,
+     "gap_to_exact": 0.0,
+     "metadata": {
+      "solver_type": "classical_exact",
+      "method": "exhaustive_enumeration",
+      "total_candidates_evaluated": 128,
+      "is_demo": false,
+      "description": "Exact enumeration evaluating all eligible binary allocation configurations to guarantee finding the global minimum."
+     },
+     "circuit": null,
+     "samples": null
+    }
+   ],
+   "reference": {
+    "deliver_nothing": {
+     "allocation": {
+      "N1": {
+       "morning": 0,
+       "evening": 0
+      },
+      "N2": {
+       "morning": 0,
+       "evening": 0
+      },
+      "N3": {
+       "morning": 0,
+       "evening": 0
+      },
+      "N4": {
+       "morning": 0,
+       "evening": 0
+      }
+     },
+     "objective_value": 10.0,
+     "metrics": {
+      "total_demand_units": 7.0,
+      "total_allocated_units": 0.0,
+      "unmet_demand_units": 7.0,
+      "weighted_shortage": 10.0,
+      "service_level": 0.0,
+      "fairness_score": 1.0,
+      "disparity": 0.0,
+      "feasible": 1.0,
+      "invalid_entries": 0.0,
+      "demand_violation_units": 0.0,
+      "supply_violation_units": 0.0,
+      "storage_violation_units": 0.0
+     }
+    }
+   },
+   "wall_seconds": 0.003297800081782043,
+   "engine": {
+    "python": "3.12.0",
+    "qiskit": "2.5.2",
+    "numpy": "2.5.3",
+    "scipy": "1.18.1",
+    "max_qaoa_qubits": 15
+   }
+  },
+  "solve_quantum": {
+   "run_id": "b302d08f715d",
+   "executed_at": "2026-10-10T20:04:57.979859+00:00",
+   "source": "live",
+   "scenario": {
+    "name": "synthetic-4x2",
+    "description": "SYNTHETIC demonstration data. Not live or measured municipal data and not based on any real water network.",
+    "slots": [
+     "morning",
+     "evening"
+    ],
+    "supply_by_slot": {
+     "morning": 2,
+     "evening": 2
+    },
+    "neighborhoods": [
+     {
+      "id": "N1",
+      "name": "Hillview (synthetic)",
+      "demand_by_slot": {
+       "morning": 1,
+       "evening": 1
+      },
+      "priority_weight": 1.5,
+      "storage_capacity_units": 2
+     },
+     {
+      "id": "N2",
+      "name": "Riverside (synthetic)",
+      "demand_by_slot": {
+       "morning": 1,
+       "evening": 1
+      },
+      "priority_weight": 1.0,
+      "storage_capacity_units": 1
+     },
+     {
+      "id": "N3",
+      "name": "Market (synthetic)",
+      "demand_by_slot": {
+       "morning": 1,
+       "evening": 0
+      },
+      "priority_weight": 1.0,
+      "storage_capacity_units": 2
+     },
+     {
+      "id": "N4",
+      "name": "Lakeside (synthetic)",
+      "demand_by_slot": {
+       "morning": 1,
+       "evening": 1
+      },
+      "priority_weight": 2.0,
+      "storage_capacity_units": 2
+     }
+    ],
+    "seed": 42
+   },
+   "settings": {
+    "include_qaoa": true,
+    "fairness_weight": 2.0,
+    "penalty_weight": 15.0,
+    "penalty_weight_was_default": true,
+    "p": 1,
+    "shots": 1024,
+    "maxiter": 25,
+    "seed": 42
+   },
+   "model": {
+    "n_decision": 7,
+    "n_slack": 5,
+    "n_vars": 12,
+    "fairness_weight": 2.0,
+    "penalty_weight": 15.0,
+    "decision_vars": [
+     {
+      "index": 0,
+      "neighborhood_id": "N1",
+      "slot": "morning",
+      "name": "x_N1_morning"
+     },
+     {
+      "index": 1,
+      "neighborhood_id": "N1",
+      "slot": "evening",
+      "name": "x_N1_evening"
+     },
+     {
+      "index": 2,
+      "neighborhood_id": "N2",
+      "slot": "morning",
+      "name": "x_N2_morning"
+     },
+     {
+      "index": 3,
+      "neighborhood_id": "N2",
+      "slot": "evening",
+      "name": "x_N2_evening"
+     },
+     {
+      "index": 4,
+      "neighborhood_id": "N3",
+      "slot": "morning",
+      "name": "x_N3_morning"
+     },
+     {
+      "index": 5,
+      "neighborhood_id": "N4",
+      "slot": "morning",
+      "name": "x_N4_morning"
+     },
+     {
+      "index": 6,
+      "neighborhood_id": "N4",
+      "slot": "evening",
+      "name": "x_N4_evening"
+     }
+    ],
+    "slack_vars": [
+     {
+      "index": 7,
+      "name": "slack_supply_morning_0"
+     },
+     {
+      "index": 8,
+      "name": "slack_supply_morning_1"
+     },
+     {
+      "index": 9,
+      "name": "slack_supply_evening_0"
+     },
+     {
+      "index": 10,
+      "name": "slack_supply_evening_1"
+     },
+     {
+      "index": 11,
+      "name": "slack_storage_N2_0"
+     }
+    ],
+    "qaoa_within_budget": true,
+    "max_qaoa_qubits": 15
+   },
+   "results": [
+    {
+     "key": "greedy",
+     "solver_name": "Greedy (Priority-First)",
+     "status": "ok",
+     "error": null,
+     "allocation": {
+      "N1": {
+       "morning": 1,
+       "evening": 0
+      },
+      "N2": {
+       "morning": 0,
+       "evening": 1
+      },
+      "N3": {
+       "morning": 0,
+       "evening": 0
+      },
+      "N4": {
+       "morning": 1,
+       "evening": 0
+      }
+     },
+     "objective_value": 7.0,
+     "feasible": true,
+     "metrics": {
+      "total_demand_units": 7.0,
+      "total_allocated_units": 3.0,
+      "unmet_demand_units": 4.0,
+      "weighted_shortage": 5.5,
+      "service_level": 0.42857142857142855,
+      "fairness_score": 0.5,
+      "disparity": 0.75,
+      "feasible": 1.0,
+      "invalid_entries": 0.0,
+      "demand_violation_units": 0.0,
+      "supply_violation_units": 0.0,
+      "storage_violation_units": 0.0
+     },
+     "runtime_seconds": 0.0006544999778270721,
+     "gap_to_exact": 1.0,
+     "metadata": {
+      "solver_type": "classical_heuristic",
+      "heuristic": "objective_aware_greedy_with_local_search",
+      "is_demo": false,
+      "description": "Objective-aware greedy heuristic with deterministic 1-opt local search. Evaluates allocations against the shared objective (shortage, disparity, penalties) and guards against returning solutions dominated by the zero-allocation baseline."
+     },
+     "circuit": null,
+     "samples": null
+    },
+    {
+     "key": "exact",
+     "solver_name": "Exact Classical (Optimal)",
+     "status": "ok",
+     "error": null,
+     "allocation": {
+      "N1": {
+       "morning": 0,
+       "evening": 1
+      },
+      "N2": {
+       "morning": 0,
+       "evening": 1
+      },
+      "N3": {
+       "morning": 1,
+       "evening": 0
+      },
+      "N4": {
+       "morning": 1,
+       "evening": 0
+      }
+     },
+     "objective_value": 6.0,
+     "feasible": true,
+     "metrics": {
+      "total_demand_units": 7.0,
+      "total_allocated_units": 4.0,
+      "unmet_demand_units": 3.0,
+      "weighted_shortage": 4.5,
+      "service_level": 0.5714285714285714,
+      "fairness_score": 0.5,
+      "disparity": 0.75,
+      "feasible": 1.0,
+      "invalid_entries": 0.0,
+      "demand_violation_units": 0.0,
+      "supply_violation_units": 0.0,
+      "storage_violation_units": 0.0
+     },
+     "runtime_seconds": 0.00263109989464283,
+     "gap_to_exact": 0.0,
+     "metadata": {
+      "solver_type": "classical_exact",
+      "method": "exhaustive_enumeration",
+      "total_candidates_evaluated": 128,
+      "is_demo": false,
+      "description": "Exact enumeration evaluating all eligible binary allocation configurations to guarantee finding the global minimum."
+     },
+     "circuit": null,
+     "samples": null
+    },
+    {
+     "key": "qaoa",
+     "solver_name": "QAOA (Quantum Heuristic)",
+     "status": "ok",
+     "error": null,
+     "allocation": {
+      "N1": {
+       "morning": 0,
+       "evening": 1
+      },
+      "N2": {
+       "morning": 1,
+       "evening": 0
+      },
+      "N3": {
+       "morning": 1,
+       "evening": 0
+      },
+      "N4": {
+       "morning": 0,
+       "evening": 1
+      }
+     },
+     "objective_value": 6.0,
+     "feasible": true,
+     "metrics": {
+      "total_demand_units": 7.0,
+      "total_allocated_units": 4.0,
+      "unmet_demand_units": 3.0,
+      "weighted_shortage": 4.5,
+      "service_level": 0.5714285714285714,
+      "fairness_score": 0.5,
+      "disparity": 0.75,
+      "feasible": 1.0,
+      "invalid_entries": 0.0,
+      "demand_violation_units": 0.0,
+      "supply_violation_units": 0.0,
+      "storage_violation_units": 0.0
+     },
+     "runtime_seconds": 0.33738779998384416,
+     "gap_to_exact": 0.0,
+     "metadata": {
+      "solver_type": "quantum_approximate",
+      "layers_p": 1,
+      "shots": 1024,
+      "seed": 42,
+      "num_qubits": 12,
+      "circuit_depth": 17,
+      "optimizer": "COBYLA",
+      "optimizer_iterations": 25,
+      "optimizer_converged": false,
+      "optimizer_status": "maxiter_reached",
+      "grid_evaluations": 36,
+      "total_evaluations": 61,
+      "optimal_gammas": [
+       0.40368467614706777
+      ],
+      "optimal_betas": [
+       0.3971116328833424
+      ],
+      "sampled_unique_bitstrings": 660,
+      "feasible_samples_ratio": 0.744140625,
+      "modal_bitstring": "101100010000",
+      "modal_bitstring_feasible": true,
+      "modal_bitstring_objective": 15.0,
+      "modal_bitstring_count": 9,
+      "selection_rule": "best_feasible_slack_consistent",
+      "best_bitstring": "000001010110",
+      "qubo_energy": 6.0,
+      "slack_consistent": true,
+      "fairness_weight": 2.0,
+      "penalty_weight": 15.0,
+      "is_demo": false,
+      "quantum_advantage_claimed": false,
+      "notes": "Genuine QAOA workflow with explicit Hamiltonian circuit execution. No quantum advantage claimed; NISQ simulation compares favorably in sampling diversity but has circuit overhead relative to exact classical solver."
+     },
+     "circuit": {
+      "num_qubits": 12,
+      "depth": 17,
+      "gate_counts": {
+       "rzz": 39,
+       "h": 12,
+       "rz": 12,
+       "rx": 12
+      },
+      "layers": 1,
+      "gammas": [
+       0.40368467614706777
+      ],
+      "betas": [
+       0.3971116328833424
+      ],
+      "gates": [
+       {
+        "name": "h",
+        "qubits": [
+         0
+        ],
+        "params": []
+       },
+       {
+        "name": "h",
+        "qubits": [
+         1
+        ],
+        "params": []
+       },
+       {
+        "name": "h",
+        "qubits": [
+         2
+        ],
+        "params": []
+       },
+       {
+        "name": "h",
+        "qubits": [
+         3
+        ],
+        "params": []
+       },
+       {
+        "name": "h",
+        "qubits": [
+         4
+        ],
+        "params": []
+       },
+       {
+        "name": "h",
+        "qubits": [
+         5
+        ],
+        "params": []
+       },
+       {
+        "name": "h",
+        "qubits": [
+         6
+        ],
+        "params": []
+       },
+       {
+        "name": "h",
+        "qubits": [
+         7
+        ],
+        "params": []
+       },
+       {
+        "name": "h",
+        "qubits": [
+         8
+        ],
+        "params": []
+       },
+       {
+        "name": "h",
+        "qubits": [
+         9
+        ],
+        "params": []
+       },
+       {
+        "name": "h",
+        "qubits": [
+         10
+        ],
+        "params": []
+       },
+       {
+        "name": "h",
+        "qubits": [
+         11
+        ],
+        "params": []
+       },
+       {
+        "name": "rzz",
+        "qubits": [
+         0,
+         1
+        ],
+        "params": [
+         0.6055270142206016
+        ]
+       },
+       {
+        "name": "rzz",
+        "qubits": [
+         0,
+         2
+        ],
+        "params": [
+         5.853427804132482
+        ]
+       },
+       {
+        "name": "rzz",
+        "qubits": [
+         0,
+         3
+        ],
+        "params": [
+         -0.20184233807353388
+        ]
+       },
+       {
+        "name": "rzz",
+        "qubits": [
+         0,
+         4
+        ],
+        "params": [
+         5.651585466058949
+        ]
+       },
+       {
+        "name": "rzz",
+        "qubits": [
+         0,
+         5
+        ],
+        "params": [
+         5.853427804132482
+        ]
+       },
+       {
+        "name": "rzz",
+        "qubits": [
+         0,
+         6
+        ],
+        "params": [
+         -0.20184233807353388
+        ]
+       },
+       {
+        "name": "rzz",
+        "qubits": [
+         0,
+         7
+        ],
+        "params": [
+         6.055270142206017
+        ]
+       },
+       {
+        "name": "rzz",
+        "qubits": [
+         0,
+         8
+        ],
+        "params": [
+         6.055270142206017
+        ]
+       },
+       {
+        "name": "rzz",
+        "qubits": [
+         1,
+         2
+        ],
+        "params": [
+         -0.20184233807353388
+        ]
+       },
+       {
+        "name": "rzz",
+        "qubits": [
+         1,
+         3
+        ],
+        "params": [
+         5.853427804132482
+        ]
+       },
+       {
+        "name": "rzz",
+        "qubits": [
+         1,
+         4
+        ],
+        "params": [
+         -0.40368467614706777
+        ]
+       },
+       {
+        "name": "rzz",
+        "qubits": [
+         1,
+         5
+        ],
+        "params": [
+         -0.20184233807353388
+        ]
+       },
+       {
+        "name": "rzz",
+        "qubits": [
+         1,
+         6
+        ],
+        "params": [
+         5.853427804132482
+        ]
+       },
+       {
+        "name": "rzz",
+        "qubits": [
+         1,
+         9
+        ],
+        "params": [
+         6.055270142206017
+        ]
+       },
+       {
+        "name": "rzz",
+        "qubits": [
+         1,
+         10
+        ],
+        "params": [
+         6.055270142206017
+        ]
+       },
+       {
+        "name": "rzz",
+        "qubits": [
+         2,
+         3
+        ],
+        "params": [
+         6.660797156426618
+        ]
+       },
+       {
+        "name": "rzz",
+        "qubits": [
+         2,
+         4
+        ],
+        "params": [
+         5.651585466058949
+        ]
+       },
+       {
+        "name": "rzz",
+        "qubits": [
+         2,
+         5
+        ],
+        "params": [
+         5.853427804132482
+        ]
+       },
+       {
+        "name": "rzz",
+        "qubits": [
+         2,
+         6
+        ],
+        "params": [
+         -0.20184233807353388
+        ]
+       },
+       {
+        "name": "rzz",
+        "qubits": [
+         2,
+         7
+        ],
+        "params": [
+         6.055270142206017
+        ]
+       },
+       {
+        "name": "rzz",
+        "qubits": [
+         2,
+         8
+        ],
+        "params": [
+         6.055270142206017
+        ]
+       },
+       {
+        "name": "rzz",
+        "qubits": [
+         2,
+         11
+        ],
+        "params": [
+         6.055270142206017
+        ]
+       },
+       {
+        "name": "rzz",
+        "qubits": [
+         3,
+         4
+        ],
+        "params": [
+         -0.40368467614706777
+        ]
+       },
+       {
+        "name": "rzz",
+        "qubits": [
+         3,
+         5
+        ],
+        "params": [
+         -0.20184233807353388
+        ]
+       },
+       {
+        "name": "rzz",
+        "qubits": [
+         3,
+         6
+        ],
+        "params": [
+         5.853427804132482
+        ]
+       },
+       {
+        "name": "rzz",
+        "qubits": [
+         3,
+         9
+        ],
+        "params": [
+         6.055270142206017
+        ]
+       },
+       {
+        "name": "rzz",
+        "qubits": [
+         3,
+         10
+        ],
+        "params": [
+         6.055270142206017
+        ]
+       },
+       {
+        "name": "rzz",
+        "qubits": [
+         3,
+         11
+        ],
+        "params": [
+         6.055270142206017
+        ]
+       },
+       {
+        "name": "rzz",
+        "qubits": [
+         4,
+         5
+        ],
+        "params": [
+         5.651585466058949
+        ]
+       },
+       {
+        "name": "rzz",
+        "qubits": [
+         4,
+         6
+        ],
+        "params": [
+         -0.40368467614706777
+        ]
+       },
+       {
+        "name": "rzz",
+        "qubits": [
+         4,
+         7
+        ],
+        "params": [
+         6.055270142206017
+        ]
+       },
+       {
+        "name": "rzz",
+        "qubits": [
+         4,
+         8
+        ],
+        "params": [
+         6.055270142206017
+        ]
+       },
+       {
+        "name": "rzz",
+        "qubits": [
+         5,
+         6
+        ],
+        "params": [
+         0.6055270142206016
+        ]
+       },
+       {
+        "name": "rzz",
+        "qubits": [
+         5,
+         7
+        ],
+        "params": [
+         6.055270142206017
+        ]
+       },
+       {
+        "name": "rzz",
+        "qubits": [
+         5,
+         8
+        ],
+        "params": [
+         6.055270142206017
+        ]
+       },
+       {
+        "name": "rzz",
+        "qubits": [
+         6,
+         9
+        ],
+        "params": [
+         6.055270142206017
+        ]
+       },
+       {
+        "name": "rzz",
+        "qubits": [
+         6,
+         10
+        ],
+        "params": [
+         6.055270142206017
+        ]
+       },
+       {
+        "name": "rzz",
+        "qubits": [
+         7,
+         8
+        ],
+        "params": [
+         6.055270142206017
+        ]
+       },
+       {
+        "name": "rzz",
+        "qubits": [
+         9,
+         10
+        ],
+        "params": [
+         6.055270142206017
+        ]
+       },
+       {
+        "name": "rz",
+        "qubits": [
+         0
+        ],
+        "params": [
+         -11.505013270191432
+        ]
+       },
+       {
+        "name": "rz",
+        "qubits": [
+         1
+        ],
+        "params": [
+         -5.449743127985415
+        ]
+       },
+       {
+        "name": "rz",
+        "qubits": [
+         2
+        ],
+        "params": [
+         -17.762125750470982
+        ]
+       },
+       {
+        "name": "rz",
+        "qubits": [
+         3
+        ],
+        "params": [
+         -11.706855608264965
+        ]
+       },
+       {
+        "name": "rz",
+        "qubits": [
+         4
+        ],
+        "params": [
+         -11.706855608264965
+        ]
+       },
+       {
+        "name": "rz",
+        "qubits": [
+         5
+        ],
+        "params": [
+         -11.303170932117897
+        ]
+       },
+       {
+        "name": "rz",
+        "qubits": [
+         6
+        ],
+        "params": [
+         -5.247900789911881
+        ]
+       },
+       {
+        "name": "rz",
+        "qubits": [
+         7
+        ],
+        "params": [
+         -12.110540284412034
+        ]
+       },
+       {
+        "name": "rz",
+        "qubits": [
+         8
+        ],
+        "params": [
+         -12.110540284412034
+        ]
+       },
+       {
+        "name": "rz",
+        "qubits": [
+         9
+        ],
+        "params": [
+         -6.055270142206017
+        ]
+       },
+       {
+        "name": "rz",
+        "qubits": [
+         10
+        ],
+        "params": [
+         -6.055270142206017
+        ]
+       },
+       {
+        "name": "rz",
+        "qubits": [
+         11
+        ],
+        "params": [
+         -6.055270142206017
+        ]
+       },
+       {
+        "name": "rx",
+        "qubits": [
+         0
+        ],
+        "params": [
+         0.7942232657666848
+        ]
+       },
+       {
+        "name": "rx",
+        "qubits": [
+         1
+        ],
+        "params": [
+         0.7942232657666848
+        ]
+       },
+       {
+        "name": "rx",
+        "qubits": [
+         2
+        ],
+        "params": [
+         0.7942232657666848
+        ]
+       },
+       {
+        "name": "rx",
+        "qubits": [
+         3
+        ],
+        "params": [
+         0.7942232657666848
+        ]
+       },
+       {
+        "name": "rx",
+        "qubits": [
+         4
+        ],
+        "params": [
+         0.7942232657666848
+        ]
+       },
+       {
+        "name": "rx",
+        "qubits": [
+         5
+        ],
+        "params": [
+         0.7942232657666848
+        ]
+       },
+       {
+        "name": "rx",
+        "qubits": [
+         6
+        ],
+        "params": [
+         0.7942232657666848
+        ]
+       },
+       {
+        "name": "rx",
+        "qubits": [
+         7
+        ],
+        "params": [
+         0.7942232657666848
+        ]
+       },
+       {
+        "name": "rx",
+        "qubits": [
+         8
+        ],
+        "params": [
+         0.7942232657666848
+        ]
+       },
+       {
+        "name": "rx",
+        "qubits": [
+         9
+        ],
+        "params": [
+         0.7942232657666848
+        ]
+       },
+       {
+        "name": "rx",
+        "qubits": [
+         10
+        ],
+        "params": [
+         0.7942232657666848
+        ]
+       },
+       {
+        "name": "rx",
+        "qubits": [
+         11
+        ],
+        "params": [
+         0.7942232657666848
+        ]
+       }
+      ]
+     },
+     "samples": {
+      "best": {
+       "bitstring": "000001010110",
+       "decision_bits": [
+        0,
+        1,
+        1,
+        0,
+        1,
+        0,
+        1
+       ],
+       "slack_bits": [
+        0,
+        0,
+        0,
+        0,
+        0
+       ],
+       "allocation": {
+        "N1": {
+         "morning": 0,
+         "evening": 1
+        },
+        "N2": {
+         "morning": 1,
+         "evening": 0
+        },
+        "N3": {
+         "morning": 1,
+         "evening": 0
+        },
+        "N4": {
+         "morning": 0,
+         "evening": 1
+        }
+       }
+      },
+      "modal": {
+       "bitstring": "101100010000",
+       "decision_bits": [
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0
+       ],
+       "slack_bits": [
+        0,
+        1,
+        1,
+        0,
+        1
+       ],
+       "allocation": {
+        "N1": {
+         "morning": 0,
+         "evening": 0
+        },
+        "N2": {
+         "morning": 0,
+         "evening": 0
+        },
+        "N3": {
+         "morning": 1,
+         "evening": 0
+        },
+        "N4": {
+         "morning": 0,
+         "evening": 0
+        }
+       }
+      }
+     }
+    }
+   ],
+   "reference": {
+    "deliver_nothing": {
+     "allocation": {
+      "N1": {
+       "morning": 0,
+       "evening": 0
+      },
+      "N2": {
+       "morning": 0,
+       "evening": 0
+      },
+      "N3": {
+       "morning": 0,
+       "evening": 0
+      },
+      "N4": {
+       "morning": 0,
+       "evening": 0
+      }
+     },
+     "objective_value": 10.0,
+     "metrics": {
+      "total_demand_units": 7.0,
+      "total_allocated_units": 0.0,
+      "unmet_demand_units": 7.0,
+      "weighted_shortage": 10.0,
+      "service_level": 0.0,
+      "fairness_score": 1.0,
+      "disparity": 0.0,
+      "feasible": 1.0,
+      "invalid_entries": 0.0,
+      "demand_violation_units": 0.0,
+      "supply_violation_units": 0.0,
+      "storage_violation_units": 0.0
+     }
+    }
+   },
+   "wall_seconds": 0.34150900004897267,
+   "engine": {
+    "python": "3.12.0",
+    "qiskit": "2.5.2",
+    "numpy": "2.5.3",
+    "scipy": "1.18.1",
+    "max_qaoa_qubits": 15
+   }
+  },
+  "model_default": {
+   "n_decision": 7,
+   "n_slack": 5,
+   "n_vars": 12,
+   "fairness_weight": 2.0,
+   "penalty_weight": 15.0,
+   "decision_vars": [
+    {
+     "index": 0,
+     "neighborhood_id": "N1",
+     "slot": "morning",
+     "name": "x_N1_morning"
+    },
+    {
+     "index": 1,
+     "neighborhood_id": "N1",
+     "slot": "evening",
+     "name": "x_N1_evening"
+    },
+    {
+     "index": 2,
+     "neighborhood_id": "N2",
+     "slot": "morning",
+     "name": "x_N2_morning"
+    },
+    {
+     "index": 3,
+     "neighborhood_id": "N2",
+     "slot": "evening",
+     "name": "x_N2_evening"
+    },
+    {
+     "index": 4,
+     "neighborhood_id": "N3",
+     "slot": "morning",
+     "name": "x_N3_morning"
+    },
+    {
+     "index": 5,
+     "neighborhood_id": "N4",
+     "slot": "morning",
+     "name": "x_N4_morning"
+    },
+    {
+     "index": 6,
+     "neighborhood_id": "N4",
+     "slot": "evening",
+     "name": "x_N4_evening"
+    }
+   ],
+   "slack_vars": [
+    {
+     "index": 7,
+     "name": "slack_supply_morning_0"
+    },
+    {
+     "index": 8,
+     "name": "slack_supply_morning_1"
+    },
+    {
+     "index": 9,
+     "name": "slack_supply_evening_0"
+    },
+    {
+     "index": 10,
+     "name": "slack_supply_evening_1"
+    },
+    {
+     "index": 11,
+     "name": "slack_storage_N2_0"
+    }
+   ],
+   "qaoa_within_budget": true,
+   "max_qaoa_qubits": 15,
+   "qubo": {
+    "offset": 145.0,
+    "linear": [
+     -45.0,
+     -45.0,
+     -59.5,
+     -59.5,
+     -40.0,
+     -45.5,
+     -45.5,
+     -45.0,
+     -45.0,
+     -45.0,
+     -45.0,
+     -15.0
+    ],
+    "quadratic": [
+     [
+      0,
+      1,
+      3.0
+     ],
+     [
+      0,
+      2,
+      29.0
+     ],
+     [
+      0,
+      3,
+      -1.0
+     ],
+     [
+      0,
+      4,
+      28.0
+     ],
+     [
+      0,
+      5,
+      29.0
+     ],
+     [
+      0,
+      6,
+      -1.0
+     ],
+     [
+      0,
+      7,
+      30.0
+     ],
+     [
+      0,
+      8,
+      30.0
+     ],
+     [
+      1,
+      2,
+      -1.0
+     ],
+     [
+      1,
+      3,
+      29.0
+     ],
+     [
+      1,
+      4,
+      -2.0
+     ],
+     [
+      1,
+      5,
+      -1.0
+     ],
+     [
+      1,
+      6,
+      29.0
+     ],
+     [
+      1,
+      9,
+      30.0
+     ],
+     [
+      1,
+      10,
+      30.0
+     ],
+     [
+      2,
+      3,
+      33.0
+     ],
+     [
+      2,
+      4,
+      28.0
+     ],
+     [
+      2,
+      5,
+      29.0
+     ],
+     [
+      2,
+      6,
+      -1.0
+     ],
+     [
+      2,
+      7,
+      30.0
+     ],
+     [
+      2,
+      8,
+      30.0
+     ],
+     [
+      2,
+      11,
+      30.0
+     ],
+     [
+      3,
+      4,
+      -2.0
+     ],
+     [
+      3,
+      5,
+      -1.0
+     ],
+     [
+      3,
+      6,
+      29.0
+     ],
+     [
+      3,
+      9,
+      30.0
+     ],
+     [
+      3,
+      10,
+      30.0
+     ],
+     [
+      3,
+      11,
+      30.0
+     ],
+     [
+      4,
+      5,
+      28.0
+     ],
+     [
+      4,
+      6,
+      -2.0
+     ],
+     [
+      4,
+      7,
+      30.0
+     ],
+     [
+      4,
+      8,
+      30.0
+     ],
+     [
+      5,
+      6,
+      3.0
+     ],
+     [
+      5,
+      7,
+      30.0
+     ],
+     [
+      5,
+      8,
+      30.0
+     ],
+     [
+      6,
+      9,
+      30.0
+     ],
+     [
+      6,
+      10,
+      30.0
+     ],
+     [
+      7,
+      8,
+      30.0
+     ],
+     [
+      9,
+      10,
+      30.0
+     ]
+    ]
+   },
+   "ising": {
+    "offset": 83.75,
+    "h": [
+     -14.25,
+     -6.75,
+     -22.0,
+     -14.5,
+     -14.5,
+     -14.0,
+     -6.5,
+     -15.0,
+     -15.0,
+     -7.5,
+     -7.5,
+     -7.5
+    ],
+    "J": [
+     [
+      0,
+      1,
+      0.75
+     ],
+     [
+      0,
+      2,
+      7.25
+     ],
+     [
+      0,
+      3,
+      -0.25
+     ],
+     [
+      0,
+      4,
+      7.0
+     ],
+     [
+      0,
+      5,
+      7.25
+     ],
+     [
+      0,
+      6,
+      -0.25
+     ],
+     [
+      0,
+      7,
+      7.5
+     ],
+     [
+      0,
+      8,
+      7.5
+     ],
+     [
+      1,
+      2,
+      -0.25
+     ],
+     [
+      1,
+      3,
+      7.25
+     ],
+     [
+      1,
+      4,
+      -0.5
+     ],
+     [
+      1,
+      5,
+      -0.25
+     ],
+     [
+      1,
+      6,
+      7.25
+     ],
+     [
+      1,
+      9,
+      7.5
+     ],
+     [
+      1,
+      10,
+      7.5
+     ],
+     [
+      2,
+      3,
+      8.25
+     ],
+     [
+      2,
+      4,
+      7.0
+     ],
+     [
+      2,
+      5,
+      7.25
+     ],
+     [
+      2,
+      6,
+      -0.25
+     ],
+     [
+      2,
+      7,
+      7.5
+     ],
+     [
+      2,
+      8,
+      7.5
+     ],
+     [
+      2,
+      11,
+      7.5
+     ],
+     [
+      3,
+      4,
+      -0.5
+     ],
+     [
+      3,
+      5,
+      -0.25
+     ],
+     [
+      3,
+      6,
+      7.25
+     ],
+     [
+      3,
+      9,
+      7.5
+     ],
+     [
+      3,
+      10,
+      7.5
+     ],
+     [
+      3,
+      11,
+      7.5
+     ],
+     [
+      4,
+      5,
+      7.0
+     ],
+     [
+      4,
+      6,
+      -0.5
+     ],
+     [
+      4,
+      7,
+      7.5
+     ],
+     [
+      4,
+      8,
+      7.5
+     ],
+     [
+      5,
+      6,
+      0.75
+     ],
+     [
+      5,
+      7,
+      7.5
+     ],
+     [
+      5,
+      8,
+      7.5
+     ],
+     [
+      6,
+      9,
+      7.5
+     ],
+     [
+      6,
+      10,
+      7.5
+     ],
+     [
+      7,
+      8,
+      7.5
+     ],
+     [
+      9,
+      10,
+      7.5
+     ]
+    ]
+   },
+   "circuit_structure": [
+    {
+     "p": 1,
+     "depth": 17,
+     "gate_counts": {
+      "rzz": 39,
+      "h": 12,
+      "rz": 12,
+      "rx": 12
+     }
+    },
+    {
+     "p": 2,
+     "depth": 29,
+     "gate_counts": {
+      "rzz": 78,
+      "rz": 24,
+      "rx": 24,
+      "h": 12
+     }
+    },
+    {
+     "p": 3,
+     "depth": 41,
+     "gate_counts": {
+      "rzz": 117,
+      "rz": 36,
+      "rx": 36,
+      "h": 12
+     }
+    }
+   ]
+  },
+  "data_sources_offline": {
+   "requested_live": false,
+   "offline_mode": false,
+   "fetched_at": "2026-10-10T20:04:57.990943+00:00",
+   "observations": [
+    {
+     "provider": {
+      "id": "bbmp_static",
+      "name": "BBMP Ward Census (Static)",
+      "organization": "BBMP",
+      "url": "https://data.opencity.in/"
+     },
+     "dataset_id": "ward_population_illustrative",
+     "geographic_level": "neighborhood",
+     "geographic_id": "N1",
+     "variable": "population",
+     "value": 35000.0,
+     "unit": "count",
+     "source_timestamp": "2011-03-01T00:00:00+00:00",
+     "retrieval_timestamp": "2026-10-10T20:04:57.990943+00:00",
+     "source_age_seconds": 492725097.990943,
+     "retrieval_age_seconds": 0.0,
+     "served_from_cache": false,
+     "quality": {
+      "status": "ILLUSTRATIVE",
+      "missing": false,
+      "error_details": null
+     }
+    },
+    {
+     "provider": {
+      "id": "bbmp_static",
+      "name": "BBMP Ward Census (Static)",
+      "organization": "BBMP",
+      "url": "https://data.opencity.in/"
+     },
+     "dataset_id": "ward_population_illustrative",
+     "geographic_level": "neighborhood",
+     "geographic_id": "N2",
+     "variable": "population",
+     "value": 42000.0,
+     "unit": "count",
+     "source_timestamp": "2011-03-01T00:00:00+00:00",
+     "retrieval_timestamp": "2026-10-10T20:04:57.990943+00:00",
+     "source_age_seconds": 492725097.990943,
+     "retrieval_age_seconds": 0.0,
+     "served_from_cache": false,
+     "quality": {
+      "status": "ILLUSTRATIVE",
+      "missing": false,
+      "error_details": null
+     }
+    },
+    {
+     "provider": {
+      "id": "bbmp_static",
+      "name": "BBMP Ward Census (Static)",
+      "organization": "BBMP",
+      "url": "https://data.opencity.in/"
+     },
+     "dataset_id": "ward_population_illustrative",
+     "geographic_level": "neighborhood",
+     "geographic_id": "N3",
+     "variable": "population",
+     "value": 28000.0,
+     "unit": "count",
+     "source_timestamp": "2011-03-01T00:00:00+00:00",
+     "retrieval_timestamp": "2026-10-10T20:04:57.990943+00:00",
+     "source_age_seconds": 492725097.990943,
+     "retrieval_age_seconds": 0.0,
+     "served_from_cache": false,
+     "quality": {
+      "status": "ILLUSTRATIVE",
+      "missing": false,
+      "error_details": null
+     }
+    },
+    {
+     "provider": {
+      "id": "bbmp_static",
+      "name": "BBMP Ward Census (Static)",
+      "organization": "BBMP",
+      "url": "https://data.opencity.in/"
+     },
+     "dataset_id": "ward_population_illustrative",
+     "geographic_level": "neighborhood",
+     "geographic_id": "N4",
+     "variable": "population",
+     "value": 51000.0,
+     "unit": "count",
+     "source_timestamp": "2011-03-01T00:00:00+00:00",
+     "retrieval_timestamp": "2026-10-10T20:04:57.990943+00:00",
+     "source_age_seconds": 492725097.990943,
+     "retrieval_age_seconds": 0.0,
+     "served_from_cache": false,
+     "quality": {
+      "status": "ILLUSTRATIVE",
+      "missing": false,
+      "error_details": null
+     }
+    }
+   ],
+   "skipped": [
+    {
+     "provider": {
+      "id": "open_meteo",
+      "name": "Open-Meteo Weather API",
+      "url": "https://open-meteo.com/"
+     },
+     "reason": "Live fetch not requested."
+    }
+   ],
+   "scenario_effect": {
+    "rainfall_heuristic_enabled": false,
+    "supply_changed": false,
+    "supply_by_slot": {
+     "morning": 2,
+     "evening": 2
+    },
+    "default_supply_by_slot": {
+     "morning": 2,
+     "evening": 2
+    },
+    "priority_weight_changes": [
+     {
+      "id": "N1",
+      "default": 1.5,
+      "data_informed": 1.4
+     },
+     {
+      "id": "N2",
+      "default": 1.0,
+      "data_informed": 1.68
+     },
+     {
+      "id": "N3",
+      "default": 1.0,
+      "data_informed": 1.12
+     },
+     {
+      "id": "N4",
+      "default": 2.0,
+      "data_informed": 2.04
+     }
+    ]
+   }
+  },
+  "benchmark": {
+   "default": {
+    "file": "benchmark_results/benchmark_default.json",
+    "instance": "synthetic-4x2",
+    "timestamp_utc": "2026-10-10T15:39:48+00:00",
+    "synthetic_notice": "All scenario data is SYNTHETIC. Nothing here is live or measured municipal data and no claim is made about any real water network.",
+    "parameters": {
+     "fairness_weight": 2.0,
+     "penalty_weight": 15.0,
+     "shots": 1024,
+     "maxiter": 25,
+     "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4
+     ],
+     "p_values": [
+      1,
+      2,
+      3
+     ]
+    },
+    "exact_optimum_objective": 6.0,
+    "seed_note": "In the engine, the seed controls only shot sampling; parameter optimisation is deterministic, so seed variability understates optimiser-initialisation variability.",
+    "provenance": {
+     "engine_module_path": "D:\\College\\SOMESHIT DOWNLOADS\\WATERWEAVE-Codex\\src\\waterweave",
+     "engine_git_commit": "f5fe6b0f5ec11f00f030db1d97bca48267e4eb5f",
+     "engine_git_branch": "codex/optimization",
+     "engine_tree_dirty": true,
+     "benchmark_git_commit": "f5fe6b0f5ec11f00f030db1d97bca48267e4eb5f",
+     "python": "3.12.0",
+     "platform": "Windows-11-10.0.26200-SP0",
+     "numpy": "2.4.6",
+     "qiskit": "2.5.2",
+     "scipy": "1.18.0"
+    },
+    "summary": [
+     {
+      "solver_name": "Greedy (Priority-First)",
+      "qaoa_p": null,
+      "runs": 15,
+      "ok_runs": 15,
+      "failed_runs": 0,
+      "feasible_rate": 1.0,
+      "hit_optimum_rate": 0.0,
+      "objective_mean": 7.0,
+      "objective_sd": 0.0,
+      "objective_min": 7.0,
+      "objective_max": 7.0,
+      "approx_ratio_mean": 1.1666666666666667,
+      "runtime_mean_s": 0.0009355933095018069,
+      "runtime_median_s": 0.0009093999397009611,
+      "runtime_max_s": 0.0010529999854043126,
+      "feasible_sample_ratio_mean": null,
+      "modal_feasible_rate": null,
+      "state_p_optimal_mean": null,
+      "state_p_feasible_mean": null,
+      "state_p_feasible_no_penalty_mean": null,
+      "state_p_optimal_no_penalty_mean": null
+     },
+     {
+      "solver_name": "Exact Classical (Optimal)",
+      "qaoa_p": null,
+      "runs": 15,
+      "ok_runs": 15,
+      "failed_runs": 0,
+      "feasible_rate": 1.0,
+      "hit_optimum_rate": 1.0,
+      "objective_mean": 6.0,
+      "objective_sd": 0.0,
+      "objective_min": 6.0,
+      "objective_max": 6.0,
+      "approx_ratio_mean": 1.0,
+      "runtime_mean_s": 0.0034925799972067278,
+      "runtime_median_s": 0.003506499924696982,
+      "runtime_max_s": 0.003689100034534931,
+      "feasible_sample_ratio_mean": null,
+      "modal_feasible_rate": null,
+      "state_p_optimal_mean": null,
+      "state_p_feasible_mean": null,
+      "state_p_feasible_no_penalty_mean": null,
+      "state_p_optimal_no_penalty_mean": null
+     },
+     {
+      "solver_name": "QAOA (Quantum Heuristic)",
+      "qaoa_p": 1,
+      "runs": 5,
+      "ok_runs": 5,
+      "failed_runs": 0,
+      "feasible_rate": 1.0,
+      "hit_optimum_rate": 0.8,
+      "objective_mean": 6.2,
+      "objective_sd": 0.4472135954999579,
+      "objective_min": 6.0,
+      "objective_max": 7.0,
+      "approx_ratio_mean": 1.0333333333333334,
+      "runtime_mean_s": 0.3283365400042385,
+      "runtime_median_s": 0.32793100003618747,
+      "runtime_max_s": 0.3495659000473097,
+      "feasible_sample_ratio_mean": 0.748828125,
+      "modal_feasible_rate": 0.8,
+      "state_p_optimal_mean": 0.012290143614400886,
+      "state_p_feasible_mean": 0.7461235275087953,
+      "state_p_feasible_no_penalty_mean": 0.6687817737438911,
+      "state_p_optimal_no_penalty_mean": 0.0020906315321005233
+     },
+     {
+      "solver_name": "QAOA (Quantum Heuristic)",
+      "qaoa_p": 2,
+      "runs": 5,
+      "ok_runs": 5,
+      "failed_runs": 0,
+      "feasible_rate": 1.0,
+      "hit_optimum_rate": 1.0,
+      "objective_mean": 6.0,
+      "objective_sd": 0.0,
+      "objective_min": 6.0,
+      "objective_max": 6.0,
+      "approx_ratio_mean": 1.0,
+      "runtime_mean_s": 0.5541958600049839,
+      "runtime_median_s": 0.5501260999590158,
+      "runtime_max_s": 0.5709342999616638,
+      "feasible_sample_ratio_mean": 0.633984375,
+      "modal_feasible_rate": 0.8,
+      "state_p_optimal_mean": 0.035323650846510776,
+      "state_p_feasible_mean": 0.6296354757047307,
+      "state_p_feasible_no_penalty_mean": 0.5727319039654344,
+      "state_p_optimal_no_penalty_mean": 0.016788398139114962
+     },
+     {
+      "solver_name": "QAOA (Quantum Heuristic)",
+      "qaoa_p": 3,
+      "runs": 5,
+      "ok_runs": 5,
+      "failed_runs": 0,
+      "feasible_rate": 1.0,
+      "hit_optimum_rate": 1.0,
+      "objective_mean": 6.0,
+      "objective_sd": 0.0,
+      "objective_min": 6.0,
+      "objective_max": 6.0,
+      "approx_ratio_mean": 1.0,
+      "runtime_mean_s": 0.7392306999769062,
+      "runtime_median_s": 0.730372800026089,
+      "runtime_max_s": 0.7712380999000743,
+      "feasible_sample_ratio_mean": 0.648828125,
+      "modal_feasible_rate": 1.0,
+      "state_p_optimal_mean": 0.020139011498312258,
+      "state_p_feasible_mean": 0.6552938601933065,
+      "state_p_feasible_no_penalty_mean": 0.5273484984548689,
+      "state_p_optimal_no_penalty_mean": 0.028261971928772427
+     },
+     {
+      "solver_name": "Uniform random sampling (shot-matched control)",
+      "qaoa_p": null,
+      "runs": 15,
+      "ok_runs": 15,
+      "failed_runs": 0,
+      "feasible_rate": 1.0,
+      "hit_optimum_rate": 1.0,
+      "objective_mean": 6.0,
+      "objective_sd": 0.0,
+      "objective_min": 6.0,
+      "objective_max": 6.0,
+      "approx_ratio_mean": 1.0,
+      "runtime_mean_s": 0.00034614664812882744,
+      "runtime_median_s": 0.00034009991213679314,
+      "runtime_max_s": 0.00039489998016506433,
+      "feasible_sample_ratio_mean": 0.5009765625,
+      "modal_feasible_rate": null,
+      "state_p_optimal_mean": null,
+      "state_p_feasible_mean": null,
+      "state_p_feasible_no_penalty_mean": null,
+      "state_p_optimal_no_penalty_mean": null
+     }
+    ],
+    "audit_checks": [
+     {
+      "name": "penalty_dominance",
+      "status": "pass",
+      "detail": "best infeasible objective 19.5000 vs optimum 6.0000 (margin 13.5000); checked by exhaustive enumeration, not by the analytical bound"
+     },
+     {
+      "name": "variable_order_matches",
+      "status": "pass",
+      "detail": "engine decision_vars [('N1', 'morning'), ('N1', 'evening'), ('N2', 'morning'), ('N2', 'evening'), ('N3', 'morning'), ('N4', 'morning'), ('N4', 'evening')]"
+     },
+     {
+      "name": "engine_objective_matches_independent",
+      "status": "pass",
+      "detail": "max |engine - independent| over all 128 states = 0.00e+00"
+     },
+     {
+      "name": "qubo_min_over_slack_equals_objective",
+      "status": "pass",
+      "detail": "max deviation 0.00e+00 over 128 decision patterns x 32 slack settings"
+     },
+     {
+      "name": "ising_diagonal_equals_qubo_energy",
+      "status": "pass",
+      "detail": "max deviation 0.00e+00 over 4096 basis states"
+     },
+     {
+      "name": "independent_qaoa_simulation_matches_engine_circuit",
+      "status": "pass",
+      "detail": "max probability deviation 3.85e-18 (p=2)"
+     }
+    ],
+    "audit_facts": {
+     "n_decision_vars": 7,
+     "n_states": 128,
+     "n_feasible_states": 65,
+     "optimal_objective": 6.0,
+     "n_optimal_ties": 3,
+     "uniform_p_feasible_pattern": 0.5078125,
+     "uniform_p_optimal_pattern": 0.0234375,
+     "best_infeasible_objective": 19.5,
+     "penalty_margin": 13.5,
+     "alpha": 2.0,
+     "penalty_weight": 15.0,
+     "serve_nobody_alpha_threshold": 7.333333333333333,
+     "unpenalised_best_is_infeasible": true,
+     "fairness_vs_disparity_inverted_pairs": 0,
+     "feasible_pairs_compared": 2080,
+     "optimum_fairness_score": 0.5,
+     "max_feasible_fairness_score": 1.0,
+     "fairness_score_of_serving_nobody": 1.0,
+     "alpha_sensitivity": [
+      {
+       "alpha": 0.0,
+       "units_served": 4,
+       "weighted_shortage": 3.0,
+       "disparity": 4.0
+      },
+      {
+       "alpha": 0.5,
+       "units_served": 4,
+       "weighted_shortage": 3.5,
+       "disparity": 2.0
+      },
+      {
+       "alpha": 1.0,
+       "units_served": 4,
+       "weighted_shortage": 4.5,
+       "disparity": 0.75
+      },
+      {
+       "alpha": 2.0,
+       "units_served": 4,
+       "weighted_shortage": 4.5,
+       "disparity": 0.75
+      },
+      {
+       "alpha": 4.0,
+       "units_served": 4,
+       "weighted_shortage": 4.5,
+       "disparity": 0.75
+      },
+      {
+       "alpha": 8.0,
+       "units_served": 0,
+       "weighted_shortage": 10.0,
+       "disparity": 0.0
+      }
+     ],
+     "n_slack_vars": 5,
+     "n_qubits": 12,
+     "uniform_mean_energy": 83.75,
+     "ground_energy": 6.0,
+     "max_abs_ising_h": 22.0,
+     "max_abs_ising_J": 8.25
+    },
+    "limitations": [
+     "Single tiny synthetic instance (7 decision bits, 12 qubits with slack): results do not generalise and are not evidence of quantum advantage.",
+     "QAOA is run by noiseless statevector simulation on a classical computer; its runtime is simulation cost, not hardware runtime.",
+     "The exact solver enumerates 2^7 decision patterns; QAOA works in a 2^12 space with slack qubits. Runtimes are not a like-for-like comparison.",
+     "The engine reports the best sampled feasible bitstring (classical post-selection over shots), not the modal one. Modal results are reported separately.",
+     "In the engine, the seed controls only shot sampling; parameter optimisation is deterministic, so seed variability understates optimiser-initialisation variability."
+    ]
+   },
+   "small": {
+    "file": "benchmark_results/benchmark_small.json",
+    "instance": "synthetic-3x2-small",
+    "timestamp_utc": "2026-10-10T16:22:53+00:00",
+    "synthetic_notice": "All scenario data is SYNTHETIC. Nothing here is live or measured municipal data and no claim is made about any real water network.",
+    "parameters": {
+     "fairness_weight": 2.0,
+     "penalty_weight": 15.0,
+     "shots": 1024,
+     "maxiter": 25,
+     "seeds": [
+      0,
+      1
+     ],
+     "p_values": [
+      1
+     ]
+    },
+    "exact_optimum_objective": 5.0,
+    "seed_note": "In the engine, the seed controls only shot sampling; parameter optimisation is deterministic, so seed variability understates optimiser-initialisation variability.",
+    "provenance": {
+     "engine_module_path": "D:\\College\\SOMESHIT DOWNLOADS\\WATERWEAVE-Integration\\src\\waterweave",
+     "engine_git_commit": "84184d69fe084a1a157e0bf235ad7ff889326442",
+     "engine_git_branch": "integration/final-validation",
+     "engine_tree_dirty": true,
+     "benchmark_git_commit": "84184d69fe084a1a157e0bf235ad7ff889326442",
+     "python": "3.12.0",
+     "platform": "Windows-11-10.0.26200-SP0",
+     "numpy": "2.4.6",
+     "qiskit": "2.5.2",
+     "scipy": "1.18.0"
+    },
+    "summary": [
+     {
+      "solver_name": "Greedy (Priority-First)",
+      "qaoa_p": null,
+      "runs": 2,
+      "ok_runs": 2,
+      "failed_runs": 0,
+      "feasible_rate": 1.0,
+      "hit_optimum_rate": 1.0,
+      "objective_mean": 5.0,
+      "objective_sd": 0.0,
+      "objective_min": 5.0,
+      "objective_max": 5.0,
+      "approx_ratio_mean": 1.0,
+      "runtime_mean_s": 0.00044049997813999653,
+      "runtime_median_s": 0.00044049997813999653,
+      "runtime_max_s": 0.00047199998516589403,
+      "feasible_sample_ratio_mean": null,
+      "modal_feasible_rate": null,
+      "state_p_optimal_mean": null,
+      "state_p_feasible_mean": null,
+      "state_p_feasible_no_penalty_mean": null,
+      "state_p_optimal_no_penalty_mean": null
+     },
+     {
+      "solver_name": "Exact Classical (Optimal)",
+      "qaoa_p": null,
+      "runs": 2,
+      "ok_runs": 2,
+      "failed_runs": 0,
+      "feasible_rate": 1.0,
+      "hit_optimum_rate": 1.0,
+      "objective_mean": 5.0,
+      "objective_sd": 0.0,
+      "objective_min": 5.0,
+      "objective_max": 5.0,
+      "approx_ratio_mean": 1.0,
+      "runtime_mean_s": 0.0007639999967068434,
+      "runtime_median_s": 0.0007639999967068434,
+      "runtime_max_s": 0.0007957000052556396,
+      "feasible_sample_ratio_mean": null,
+      "modal_feasible_rate": null,
+      "state_p_optimal_mean": null,
+      "state_p_feasible_mean": null,
+      "state_p_feasible_no_penalty_mean": null,
+      "state_p_optimal_no_penalty_mean": null
+     },
+     {
+      "solver_name": "QAOA (Quantum Heuristic)",
+      "qaoa_p": 1,
+      "runs": 2,
+      "ok_runs": 2,
+      "failed_runs": 0,
+      "feasible_rate": 1.0,
+      "hit_optimum_rate": 1.0,
+      "objective_mean": 5.0,
+      "objective_sd": 0.0,
+      "objective_min": 5.0,
+      "objective_max": 5.0,
+      "approx_ratio_mean": 1.0,
+      "runtime_mean_s": 0.12243669998133555,
+      "runtime_median_s": 0.12243669998133555,
+      "runtime_max_s": 0.13038139999844134,
+      "feasible_sample_ratio_mean": 0.77392578125,
+      "modal_feasible_rate": 1.0,
+      "state_p_optimal_mean": 0.05553893915549047,
+      "state_p_feasible_mean": 0.7633990618549744,
+      "state_p_feasible_no_penalty_mean": 0.586310368233121,
+      "state_p_optimal_no_penalty_mean": 0.03225087109675359
+     },
+     {
+      "solver_name": "Uniform random sampling (shot-matched control)",
+      "qaoa_p": null,
+      "runs": 2,
+      "ok_runs": 2,
+      "failed_runs": 0,
+      "feasible_rate": 1.0,
+      "hit_optimum_rate": 1.0,
+      "objective_mean": 5.0,
+      "objective_sd": 0.0,
+      "objective_min": 5.0,
+      "objective_max": 5.0,
+      "approx_ratio_mean": 1.0,
+      "runtime_mean_s": 0.0002558000269345939,
+      "runtime_median_s": 0.0002558000269345939,
+      "runtime_max_s": 0.00025889999233186245,
+      "feasible_sample_ratio_mean": 0.3271484375,
+      "modal_feasible_rate": null,
+      "state_p_optimal_mean": null,
+      "state_p_feasible_mean": null,
+      "state_p_feasible_no_penalty_mean": null,
+      "state_p_optimal_no_penalty_mean": null
+     }
+    ],
+    "audit_checks": [],
+    "audit_facts": {},
+    "limitations": [
+     "Single tiny synthetic instance (7 decision bits, 12 qubits with slack): results do not generalise and are not evidence of quantum advantage.",
+     "QAOA is run by noiseless statevector simulation on a classical computer; its runtime is simulation cost, not hardware runtime.",
+     "The exact solver enumerates 2^7 decision patterns; QAOA works in a 2^12 space with slack qubits. Runtimes are not a like-for-like comparison.",
+     "The engine reports the best sampled feasible bitstring (classical post-selection over shots), not the modal one. Modal results are reported separately.",
+     "In the engine, the seed controls only shot sampling; parameter optimisation is deterministic, so seed variability understates optimiser-initialisation variability."
+    ]
+   }
+  }
+ }
+}

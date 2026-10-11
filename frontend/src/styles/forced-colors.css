@@ -1,0 +1,52 @@
+/*
+ * Windows high contrast (forced colours). The browser swaps the palette for
+ * the user's system colours and drops box shadows and background colours,
+ * so anything that relied on them needs another cue here.
+ */
+@media (forced-colors: active) {
+  /* Focus rings are box shadows elsewhere, which forced colours remove. */
+  :focus-visible,
+  .segmented__option input:focus-visible + span {
+    outline: 3px solid Highlight;
+    outline-offset: 2px;
+  }
+
+  /* These controls clip their overflow, so the ring is drawn inwards. */
+  .stepper__button:focus-visible,
+  .stepper__input:focus-visible,
+  .weave__toggle:focus-visible {
+    outline-offset: -3px;
+  }
+
+  /* Selected options were shown by fill colour alone. */
+  .segmented__option input:checked + span,
+  .presenter__steps button[aria-current='step'] {
+    forced-color-adjust: none;
+    background: Highlight;
+    border-color: Highlight;
+    color: HighlightText;
+  }
+
+  /* The current page was marked by a coloured thread drawn as a background. */
+  .primary-nav__link[aria-current='page'] {
+    text-decoration: underline;
+    text-decoration-thickness: 3px;
+    text-underline-offset: 0.4em;
+  }
+
+  /* Without its colour the solver thread only masks the panel's top border. */
+  .solver::before {
+    display: none;
+  }
+
+  /* Presentation progress: finished and elapsed time were shown by fill colour alone. */
+  .present-progress__segment {
+    border: 1px solid CanvasText;
+  }
+
+  .present-progress li[data-state='done'] .present-progress__segment,
+  .present-progress__fill {
+    forced-color-adjust: none;
+    background: Highlight;
+  }
+}

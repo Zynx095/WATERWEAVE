@@ -95,3 +95,47 @@ def test_data_provider_outage_behavior():
     assert obs.quality.missing is True
     assert obs.quality.status == "ERROR"
     assert "Network timeout" in obs.quality.error_details
+
+
+class _Response:
+    def __init__(self, payload):
+        import json
+        self._data = json.dumps(payload).encode("utf-8")
+
+    def read(self):
+        return self._data
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+
+def _fetch_open_meteo(monkeypatch, payload):
+    from waterweave.data import clear_cache
+
+    clear_cache()
+    monkeypatch.setattr("urllib.request.urlopen", lambda *a, **k: _Response(payload))
+    try:
+        return registry.get_provider("open_meteo").fetch()
+    finally:
+        clear_cache()
+
+
+def test_open_meteo_reading_keeps_its_own_observation_time(monkeypatch):
+    (obs,) = _fetch_open_meteo(monkeypatch, {"current": {"time": "2026-10-11T04:00", "precipitation": 1.5}})
+    assert obs.value == 1.5 and obs.quality.status == "VERIFIED_LIVE"
+    assert obs.source_timestamp == datetime(2026, 10, 11, 4, 0, tzinfo=timezone.utc)
+
+
+@pytest.mark.parametrize(
+    "current",
+    [{"time": "2026-10-11T04:00"}, {"time": "2026-10-11T04:00", "precipitation": None}, {"precipitation": 0.0}, {}],
+)
+def test_open_meteo_never_invents_a_reading_or_a_time(monkeypatch, current):
+    """Regression: a missing value became 0.0 mm and a missing time became now."""
+    (obs,) = _fetch_open_meteo(monkeypatch, {"current": current})
+    assert obs.value is None and obs.quality.missing is True
+    assert obs.source_timestamp is None
+    assert obs.quality.status == "ERROR"

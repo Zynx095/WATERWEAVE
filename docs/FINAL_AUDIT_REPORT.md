@@ -177,10 +177,10 @@ packages beyond what `pip-audit` resolves.
 
 | Test/check | Command or method | Result | Evidence | Notes |
 |---|---|---|---|---|
-| Python | `python -m pytest -q` | 162 passed, 1 skipped | run after the last code change | skipped test is the optional live fetch |
-| Frontend unit | `npx vitest run` in `frontend/` | 115 passed (18 files) | after the last code change | |
+| Python | `python -m pytest -q` | 163 passed, 1 skipped | run after the last code change | skipped test is the optional live fetch |
+| Frontend unit | `npx vitest run` in `frontend/` | 118 passed (18 files) | after the last code change | |
 | Frontend build | `npm run build` (tsc + vite) | passes | run inside `npm run e2e` | |
-| Browser | `PLAYWRIGHT_CHANNEL=msedge npm run e2e` | 22 passed, 1.7 min | against the real API on the final build | Edge only |
+| Browser | `PLAYWRIGHT_CHANNEL=msedge npm run e2e` | 23 passed, 1.7 min | against the real API on the final build | Edge only |
 | Viewport sweep | scripted, 7 routes x 4 sizes | 0 overflow, 0 console issues | | with the security policy active |
 | Presentation stress | scripted, 3 rounds | no errors | | |
 | Independent maths | scripted, 40 scenarios | 0 failures | | not committed as a test; the maths is covered by existing tests and the benchmark audit |
@@ -288,3 +288,30 @@ Retry the show stays paused (Info). The presenter-session design (a tab
 claiming a session id and commands carrying it) was not built; the
 visibility rule above is a heuristic, so two visible app windows can still
 both react.
+
+## O. Release round
+
+Run before the merge decision, against the current remote state (no CI,
+no branch protection, no reviews or comments exist on PRs #1, #2 or #4).
+
+* **PR #1 and #2:** each head (`657af24`, `b2d63b7`) is an ancestor of the
+  branch head, so every commit is included; the differing file contents are
+  later integration work on those files. Nothing is missing.
+* **Presenter ownership made deterministic.** Each app window has an id;
+  the presenter view pins to one window and commands carry that target;
+  other windows ignore them. Tests: command parsing, two simulated windows,
+  and an e2e with three app windows plus the presenter (exactly one
+  presents; Home starts nothing). Replaces the visibility heuristic noted in
+  section N.
+* **Other follow-ups fixed:** COBYLA's raised iteration limit is now
+  explicit and both requested and used values are reported; a real score gap
+  under 0.005 reads "<0.01", not "0"; Retry resumes the show.
+* **Left as is:** the solver lock can be held for about 20 s by the heaviest
+  accepted request (Low; single-user demo).
+* **README template:** headings and order compared line by line with the
+  official template repository's README (fetched from GitHub): identical.
+  Metadata fields still hold placeholders for the video link, the demo
+  timestamp and the team members' names, e-mails and GitHub users. Only the
+  team can supply them; they must be filled in before submission.
+* **Hackathon window:** the earliest commit is `2026-10-10T19:37+05:30`;
+  none is before 19:05 on 10 October.

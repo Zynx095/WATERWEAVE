@@ -142,7 +142,7 @@ print(f"Circuit width: {qc.num_qubits} qubits, Depth: {qc.depth()}, Gate counts:
    ```bash
    python -m waterweave.api
    ```
-   Open <http://127.0.0.1:8000>. Options: `--port 8080`, `--host 0.0.0.0`, and `--offline` (never contact network data providers; same as `WATERWEAVE_OFFLINE=1`). No API keys or environment variables are needed.
+   Open <http://127.0.0.1:8000>. A step-by-step Windows PowerShell guide with troubleshooting is in [`docs/WINDOWS_SETUP.md`](docs/WINDOWS_SETUP.md). Options: `--port 8080`, `--host 0.0.0.0`, and `--offline` (never contact network data providers; same as `WATERWEAVE_OFFLINE=1`). No API keys or environment variables are needed.
 
 5. **Launch the guided presentation:** press **Present** in the header (or *Start the guided presentation* on the overview). The preflight dialog runs the real engine once, checks live weather, and then offers *Start with the live engine* (or, if the API is down, *Start with the recorded run*). For a second screen, press *Open presenter view* in the dialog, or open <http://127.0.0.1:8000/presenter> in another window of the same browser. Details and controls are in section 4.
 
@@ -227,7 +227,7 @@ Each step navigates to its page, scrolls to and outlines the element it is about
 
 * **Automatic or manual:** progression is automatic by default; switch *Advance automatically* off in the preflight to move only by hand. The pace (quick check about 1 minute, brisk, standard about 4 minutes, relaxed, slow) is set in the preflight.
 * **Timing:** pausing stops the clock at once and resuming continues from the same point. While a solver run or fetch is in flight, the clock waits ("Waiting for the engine"). If a step fails, the walkthrough pauses with the reason and a *Retry* button; *Next* always works.
-* **Presenter view:** `/presenter` in a second window shows the current chapter, time left, notes, what the audience reads, the next step, and large controls. It is linked to the main window over `BroadcastChannel` (same browser, no server involved) and only sends commands.
+* **Presenter view:** `/presenter` in a second window shows the current chapter, time left, notes, what the audience reads, the next step, and large controls. It is linked to the main window over `BroadcastChannel` (same browser, no server involved) and only sends commands. Each app window has its own id, the presenter view pins to one window, and every command names it as the target, so other open tabs never react.
 * **Offline:** the solvers run locally and need no internet. If live weather is unavailable the data step says so. If the API itself is down, *Start with the recorded run* uses `frontend/src/data/recordedRun.json`, real API output recorded by `scripts/export_demo_snapshot.py` and checked against the engine by `tests/test_recorded_snapshot.py`; a banner states when and from which commit it was recorded, and every result is labelled "Recorded run".
 
 ### Live municipal data integration
@@ -329,7 +329,7 @@ Scenario: synthetic-4x2 (4 neighborhoods, 2 delivery slots)
 
   * **Fairness Score vs. Disparity Metric Separation:** Range-based `fairness_score` ($1 - (\max s - \min s) = 0.50$) and quadratic `disparity` ($\sum (s_i - s_j)^2 = 0.75$) are distinct mathematical quantities that can invert rankings. Both are reported explicitly to prevent conflation.
   * **Modal Bitstring vs. Post-Selection:** In multiple runs, the modal (most frequent) measured bitstring was infeasible. The reported solution is obtained via classical post-selection of the best feasible bitstring.
-  * **Test suite (measured on this branch):** 162 Python tests pass and 1 optional live-fetch test is skipped; 115 Vitest tests and 22 Playwright browser tests pass. The browser tests play the full presentation on the real engine and include an axe-core WCAG 2.1 AA audit with no serious or critical violations and a Windows high-contrast (forced colours) check.
+  * **Test suite (measured on this branch):** 163 Python tests pass and 1 optional live-fetch test is skipped; 118 Vitest tests and 23 Playwright browser tests pass. The browser tests play the full presentation on the real engine and include an axe-core WCAG 2.1 AA audit with no serious or critical violations and a Windows high-contrast (forced colours) check.
 
 * **Critical Reflection on Limitations:**  
   * **No Quantum Advantage Claimed:** On this synthetic benchmark, classical enumeration is two orders of magnitude faster than QAOA statevector simulation. Quantum advantage cannot be claimed or inferred.

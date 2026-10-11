@@ -352,3 +352,12 @@ Scenario: synthetic-4x2 (4 neighborhoods, 2 delivery slots)
   | Random control | n/a | 100% | 100% | 6.000 ± 0.000 | 0.0003 s | 50.8% |
 
   **Tests, measured on this branch:** 163 Python tests pass (1 optional live-fetch test is skipped), 118 frontend unit tests pass, and 23 browser tests pass. The browser tests play the whole presentation against the real engine and include an automated accessibility audit and a Windows high-contrast check.
+
+* **Critical Reflection on Limitations:**
+  * **No quantum advantage, and none claimed.** On this benchmark exact search is far faster than simulated QAOA, and random sampling matches its hit rate.
+  * **It is a simulation.** The circuit ran on a noiseless classical simulator. On a real device, two-qubit gate errors, decoherence and readout errors would hurt a 39-RZZ, depth-17 circuit badly, and we would need error mitigation and many more shots.
+  * **It does not scale as built.** Slack qubits grow with the size of each limit, and the live app caps simulation at 15 qubits so answers return in seconds. Bigger networks would need a more compact encoding.
+  * **The data is made up.** Scenarios are benchmarks for the optimisation method, not a model of any real pipe network or utility.
+  * **App limits.** The recorded fallback only covers the default scenario with default settings. Each delivery is one unit, so per-slot demand is 0 or 1. The presenter view needs both windows in the same browser. It has not been tried on a real projector, in Firefox or Safari, or with a screen reader.
+
+---

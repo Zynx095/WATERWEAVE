@@ -4,7 +4,7 @@
 
 ## Project Metadata
 
-* **Project Title:** WATERWEAVE — Fair & Resilient Municipal Water Allocation via Quantum Optimization
+* **Project Title:** Yukith M Joseph
 * **Team Name:** WATERWEAVE Project Team
 * **Chosen Track:** Track 2: Open-Domain Optimization & Real-World Solvers
 * **Video Presentation Link:** *[Pending Submission Video URL — To be uploaded prior to final deadline]*  
@@ -14,10 +14,7 @@
 ### Team Members (Max 4 members)
 | Name | Email | GitHub Username |
 | :--- | :--- | :--- |
-| *[Team Lead / Optimization Engineer]* | *[lead-email@example.com]* | *[@team-lead]* |
-| *[Quantum Algorithm Engineer]* | *[quantum-dev@example.com]* | *[@quantum-dev]* |
-| *[Full-Stack Dashboard Engineer]* | *[ui-dev@example.com]* | *[@ui-dev]* |
-| *[Validation & Benchmark Engineer]* | *[validation-dev@example.com]* | *[@validation-dev]* |
+| *Yukith M Joseph* | *yukithj@gmail.com* | *@Zynx095* |
 
 *(Note: Team members above are placeholders for the team registration form. Individual workstream branches `codex/optimization`, `antigravity/dashboard`, `antigravity/live-data-research`, `claude/validation` and `claude/frontend-demo-mode` developed the respective subsystems).*
 

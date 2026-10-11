@@ -35,3 +35,8 @@ A drought-time water rationing problem, solved three ways: a quick rule of thumb
 | Yukith M Joseph | yukithj@gmail.com | [@Zynx095](https://github.com/Zynx095) |
 
 ---
+
+## 1. Project Overview & Motivation
+
+* **Summary (3–4 sentences):**
+  When a city has less water than people are asking for, somebody has to decide who gets it and when. WATERWEAVE turns that decision into a small, checkable maths problem: seven delivery requests, water for four, and a fairness rule that stops any one neighbourhood from being quietly forgotten. We solve it with a simple rule of thumb, with an exhaustive search that is guaranteed to find the best answer, and with a 12-qubit QAOA circuit built in Qiskit. A web app runs all three on the real engine and can walk an audience through the results on its own.

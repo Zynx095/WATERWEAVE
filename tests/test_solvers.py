@@ -225,3 +225,15 @@ def test_qaoa_p2_execution():
     assert len(res.metadata["optimal_gammas"]) == 2
     assert len(res.metadata["optimal_betas"]) == 2
 
+
+
+def test_qaoa_notes_state_simulation_and_make_no_performance_claim():
+    """Regression: the note once said the simulation 'compares favorably in sampling diversity'."""
+    from waterweave.scenarios import default_scenario
+    from waterweave.solvers import solve_qaoa
+
+    meta = solve_qaoa(default_scenario(), shots=64, maxiter=3).metadata
+    notes = meta["notes"].lower()
+    assert "simulator" in notes and "no quantum advantage" in notes
+    assert "favorabl" not in notes
+    assert meta["quantum_advantage_claimed"] is False

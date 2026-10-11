@@ -593,8 +593,10 @@ def solve_qaoa(
                 "quantum_advantage_claimed": False,
                 "notes": (
                     "Genuine QAOA workflow with explicit Hamiltonian circuit execution. "
-                    "No quantum advantage claimed; NISQ simulation compares favorably in "
-                    "sampling diversity but has circuit overhead relative to exact classical solver."
+                    "Executed on a classical statevector simulator, not quantum hardware. "
+                    "No quantum advantage is claimed. The reported allocation is the best "
+                    "feasible bitstring among the sampled shots, selected by classical "
+                    "post-processing; the most frequent bitstring is reported separately."
                 ),
             },
         )

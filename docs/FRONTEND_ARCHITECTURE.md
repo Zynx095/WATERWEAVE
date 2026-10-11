@@ -167,8 +167,8 @@ labelled "recorded".
 
 | Suite | Command | Result on this branch |
 |---|---|---|
-| Python | `pytest` | 142 passed, 1 skipped (optional live fetch). The original 104 still pass; `tests/test_api.py` covers every endpoint, validation, failure reporting and offline mode; `tests/test_recorded_snapshot.py` replays the recorded run against the engine. |
-| Frontend | `cd frontend && npm test` | 108 passed: state machine transitions, the controller with fake timers (auto-advance, pause, resume, keys, failures, timer cleanup), preflight, presenter channel, API client, weave, editor validation, pages, and the browser-side service shares checked against the engine's fairness numbers. |
+| Python | `pytest` | 156 passed, 1 skipped (optional live fetch). The original 104 still pass; `tests/test_api.py` covers every endpoint, validation, failure reporting and offline mode; `tests/test_recorded_snapshot.py` replays the recorded run against the engine. |
+| Frontend | `cd frontend && npm test` | 113 passed: state machine transitions, the controller with fake timers (auto-advance, pause, resume, keys, failures, timer cleanup), preflight, presenter channel, API client, weave, editor validation, pages, and the browser-side service shares checked against the engine's fairness numbers. |
 | Browser | `cd frontend && npm run e2e` | 22 passed in Microsoft Edge against the real API (1.7 min): all pages, real solver runs, failure and offline paths, three viewport sizes, keyboard use, forced colours, the full nine-step presentation playing on its own, the presenter window, and an axe-core WCAG 2.1 AA audit with no serious or critical violations. |
 
 Clean setup, 2026-10-11: a fresh clone of the pushed branch (at
